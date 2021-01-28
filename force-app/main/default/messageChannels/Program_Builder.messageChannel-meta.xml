@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>ProgramBuilder</masterLabel>
+    <isExposed>true</isExposed>
+    <description>Message Channel to pass App updates</description>
+     <lightningMessageFields>
+        <fieldName>operator</fieldName>
+        <description>This is the operator type of the manipulation</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+         <fieldName>constant</fieldName>
+        <description>This is the number for the manipulation</description>
+     </lightningMessageFields>
+     <lightningMessageFields>
+        <fieldName>connector</fieldName>
+        <description>To wake up modals</description>
+    </lightningMessageFields>
+</LightningMessageChannel>
