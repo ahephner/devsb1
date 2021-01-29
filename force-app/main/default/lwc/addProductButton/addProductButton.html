@@ -1,6 +1,22 @@
 <template>
-    <lightning-card  variant="Narrow"  title="App Info" >
-        <lightning-button variant="brand-outline" label="Add Products" 
-        title="Primary action with lighter look" onclick={openModal} class="slds-m-left_x-small"></lightning-button>
+    <lightning-card  variant="Narrow"  title="Area Selected {area}" >
+        <div class='slds-grid'>
+            <div class='slds-col'>
+                <lightning-combobox
+                    name="area"
+                    class='areaBox'
+                    label="Area"
+                    value={area}
+                    placeholder="Select an area to add app too"
+                    options={areaOptions}
+                    onchange={selectArea} ></lightning-combobox>
+            </div>
+        </div>
+        <div class='slds-m-around_small'>
+            <lightning-button variant="brand-outline" label="Add Products" 
+            title="Primary action with lighter look" onclick={openModal} class="slds-m-left_x-small"></lightning-button>
+            <lightning-button variant="success" label="Add Area" 
+            title="newArea" onclick={newArea}></lightning-button>
+        </div>
     </lightning-card>
 </template>
