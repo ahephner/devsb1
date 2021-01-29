@@ -1,6 +1,32 @@
 <template>
-    <lightning-card  variant="Narrow"  title="App Info" >
-        <lightning-button variant="brand-outline" label="Add Products" 
-        title="Primary action with lighter look" onclick={openModal} class="slds-m-left_x-small"></lightning-button>
+    <lightning-card  variant="Narrow"  title={titleText} >
+        <div class='slds-grid'>
+            <div class='slds-col'>
+                <lightning-combobox
+                    name='box'
+                    class='areaBox'
+                    label="Area"
+                    value={area}
+                    placeholder="Select an area to add app too"
+                    options={areaOptions}
+                    onchange={selectArea} ></lightning-combobox>
+            </div>
+        </div>
+        <div class='slds-m-around_small slds-grid'>
+            <div class='slds-col'>
+                <lightning-button variant="brand-outline" label="Add Products" 
+                title="Primary action with lighter look" onclick={openModal} class="slds-m-left_x-small"></lightning-button>
+            </div>
+            <div class='slds-col'>
+                <lightning-button variant="success" label="Add Area" 
+                title="newArea" onclick={newArea}></lightning-button>
+            </div>
+        </div>
+        <!--New area modal rec-id is how we pass recordId to the child using @api in the child
+        the onnewarea is how we listen for a new custom event from the child and call a function in the 
+        parent-->
+        <c-app-modal
+        rec-id={recordId}
+        onnewarea={addedOption}></c-app-modal>
     </lightning-card>
 </template>
