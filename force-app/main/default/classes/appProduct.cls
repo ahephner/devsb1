@@ -24,11 +24,11 @@ public class appProduct {
 //need to make it that if the searchKey is blank nothing happens
 //probally better in js    
   @AuraEnabled(Cacheable=true)
-    public static Product__c[] searchProduct(string searchKey, string cat){
+    public static Product__c[] searchProduct(string searchKey, string cat, string family){
         searchKey = '%' + searchKey + '%'; 
         system.debug('cat '+ cat); 
         list<product__c> searchResult = new list<product__c>();
-        if (cat != null && searchKey == '%%'){
+        if (cat != null && searchKey == '%%' && family != null){
             return null; 
         }
          else if( cat=='ALL'){

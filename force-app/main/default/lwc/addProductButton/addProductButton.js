@@ -40,7 +40,8 @@ export default class AddProductButton extends LightningElement {
         //open productTable if area is selected
         if(this.area){
             const payload = {
-                connector: true
+                connector: true,
+                message: this.selectedLabel
             }
             publish(this.messageContext, Program_Builder, payload); 
        }else{
