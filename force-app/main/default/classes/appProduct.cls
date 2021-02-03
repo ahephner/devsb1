@@ -69,3 +69,21 @@ public class appProduct {
         return prods; 
     }
 }
+
+//older search function. Going to get all products and try and filter in the dom 
+// @AuraEnabled
+// public static Product__c[] searchProduct(string searchKey, string cat, string family){
+//     searchKey = '%' + searchKey + '%'; 
+//     system.debug('searchKey '+' cat '+ ' family '+ family);
+//     String query = 'Select '
+//                     + ' Id, Name, Product_Name__c, Product_Status__c,Average_Cost__c '
+//                     + 'From Product__c Where Include_in_Programs__c =True';
+//     if(searchKey != '%%' && cat != 'All' && family != 'All'){
+//         query += ' AND Subcategory__c = :cat AND Product_Family__c =: family AND (name like :searchKey or product_name__c like :searchKey) '; 
+//     }Else If(searchKey != '%%' && cat == 'All' && family == 'All'){
+//         query += ' AND (name like :searchKey or product_name__c like :searchKey)';
+//     }Else If(searchKey == '%%' && cat != 'All' && family == 'All'){
+//         query += ' AND Subcategory__c =: cat';
+//     }
+//     return Database.query(query); 
+// } 

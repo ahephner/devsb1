@@ -1,5 +1,19 @@
 <template>
+    <template if:true={loaded}>
+        <lightning-datatable
+                key-field="Id"
+                data={prod}
+                show-row-number-column
+                hide-checkbox-column
+                columns={columnsList}
+        >
+        </lightning-datatable>
     
-        <p>searchKey: {searchkey}, prodFam: {prodfam}, category: {category}</p>
-    
+    </template>
+    <template if:false={loaded}>
+        <lightning-spinner
+        variant="brand"
+        size="large">
+    </lightning-spinner>
+    </template>
 </template>

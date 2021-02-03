@@ -5,7 +5,7 @@ import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 export default class ProductTable extends LightningElement {
     exposed = false;
     subscritption = null; 
-    searchKey; 
+    searchKey = ''; 
     pf ='All';
     cat = "All"; 
     areaSelected; 
@@ -47,7 +47,8 @@ export default class ProductTable extends LightningElement {
     get pfOptions(){
         return [
             {label: 'All', value:'All'}, 
-            {label: 'ph', value:'ph'}
+            {label: 'Foliar-Pak', value:'Foliar-Pak'},
+            {label: 'BASF', value:'BASF'}
         ]
     }
     get catOptions(){
@@ -61,7 +62,7 @@ export default class ProductTable extends LightningElement {
     }
 
     search(){
-        this.pf = this.template.querySelector('c-app-product-list').searchProd();   
+         this.template.querySelector('c-app-product-list').searchProd(this.searchKey, this.pf, this.cat);   
     }
     ///! Uncomment these if we want to change the values each time they change
     searchProd(event){
