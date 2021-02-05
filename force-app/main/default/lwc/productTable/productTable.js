@@ -9,7 +9,7 @@ export default class ProductTable extends LightningElement {
     pf ='All';
     cat = "All"; 
     areaSelected; 
-
+    count = 0; 
     @wire(MessageContext)
         messageContext; 
 //subscribe to message channel
@@ -78,5 +78,11 @@ export default class ProductTable extends LightningElement {
 //close modal
     closeModal(){
         this.exposed = false; 
+    }
+
+    save(){
+        this.count += 1; 
+        console.log('count ' + this.count);
+        
     }
 }

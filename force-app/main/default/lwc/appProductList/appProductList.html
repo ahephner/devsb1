@@ -3,9 +3,9 @@
         <lightning-datatable
                 key-field="Id"
                 data={prod}
-                show-row-number-column
-                hide-checkbox-column
                 columns={columnsList}
+                selected-rows={selectedRows}
+                onrowselection={rowSelect}
         >
         </lightning-datatable>
     
