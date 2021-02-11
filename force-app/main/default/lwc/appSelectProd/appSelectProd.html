@@ -1,0 +1,23 @@
+<template>
+    <template if:true={loaded}>
+        <div class='slds-grid'>
+            <div class='slds-col slds-size_2-of-3'>
+                <lightning-datatable
+                    key-field="Id"
+                    data={prod}
+                    hide-checkbox-column
+                    columns={columnsList}
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+            </div>
+            <div class='slds-col slds-size_1-of-3'>
+                <c-app-selected-prod selection={selection}></c-app-selected-prod>
+            </div>
+    </div>
+    </template>
+    <template if:false={loaded}>
+        <lightning-spinner 
+            alternative-text="Loading" 
+            size="large"></lightning-spinner>
+    </template>
+</template>

@@ -1,0 +1,19 @@
+<template>
+    <lightning-card  variant="Narrow"  title="Selected Products" icon-name="utility:cart">
+        <template if:true={haveProductsToShow}>
+            <ul class='slds-m-top-small'>
+                <template for:each={selectedProd} for:item="sp" >
+                   <li key={sp.Id}>
+                        {sp.name}
+                   </li>
+                </template>
+            </ul>
+        </template>
+        <template if:false={haveProductsToShow}>
+            <div class='slds-m-around_large'>
+                <h4>Added Products will appear here</h4>
+                <h6>We will add rates and pricing after this</h6>
+            </div>
+        </template>
+    </lightning-card>
+</template>

@@ -62,7 +62,8 @@ export default class ProductTable extends LightningElement {
     }
 
     search(){
-         this.template.querySelector('c-app-product-list').searchProd(this.searchKey, this.pf, this.cat);   
+         //this.template.querySelector('c-app-product-list').searchProd(this.searchKey, this.pf, this.cat);
+         this.template.querySelector('c-app-select-prod').searchProd(this.searchKey, this.pf, this.cat);   
     }
     ///! Uncomment these if we want to change the values each time they change
     searchProd(event){
