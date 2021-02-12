@@ -1,5 +1,64 @@
 <template>
-    <lightning-card  variant="Narrow"  title="Hello" icon-name="standard:account">
-        <p>{message}</p>
-    </lightning-card>
+    <template if:true={loaded}>
+        <table aria-multiselectable="true" class="slds-table 
+             slds-table_bordered slds-table_resizable-cols">
+             <thead>
+                <tr class="slds-line-height_reset">
+                    <th class="slds-text-align_right" scope="col" style="width:3.25rem">
+                        <p>Add Product</p>
+                    </th>
+                <th aria-label="Name" aria-sort="none" class="productName" scope="col">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                        <span class="slds-truncate" title="Name">Product Name</span>
+                    </div>
+                </th>
+                <th aria-label="Product Code" aria-sort="none" class="productCode" scope="col">    
+                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                        <span class="slds-truncate" title="Product Code">Product Code</span>
+                    </div>
+                </th>
+                <th aria-label="Stock Status" aria-sort="none" class="productStatus" scope="col">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                        <span class="slds-truncate" title="Product Status">Status</span>
+                    </div>
+                </th>
+                <th aria-label="Average Cost" aria-sort="none" class="averageCost" scope="col">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                        <span class="slds-truncate" title="Average Cost">Average Cost</span>
+                    </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+                 <template for:each={prod} for:item="prods" >
+              <tr class="slds-hint-parent" key={prods.Id}>
+                <td class="slds-text-align_center" role="gridcell">
+                        <lightning-input type="checkbox" name={prods.Id} onchange={rowSelect}></lightning-input>
+                  </td>
+                
+                <th data-label="Product Name" scope="row">
+                  <div class="slds-truncate" title="Product_Name__c">
+                    <p tabindex="-1">{prods.Product_Name__c}</p>
+                  </div>
+                </th>
+                <td data-label="Product Code">
+                  <div class="slds-truncate" title="name">{prods.Name}</div>
+                </td>
+                <td data-label="Status">
+                  <div class="slds-truncate" title='Product_Status__c'>{prods.Product_Status__c}</div>
+                </td>
+                <td data-label="Average Cost">
+                  <div class="slds-truncate" title="Average_Cost__c">${prods.Average_Cost__c}</div>
+                </td>
+              </tr>
+            </template>
+            </tbody>
+            </table>
+    </template>
+    <template if:false={loaded}>
+        <lightning-spinner
+        variant="brand"
+        size="large">
+    </lightning-spinner>
+    </template>
 </template>

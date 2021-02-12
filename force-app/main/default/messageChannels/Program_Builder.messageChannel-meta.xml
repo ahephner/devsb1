@@ -15,4 +15,8 @@
         <fieldName>connector</fieldName>
         <description>To wake up modals</description>
     </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>message</fieldName>
+        <description>To pass string values</description> 
+    </lightningMessageFields>
 </LightningMessageChannel>
