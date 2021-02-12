@@ -1,6 +1,6 @@
 //go to https://github.com/ahephner/lwc_Comm_Examples/tree/main/dataTableExample for more dataTable example stuff like buttons mapping data
 
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api, wire, track } from 'lwc';
 import searchProduct from '@salesforce/apex/appProduct.searchProduct'
 
 const columnsList = [
@@ -27,7 +27,8 @@ export default class AppSelectProd extends LightningElement {
     columnsList = columnsList; 
     prod; 
     error; 
-    selection = [];
+    //needs to be @track so we can follow reactive properties on an array or obj in childern
+    @track selection = [];
 
     @wire(searchProduct)
      wiredProduct({error, data}){
@@ -82,6 +83,7 @@ export default class AppSelectProd extends LightningElement {
             const index = this.selection.indexOf(prodId);
             this.selection.splice(index, 1);
             console.log(this.selection);
+            
         }
 
 }

@@ -1,8 +1,8 @@
 <template>
     <lightning-card  variant="Narrow"  title="Selected Products" icon-name="utility:cart">
-        <template if:true={haveProductsToShow}>
+        <template if:true={selection}>
             <ul class='slds-m-top-small'>
-                <template for:each={selectedProd} for:item="sp" >
+                <template for:each={selection} for:item="sp" >
                    <li key={sp.id}>
                     <lightning-icon icon-name="utility:close" name={sp.id} 
                     alternative-text='remove' title="Remove" onclick={removeProd}></lightning-icon>
@@ -11,7 +11,7 @@
                 </template>
             </ul>
         </template>
-        <template if:false={haveProductsToShow}>
+        <template if:false={selection}>
             <div class='slds-m-around_large'>
                 <h4>Added Products will appear here</h4>
                 <h6>We will add rates and pricing after this</h6>
