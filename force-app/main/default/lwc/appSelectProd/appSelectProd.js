@@ -75,7 +75,13 @@ export default class AppSelectProd extends LightningElement {
                 ]
                 
             }
-            
-            
         }
+        handleRemove(x){
+            //console.log('connected');
+            const prodId = x.detail; 
+            const index = this.selection.indexOf(prodId);
+            this.selection.splice(index, 1);
+            console.log(this.selection);
+        }
+
 }

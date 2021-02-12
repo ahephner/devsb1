@@ -3,8 +3,10 @@
         <template if:true={haveProductsToShow}>
             <ul class='slds-m-top-small'>
                 <template for:each={selectedProd} for:item="sp" >
-                   <li key={sp.Id}>
-                        {sp.name}
+                   <li key={sp.id}>
+                    <lightning-icon icon-name="utility:close" name={sp.id} 
+                    alternative-text='remove' title="Remove" onclick={removeProd}></lightning-icon>
+                       <p class='slds-m-left_medium'>{sp.name}</p>
                    </li>
                 </template>
             </ul>
@@ -17,3 +19,4 @@
         </template>
     </lightning-card>
 </template>
+

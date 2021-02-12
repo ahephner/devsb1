@@ -11,7 +11,8 @@
                 </lightning-datatable>
             </div>
             <div class='slds-col slds-size_1-of-3'>
-                <c-app-selected-prod selection={selection}></c-app-selected-prod>
+                <c-app-selected-prod selection={selection}
+                                     onupdate={handleRemove}></c-app-selected-prod>
             </div>
     </div>
     </template>
