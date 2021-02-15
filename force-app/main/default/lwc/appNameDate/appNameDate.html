@@ -1,0 +1,17 @@
+<template>
+    <lightning-card  variant="Narrow"  title="Application Name and Date" icon-name="standard:account">
+        <lightning-button-icon  icon-name="utility:down" variant="border-filled" alternative-text="Show More" slot="actions"></lightning-button-icon>
+        
+        <lightning-input type="text" variant="standard" 
+            name="appName" label="Application Name" 
+            required placeholder="type here..."></lightning-input>
+
+        <lightning-input type="date" name="appDate" 
+            label="Application Date" required></lightning-input>
+        
+        <div class="slds-docked-form-footer">
+            <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
+            <button type="button" onclick={next} class="slds-button slds-button_brand">Next</button>
+        </div>
+    </lightning-card>
+</template>

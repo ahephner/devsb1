@@ -4,6 +4,8 @@ import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     exposed = false;
+    dateName = false;
+    productList = false; 
     subscritption = null; 
     searchKey = ''; 
     pf ='All';
@@ -28,6 +30,7 @@ export default class ProductTable extends LightningElement {
             //console.log('handling ' +message.connector);
             this.exposed = message.connector;
             this.areaSelected = message.message; 
+            this.dateName = true;
         }
 //life cycle hooks
         unsubscribeFromMessageChannel(){
@@ -79,8 +82,14 @@ export default class ProductTable extends LightningElement {
 //close modal
     closeModal(){
         this.exposed = false; 
+        //for now I have to turn both off. May make sense to either A. clear all values in the components first
+        this.dateName = false;
+        this.productList = false; 
     }
-
+    nextProdList(){
+        this.dateName = false;
+        this.productList = true; 
+    }
     save(){
         this.count += 1; 
         console.log('count ' + this.count);

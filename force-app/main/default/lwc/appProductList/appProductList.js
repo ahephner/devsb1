@@ -113,9 +113,9 @@ export default class AppProductList extends LightningElement {
                 console.log(this.selection); 
                 console.log(fieldRow)  
             }
-            
-            
+   
         }
+
     }
         //https://salesforce.stackexchange.com/questions/321827/how-can-i-add-remove-the-checked-attribute-via-lwc-controller-data
         //https://www.linkedin.com/pulse/keep-selected-rows-persistent-lightning-web-component-harsh-patel-
