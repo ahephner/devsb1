@@ -3,10 +3,13 @@ import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
+    //controls what component is up
     exposed = false;
     dateName = false;
     productList = false; 
+    productRates = false;
     subscritption = null; 
+    //searching product table
     searchKey = ''; 
     pf ='All';
     cat = "All"; 
@@ -19,7 +22,7 @@ export default class ProductTable extends LightningElement {
     numbApps;
     daysApart;
     customInsert = false; 
-
+    selectedProducts = []; 
 
     @wire(MessageContext)
         messageContext; 
@@ -124,6 +127,21 @@ export default class ProductTable extends LightningElement {
         // console.log('app name ' + this.appName + ' date '+this.appDate);
         // console.log('numbApps ' +this.numbApps + ' interval '+this.interval);
         // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
+        
+        
+        
+    }
+
+    gatherProducts(mess){
+        this.productList = false;
+        this.productRates = true; 
+        for(let prod of Object.keys(mess.detail)){
+            mess.detail[prod].Rate2__c = 0
+            this.selectedProducts.push(mess.detail[prod])
+            
+        }
+        
+        console.log('products returned '+this.selectedProducts);
         
         
         

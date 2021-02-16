@@ -82,12 +82,17 @@ export default class AppSelectProd extends LightningElement {
             const prodId = x.detail; 
             const index = this.selection.indexOf(prodId);
             this.selection.splice(index, 1);
-            console.log(this.selection);
+            //console.log(this.selection);
             
         }
         //control flow here 
         next(){
-            this.dispatchEvent(new CustomEvent('move'));
+            this.selection = new Set(this.selection);
+            this.dispatchEvent(new CustomEvent('move',{
+                detail: this.selection
+            }));
+            
+            
         }
 
         cancel(){
