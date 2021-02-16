@@ -12,6 +12,15 @@ export default class ProductTable extends LightningElement {
     cat = "All"; 
     areaSelected; 
     count = 0; 
+    //App Info
+    appName;
+    appDate;
+    interval;
+    numbApps;
+    daysApart;
+    customInsert = false; 
+
+
     @wire(MessageContext)
         messageContext; 
 //subscribe to message channel
@@ -89,6 +98,35 @@ export default class ProductTable extends LightningElement {
     nextProdList(){
         this.dateName = false;
         this.productList = true; 
+    }
+
+    //set Name Date
+    setNameDate(mess){
+        this.appName = mess.detail.name;
+        this.appDate = mess.detail.date;
+        this.numbApps = mess.detail.numb;
+        this.interval = mess.detail.spread;
+        this.dateName = false;
+        this.productList = true; 
+        //console.log('appName '+ this.appName);
+        
+    }
+//custom insert will allow for on the insert to use apex function that clones
+    setCustNameDate(mess){
+        this.appName = mess.detail.name;
+        this.appDate = mess.detail.date;
+        this.numbApps = mess.detail.numb;
+        this.interval = mess.detail.time;
+        this.daysApart = mess.detail.time; 
+        this.customInsert = true; 
+        this.dateName = false;
+        this.productList = true;
+        // console.log('app name ' + this.appName + ' date '+this.appDate);
+        // console.log('numbApps ' +this.numbApps + ' interval '+this.interval);
+        // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
+        
+        
+        
     }
     save(){
         this.count += 1; 

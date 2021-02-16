@@ -2,23 +2,23 @@
     <lightning-card  variant="Narrow"  title="Application Name and Date" icon-name="utility:event">
         
         <lightning-input type="text" variant="standard" 
-            name="appName" label="Application Name" 
+            name="appName" label="Application Name" onchange={setName}
             required placeholder="type here..."></lightning-input>
 
         <lightning-input type="date" name="appDate" 
-            label="Application Date" required></lightning-input>
-        
+            label="Application Date" required onchange={setDate}></lightning-input>
+        <!--footer on the top card here-->
         <div class="slds-docked-form-footer">
             <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
             <button type="button" onclick={next} class="slds-button slds-button_brand">Next</button>
         </div>
         <lightning-card variant='Narrow' title="Occurences">
-            <div class="slds-grid">
+            <div class="slds-grid slds-m-left_small">
                 <div class='slds-col slds-size_2-of-3 slds-m-around_x-small"'>
                     <lightning-combobox
                         name='clone'
                         label='Repeats'
-                        value={numberApps}
+                        value={interval}
                         placeholder="Does Not Repeat"
                         options={numOptions}
                         onchange={handleNumchange}>
@@ -26,12 +26,13 @@
                 </div>
                 <template if:true={hiddenNumberBox}>
                     <div class="slds-size_1-of-3 slds-m-left_x-small">
-                        <lightning-input type="number" name="input2" label="Number of apps" value="1"></lightning-input>
+                        <lightning-input type="number" name="input2" label="Number of apps" value={numbApps} onchange={handleNewNumbApps}></lightning-input>
                     </div>
                 </template>
+            </div>
                 <!--Custom Insert-->
                 <template if:true={customInsert}>
-                    <div class="slds-p-around_medium slds-grid slds-wrap">
+                    <div class="slds-p-around_medium slds-m-left_small slds-grid slds-wrap">
                         <lightning-input class="slds-col slds-size_1-of-3" 
                         type="number" 
                         name="input1" 
@@ -55,7 +56,7 @@
                     </div>
             
                 </template>
-            </div>
+            
         </lightning-card>
     </lightning-card>
 </template>
