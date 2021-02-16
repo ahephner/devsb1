@@ -85,5 +85,14 @@ export default class AppSelectProd extends LightningElement {
             console.log(this.selection);
             
         }
+        //control flow here 
+        next(){
+            this.dispatchEvent(new CustomEvent('move'));
+        }
+
+        cancel(){
+            this.dispatchEvent(new CustomEvent('close'));
+        }
+
 
 }

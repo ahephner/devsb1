@@ -4,12 +4,23 @@ import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     exposed = false;
+    dateName = false;
+    productList = false; 
     subscritption = null; 
     searchKey = ''; 
     pf ='All';
     cat = "All"; 
     areaSelected; 
     count = 0; 
+    //App Info
+    appName;
+    appDate;
+    interval;
+    numbApps;
+    daysApart;
+    customInsert = false; 
+
+
     @wire(MessageContext)
         messageContext; 
 //subscribe to message channel
@@ -28,6 +39,7 @@ export default class ProductTable extends LightningElement {
             //console.log('handling ' +message.connector);
             this.exposed = message.connector;
             this.areaSelected = message.message; 
+            this.dateName = true;
         }
 //life cycle hooks
         unsubscribeFromMessageChannel(){
@@ -79,8 +91,43 @@ export default class ProductTable extends LightningElement {
 //close modal
     closeModal(){
         this.exposed = false; 
+        //for now I have to turn both off. May make sense to either A. clear all values in the components first
+        this.dateName = false;
+        this.productList = false; 
+    }
+    nextProdList(){
+        this.dateName = false;
+        this.productList = true; 
     }
 
+    //set Name Date
+    setNameDate(mess){
+        this.appName = mess.detail.name;
+        this.appDate = mess.detail.date;
+        this.numbApps = mess.detail.numb;
+        this.interval = mess.detail.spread;
+        this.dateName = false;
+        this.productList = true; 
+        //console.log('appName '+ this.appName);
+        
+    }
+//custom insert will allow for on the insert to use apex function that clones
+    setCustNameDate(mess){
+        this.appName = mess.detail.name;
+        this.appDate = mess.detail.date;
+        this.numbApps = mess.detail.numb;
+        this.interval = mess.detail.time;
+        this.daysApart = mess.detail.time; 
+        this.customInsert = true; 
+        this.dateName = false;
+        this.productList = true;
+        // console.log('app name ' + this.appName + ' date '+this.appDate);
+        // console.log('numbApps ' +this.numbApps + ' interval '+this.interval);
+        // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
+        
+        
+        
+    }
     save(){
         this.count += 1; 
         console.log('count ' + this.count);

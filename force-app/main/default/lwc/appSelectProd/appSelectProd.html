@@ -15,6 +15,10 @@
                                      onupdate={handleRemove}></c-app-selected-prod>
             </div>
     </div>
+    <div class="slds-docked-form-footer">
+        <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
+        <button type="button" onclick={next} class="slds-button slds-button_brand">Next</button>
+    </div>
     </template>
     <template if:false={loaded}>
         <lightning-spinner 
