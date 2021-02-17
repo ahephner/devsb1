@@ -27,5 +27,7 @@ export default class AppSelectedProd extends LightningElement {
             this.dispatchEvent(new CustomEvent('update', {
                 detail: xId
             })); 
+            console.log('selected id '+ xId);
+            
         }
 }

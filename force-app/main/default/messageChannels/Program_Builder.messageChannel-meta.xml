@@ -19,4 +19,8 @@
         <fieldName>message</fieldName>
         <description>To pass string values</description> 
     </lightningMessageFields>
+        <lightningMessageFields>
+        <fieldName>areaId</fieldName>
+        <description>To pass selected area id along</description> 
+    </lightningMessageFields>
 </LightningMessageChannel>

@@ -13,7 +13,8 @@ export default class ProductTable extends LightningElement {
     searchKey = ''; 
     pf ='All';
     cat = "All"; 
-    areaSelected; 
+    areaSelected;
+    areaId;  
     count = 0; 
     //App Info
     appName;
@@ -38,11 +39,15 @@ export default class ProductTable extends LightningElement {
             }
         }
 //handle the message
+//areaId will be passed to the pricerate comp. 
         handleMessage(message){
             //console.log('handling ' +message.connector);
             this.exposed = message.connector;
             this.areaSelected = message.message; 
             this.dateName = true;
+            this.areaId = message.areaId;
+            console.log('areaId '+this.areaId);
+            
         }
 //life cycle hooks
         unsubscribeFromMessageChannel(){
@@ -97,6 +102,7 @@ export default class ProductTable extends LightningElement {
         //for now I have to turn both off. May make sense to either A. clear all values in the components first
         this.dateName = false;
         this.productList = false; 
+        this.productRates = false; 
     }
     nextProdList(){
         this.dateName = false;
@@ -135,8 +141,12 @@ export default class ProductTable extends LightningElement {
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
+        
         for(let prod of Object.keys(mess.detail)){
             mess.detail[prod].Rate2__c = 0
+            mess.detail[prod].Unit_Price__c = 0
+            mess.detail[prod].Margin__c = 0
+            console.log('mess.detail '+mess.detail[prod].Size__c)
             this.selectedProducts.push(mess.detail[prod])
             
         }

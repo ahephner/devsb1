@@ -61,7 +61,8 @@
 
               <template if:true={productRates}>
                 <c-app-rate-price selection={selectedProducts}
-                                  onnext={closeModal}></c-app-rate-price>
+                                  onnext={closeModal}
+                                  oncancel={closeModal}></c-app-rate-price>
               </template>
             </div>
               <!-- <footer class="slds-modal__footer">

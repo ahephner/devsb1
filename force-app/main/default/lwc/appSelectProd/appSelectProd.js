@@ -79,15 +79,20 @@ export default class AppSelectProd extends LightningElement {
         }
         handleRemove(x){
             //console.log('connected');
-            const prodId = x.detail; 
-            const index = this.selection.indexOf(prodId);
+            //const prodId = x.detail;
+            console.log('prodId '+ prodId);  
+            const index = this.selection.findIndex(item => item.id === prodId);
+            //console.log('index '+ index);
+            
             this.selection.splice(index, 1);
             //console.log(this.selection);
             
         }
         //control flow here 
+        //can't call set here. A set does not evaluate an array of objects like I was thinking it sees
+        // {id: 1, name:'AJ'} != {id:1, name:'AJ'} as true
         next(){
-            this.selection = new Set(this.selection);
+            //this.selection = new Set(this.selection);
             this.dispatchEvent(new CustomEvent('move',{
                 detail: this.selection
             }));
