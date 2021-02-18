@@ -1,6 +1,7 @@
 import { LightningElement, wire } from 'lwc';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
+import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -39,14 +40,14 @@ export default class ProductTable extends LightningElement {
             }
         }
 //handle the message
-//areaId will be passed to the pricerate comp. 
+//then call get the area info for the product conversions 
         handleMessage(message){
             //console.log('handling ' +message.connector);
             this.exposed = message.connector;
             this.areaSelected = message.message; 
             this.dateName = true;
             this.areaId = message.areaId;
-            console.log('areaId '+this.areaId);
+            this.handleArea(this.areaId)
             
         }
 //life cycle hooks
@@ -62,6 +63,15 @@ export default class ProductTable extends LightningElement {
             this.unsubscribeFromMessageChannel(); 
         }
 
+        //get area info for the product calculations
+       handleArea(x){ 
+        areaInfo({ai:x})
+            .then((resp)=>{
+                this.areaSQft = resp[0].Area_Sq_Feet__c
+                this.areaUM = resp[0].Pref_U_of_M__c
+                //console.log('areaCall '+x);
+            })
+        }
 
 //get set new product family/category search
     get pfOptions(){
@@ -133,28 +143,29 @@ export default class ProductTable extends LightningElement {
         // console.log('app name ' + this.appName + ' date '+this.appDate);
         // console.log('numbApps ' +this.numbApps + ' interval '+this.interval);
         // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
-        
-        
-        
+  
     }
 
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
-        
-        for(let prod of Object.keys(mess.detail)){
-            mess.detail[prod].Rate2__c = 0
-            mess.detail[prod].Unit_Price__c = 0
-            mess.detail[prod].Margin__c = 0
-            console.log('mess.detail '+mess.detail[prod].Size__c)
-            this.selectedProducts.push(mess.detail[prod])
-            
-        }
-        
-        console.log('products returned '+this.selectedProducts);
-        
-        
-        
+        //this.selectedProducts = mess.detail;       
+         console.log('this areaUM '+ this.areaUM);
+         
+        this.selectedProducts = mess.detail.map(item=>{
+            return {...item, 
+               Rate2__c: 0,
+               Application__c: '',
+               Note__c: '' ,
+               Units_Required__c: '',
+               Unit_Area__c: this.areaUM, 
+               Unit_Price__c: "0",
+               Margin__c: "0", 
+               Total_Price__c: "0",
+               Area__c: ''
+            }
+        } );
+
     }
     save(){
         this.count += 1; 

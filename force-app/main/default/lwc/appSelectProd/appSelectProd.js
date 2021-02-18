@@ -39,8 +39,8 @@ export default class AppSelectProd extends LightningElement {
         //      let selectColor = item.Average_Cost__c < 10 ? 'none':"slds-theme_success"
         //      return  {...item, 'select': false, 'selectColor':selectColor }
         //  }); 
-         this.copy = data; 
-         console.log(1, this.prod); 
+         this.copy = data 
+         console.log(1, this.copy); 
         }else{
             this.error = error;
             console.log(JSON.stringify(this.error)); 
@@ -91,13 +91,14 @@ export default class AppSelectProd extends LightningElement {
         //control flow here 
         //can't call set here. A set does not evaluate an array of objects like I was thinking it sees
         // {id: 1, name:'AJ'} != {id:1, name:'AJ'} as true
+        //then get all the fields need for pricing. 
         next(){
             //this.selection = new Set(this.selection);
+            this.selection = this.copy.filter(cItem => this.selection.some(sItem => cItem.Id === sItem.id));
+            
             this.dispatchEvent(new CustomEvent('move',{
                 detail: this.selection
-            }));
-            
-            
+            }));  
         }
 
         cancel(){

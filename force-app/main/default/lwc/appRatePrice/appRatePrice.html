@@ -1,27 +1,27 @@
 <template>
     <lightning-card  variant="Narrow"  title="Rates and Pricing" icon-name="utility:adjust_value">
         <template if:true={loaded}>
-                    <template for:each={selection} for:item="sp" >
-                       <div key={sp.id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid'>
+                    <template for:each={data} for:item="sp" >
+                       <div key={sp.Id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid'>
                             <div class="slds-col slds-size_3-of-12">
-                                <p class='pName'>{sp.name}</p>
+                                <p class='pName'>{sp.Name}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-12">
                                 <lightning-input  type="number"  step="0.1" label="Rate"
-                                name={sp.id} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
+                                name={sp.Id} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
                             </div>    
                             <div class="slds-col slds-size_1-of-12">
                                 <lightning-input class='liquid' type="number"  
-                                                label="Unit Price" name={sp.id} 
+                                                label="Unit Price" name={sp.Id} 
                                                 value={sp.Unit_Price__c} onchange={newPrice} 
                                                 formatter="currency" step="0.01"></lightning-input>
                             </div>
                             <div class="slds-col slds-size_1-of-12">
                                 <lightning-input class='liquid' type="number"  
-                                                label="Margin%" name={sp.id} 
+                                                label="Margin%" name={sp.Id} 
                                                 value={sp.Margin__c} onchange={newMargin} step="0.01" ></lightning-input>
                             </div> 
-                            <div class="slds-col slds-size_1-of-12"><p>{sp.Size__c}</p></div>   
+                            <div class="slds-col slds-size_1-of-12"><p>{sp.Area__c}</p></div>   
                        </div>
                     </template>
         <div class="slds-docked-form-footer">
