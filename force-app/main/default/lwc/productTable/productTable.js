@@ -145,12 +145,25 @@ export default class ProductTable extends LightningElement {
         // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
   
     }
-
+    //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
+    //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
+    pref = (areaUm, type)=>{ 
+        // eslint-disable-next-line no-return-assign
+        console.log('areaUM '+areaUm+ ' type '+type);
+        
+        return areaUm ==='M' && type==='Dry' ?  'LB/M':
+        areaUm ==='M' && type==='Liquid' ?  'OZ/M':
+        areaUm ==='Acre' && type==='Dry' ?  'LB/Acre':
+        areaUm ==='Acre' && type==='Liquid' ?  'OZ/Acre':
+         ''
+    }
+    //gathers products from appSelectProd then maps over to set values for the appRatePrice that are need for the math functions
+    //the pref uses the above function to set the unit of measure automatically for the user
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
         //this.selectedProducts = mess.detail;       
-         console.log('this areaUM '+ this.areaUM);
+         //console.log('this areaUM '+ this.areaUM);
          
         this.selectedProducts = mess.detail.map(item=>{
             return {...item, 
@@ -158,7 +171,7 @@ export default class ProductTable extends LightningElement {
                Application__c: '',
                Note__c: '' ,
                Units_Required__c: '',
-               Unit_Area__c: this.areaUM, 
+               Unit_Area__c: this.pref(this.areaUM, item.Product_Type__c),  
                Unit_Price__c: "0",
                Margin__c: "0", 
                Total_Price__c: "0",

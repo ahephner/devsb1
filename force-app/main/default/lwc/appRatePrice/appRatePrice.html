@@ -4,12 +4,23 @@
                     <template for:each={data} for:item="sp" >
                        <div key={sp.Id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid'>
                             <div class="slds-col slds-size_3-of-12">
-                                <p class='pName'>{sp.Name}</p>
+                                <p class='pName'>{sp.Product_Name__c}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-12">
                                 <lightning-input  type="number"  step="0.1" label="Rate"
                                 name={sp.Id} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
-                            </div>    
+                            </div>   
+                            <div class="slds-col slds-size_1-of-12">
+                                <lightning-combobox
+                                name={sp.Id}
+                                label="Unit Area"
+                                value={sp.Unit_Area__c}
+                                placeholder="Select Measure"
+                                options={unitArea}
+                                onchange={handleUnitArea}
+                                required
+                                ></lightning-combobox> 
+                            </div>
                             <div class="slds-col slds-size_1-of-12">
                                 <lightning-input class='liquid' type="number"  
                                                 label="Unit Price" name={sp.Id} 
@@ -21,7 +32,7 @@
                                                 label="Margin%" name={sp.Id} 
                                                 value={sp.Margin__c} onchange={newMargin} step="0.01" ></lightning-input>
                             </div> 
-                            <div class="slds-col slds-size_1-of-12"><p>{sp.Area__c}</p></div>   
+                             
                        </div>
                     </template>
         <div class="slds-docked-form-footer">

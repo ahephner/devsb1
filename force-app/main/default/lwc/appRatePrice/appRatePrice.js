@@ -11,6 +11,7 @@ export default class AppRatePrice extends LightningElement {
            //need to make this private so we can edit this
            set selection(value){
                this.data = JSON.parse(JSON.stringify(value)); 
+                console.log(this.data);
                 
            }
 
@@ -32,12 +33,15 @@ export default class AppRatePrice extends LightningElement {
             console.log('newMargin '+e.target.name);
            }
 
-           prodInfo(){
-               console.log(this.selection.length);
-               for(let i=0;i<this.selection.length;i++){
-                   console.log(this.selection[i])
-               }
-           }
+           //for the combo box 
+           get unitArea(){
+            return [
+                {label:'OZ/M', value:'OZ/M'}, 
+                {label: 'OZ/Acre', value:'OZ/Acre'},
+                {label: 'LB/M', value:'LB/M'},
+                {label: 'LB/Acre', value:'LB/Acre'}
+            ];
+        }
            //flow
            save(){
                this.dispatchEvent(new CustomEvent('next'))   
@@ -46,4 +50,10 @@ export default class AppRatePrice extends LightningElement {
            cancel(){
                this.dispatchEvent(new CustomEvent('cancel'))
            }
+           prodInfo(){
+            console.log(this.selection.length);
+            for(let i=0;i<this.selection.length;i++){
+                console.log(this.selection[i])
+            }
+        }
 }
