@@ -69,7 +69,7 @@ export default class ProductTable extends LightningElement {
             .then((resp)=>{
                 this.areaSQft = resp[0].Area_Sq_Feet__c
                 this.areaUM = resp[0].Pref_U_of_M__c
-                //console.log('areaCall '+x);
+                console.log('areaCall '+this.areaSQft);
             })
         }
 
@@ -170,7 +170,7 @@ export default class ProductTable extends LightningElement {
                Rate2__c: 0,
                Application__c: '',
                Note__c: '' ,
-               Units_Required__c: '',
+               Units_Required__c: '0',
                Unit_Area__c: this.pref(this.areaUM, item.Product_Type__c),  
                Unit_Price__c: "0",
                Margin__c: "0", 

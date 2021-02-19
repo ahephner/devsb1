@@ -32,6 +32,14 @@
                                                 label="Margin%" name={sp.Id} 
                                                 value={sp.Margin__c} onchange={newMargin} step="0.01" ></lightning-input>
                             </div> 
+                            <div class='slds-col slds-size_1-of-12'>
+                                <lightning-input type="number" name="input4" 
+                                                 readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
+                            </div>
+                            <div class='slds-col slds-size_1-of-12'>
+                                <lightning-input type="number" name="input4" formatter="currency"
+                                                 readonly value={sp.Total_Price__c} label="Total Price" ></lightning-input>
+                            </div>
                              
                        </div>
                     </template>
