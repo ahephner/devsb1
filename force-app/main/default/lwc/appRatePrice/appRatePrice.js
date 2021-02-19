@@ -1,7 +1,8 @@
 import { LightningElement, api, track } from 'lwc';
 export default class AppRatePrice extends LightningElement {
            @track data; 
-           @api areaSize; 
+           @api areaSize;
+           appTotal;  
            loaded = true; 
            
            @api 
@@ -11,14 +12,14 @@ export default class AppRatePrice extends LightningElement {
            //need to make this private so we can edit this
            set selection(value){
                this.data = JSON.parse(JSON.stringify(value)); 
-                console.log(this.areaSize);
+                //console.log(this.areaSize);
                 
            }
 //this will set the number of required units based on rate. 
            unitsRequired = (uOFM, rate, areaS, unitS) => {
                return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*areaS))/unitS) : Math.ceil(((rate*areaS)/unitS))
             }
-
+//user changes the rate for the product
            newRate(e){
             let index = this.data.findIndex(prod => prod.Id === e.target.name);
             
@@ -37,12 +38,70 @@ export default class AppRatePrice extends LightningElement {
                 
             },500 ) 
            }
+
+           handleUnitArea(e){
+               let index = this.data.findIndex(prod => prod.Id === e.target.name);
+               console.log('index ' +index + ' detail '+e.detail.value );
+               
+               this.data[index].Unit_Area__c = e.detail.value;
+               
+               if(this.data[index].Rate2__c > 0){
+                this.data[index].Units_Required__c = this.unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].Size__c );
+                this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+               }
+           }
+
+//Pricing 
+           //this is a reuable functions for pricing and line totals
+           appTotal = (t, nxt)=> (t+nxt);
+           lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
-            console.log('newPrice '+e.target.name);
+            window.clearTimeout(this.delay);
+            let index = this.data.findIndex(prod => prod.Id === e.target.name);
+
+            this.delay = setTimeout(()=>{
+                this.data[index].Unit_Price__c = e.detail.value;
+                this.data[index].Unit_Price__c = Number(this.data[index].Unit_Price__c);
+                //console.log(typeof this.data[index].Unit_Price__c +' unit Type');          
+                    
+                    if(this.data[index].Unit_Price__c > 0){
+                    this.data[index].Margin__c = Number((1 - (this.data[index].Average_Cost__c /this.data[index].Unit_Price__c))*100).toFixed(2)
+                    this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                    
+                    this.appTotalPrice = this.data.map(el=>Number(el.Total_Price__c)).reduce(this.appTotal)
+                    //console.log('newPrice if ' + this.appTotalPrice);
+                }else{
+                    this.data[index].Margin__c = 0;                
+                    this.data[index].Margin__c = this.data[index].Margin__c.toFixed(2)
+                    this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                    //console.log(this.data[index].Total_Price__c, 'here price');
+                    this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                    //console.log('price else '+ this.appTotalPrice);
+                }
+                }, 1000)
            }
-           newMargin(e){
-            console.log('newMargin '+e.target.name);
-           }
+           newMargin(m){
+                window.clearTimeout(this.delay)
+                    let index = this.data.findIndex(prod => prod.Id === m.target.name)
+                    // eslint-disable-next-line @lwc/lwc/no-async-operation
+                    this.delay = setTimeout(()=>{
+                            this.data[index].Margin__c = Number(m.detail.value);
+                            if(1- this.data[index].Margin__c/100 > 0){
+                                this.data[index].Unit_Price__c = Number(this.data[index].Average_Cost__c /(1- this.data[index].Margin__c/100)).toFixed(2);
+                                this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                                this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                            // console.log('margin if ' +this.appTotalPrice);
+                            }else{
+                                this.data[index].Unit_Price__c = 0;
+                                this.data[index].Unit_Price__c = this.data[index].Unit_Price__c.toFixed(2);
+                                this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)   
+                                this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                                //console.log('margin else ' +this.appTotalPrice);
+                                
+                            }
+                },1500)
+            }   
+           
 
            //for the combo box 
            get unitArea(){
