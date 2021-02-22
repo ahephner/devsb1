@@ -5,6 +5,7 @@ import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 import addApplication from '@salesforce/apex/addApp.addApplication';
 import addProducts from '@salesforce/apex/addApp.addProducts';
+import multiInsert from '@salesforce/apex/addApp.multiInsert';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -122,7 +123,7 @@ export default class ProductTable extends LightningElement {
         this.productList = true; 
     }
 
-    //set Name Date
+    //set Name Date get values from appNameDate
     setNameDate(mess){
         this.appName = mess.detail.name;
         this.appDate = mess.detail.date;
@@ -130,24 +131,10 @@ export default class ProductTable extends LightningElement {
         this.interval = mess.detail.spread;
         this.dateName = false;
         this.productList = true; 
-        //console.log('appName '+ this.appName);
+        //console.log('spread '+ this.interval);
         
     }
-//custom insert will allow for on the insert to use apex function that clones
-    setCustNameDate(mess){
-        this.appName = mess.detail.name;
-        this.appDate = mess.detail.date;
-        this.numbApps = mess.detail.numb;
-        this.interval = mess.detail.time;
-        this.daysApart = mess.detail.time; 
-        this.customInsert = true; 
-        this.dateName = false;
-        this.productList = true;
-        // console.log('app name ' + this.appName + ' date '+this.appDate);
-        // console.log('numbApps ' +this.numbApps + ' interval '+this.interval);
-        // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
-  
-    }
+
     //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
     //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
     pref = (areaUm, type)=>{ 
@@ -193,7 +180,7 @@ export default class ProductTable extends LightningElement {
                 this.appId = resp.Id;
                 this.selectedProducts.forEach((x)=> x.Application__c = this.appId)
                 let products = JSON.stringify(this.selectedProducts);
-                console.log('products '+products);
+                //console.log('products '+products);
 
                 addProducts({products:products})
                     .then(()=>{
@@ -203,11 +190,17 @@ export default class ProductTable extends LightningElement {
                                 message: 'Application created '+ this.appName,
                                 variant: 'success',
                             }),
-                        ); 
+                        );      
+                    }).then(()=>{
+                        if(this.interval !='once'){
+                            multiInsert({appId:this.appId, occurance:this.numbApps, daysBetween: this.interval})
+                        }
+                    }).then(()=>{
+                        this.closeModal(); 
                         this.appName = '';
                         this.areaId = '';
                         this.appDate = '';
-                        this.selectedProducts = [];    
+                        this.selectedProducts = [];
                     }).catch((error)=>{
                         console.log(JSON.stringify(error))
                         this.dispatchEvent(

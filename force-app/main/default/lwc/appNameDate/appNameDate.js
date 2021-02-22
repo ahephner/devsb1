@@ -15,7 +15,7 @@ export default class AppNameDate extends LightningElement {
 
     get numOptions(){
         return [
-            {label:'Does Not Repeat', value:'1'},
+            {label:'Does Not Repeat', value: 'once'},
             {label:'Weekly', value:'7'},
             {label:'Monthly', value:'30'},
             {label: 'Custom', value:'custom'},
@@ -38,7 +38,7 @@ export default class AppNameDate extends LightningElement {
     handleNumchange(event){
         this.interval = event.detail.value; 
         console.log(this.interval)
-        if(this.interval != '1' && this.interval != 'custom'){
+        if(this.interval != 'once' && this.interval != 'custom'){
             this.hiddenNumberBox = true;
             this.customInsert = false;             
         }else if(this.interval ==='custom'){
@@ -74,33 +74,6 @@ handleOption(event){
         
     }
 
-//this is where I determine what to dispatch back to the main productTable comp
-    sendCustomInsert(){
-        this.dispatchEvent(new CustomEvent('custnamedate', {
-           detail:{ 
-            name: this.appName,
-            date: this.appDate,
-            spread: this.custSpreadBetweenApps,
-            numb: this.custNumberApps,
-            time: this.custDaysApart
-           }
-        }));
-        //console.log('custom insert');
-        
-    }
-    
-    normalInsert(){
-        this.dispatchEvent(new CustomEvent('normalnamedate',{
-            detail:{
-                    name: this.appName,
-                    date: this.appDate,
-                    spread: this.interval,
-                    numb: this.numbApps
-                }
-            }));
-        //console.log('normal '+this.appName);    
-    }
-
 //flow
     cancel(){
         // console.log('spread '+ this.custSpreadBetweenApps);
@@ -111,9 +84,24 @@ handleOption(event){
 
     next(){
         if(this.interval === 'custom'){
-            this.sendCustomInsert();
+            const spread = this.custSpreadBetweenApps * this.custDaysApart; 
+            this.dispatchEvent(new CustomEvent('namedate', {
+                detail:{ 
+                 name: this.appName,
+                 date: this.appDate,
+                 spread: spread,
+                 numb: this.custNumberApps,
+                }
+             }));
         }else{
-            this.normalInsert();
+            this.dispatchEvent(new CustomEvent('namedate',{
+                detail:{
+                        name: this.appName,
+                        date: this.appDate,
+                        spread: this.interval,
+                        numb: this.numbApps
+                    }
+                }));
         }
         
     }
