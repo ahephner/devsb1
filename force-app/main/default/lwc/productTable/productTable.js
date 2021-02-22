@@ -2,6 +2,7 @@ import { LightningElement, wire } from 'lwc';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 import areaInfo from '@salesforce/apex/appProduct.areaInfo';
+import addApplication from '@salesforce/apex/addApp.addApplication';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -64,7 +65,7 @@ export default class ProductTable extends LightningElement {
         }
 
         //get area info for the product calculations
-       handleArea(x){ 
+       handleArea(x){  
         areaInfo({ai:x})
             .then((resp)=>{
                 this.areaSQft = resp[0].Area_Sq_Feet__c
@@ -180,9 +181,12 @@ export default class ProductTable extends LightningElement {
         } );
 
     }
-    save(){
-        this.count += 1; 
-        console.log('count ' + this.count);
-        
+    save(prod){
+        console.log('appName ' + this.appName);
+        console.log('areaId ' + this.areaId);
+        console.log('appDate ' + this.appDate);
+        console.log('prod ' + prod.detail);
+
+        this.closeModal(); 
     }
 }

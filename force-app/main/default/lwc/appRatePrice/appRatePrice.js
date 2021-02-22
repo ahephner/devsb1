@@ -2,7 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 export default class AppRatePrice extends LightningElement {
            @track data; 
            @api areaSize;
-           appTotal;  
+           appTotalPrice;  
            loaded = true; 
            
            @api 
@@ -114,7 +114,11 @@ export default class AppRatePrice extends LightningElement {
         }
            //flow
            save(){
-               this.dispatchEvent(new CustomEvent('next'))   
+              // console.log('save clicked '+this.data);
+               
+               this.dispatchEvent(new CustomEvent('save',{
+                    detail: this.data
+               }));    
            }
 
            cancel(){

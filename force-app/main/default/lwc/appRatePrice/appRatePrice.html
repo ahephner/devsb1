@@ -44,9 +44,13 @@
                        </div>
                     </template>
         <div class="slds-docked-form-footer">
-            <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
-            <button type="button" onclick={save} class="slds-button slds-button_brand">Next</button>
-            <button type="button" onclick={prodInfo} class="slds-button slds-button_brand">prod info</button>
+            <lightning-button variant="destructive" label="Cancel" 
+                              title="Cancel" onclick={cancel} 
+                              class="slds-m-left_x-small"></lightning-button>
+            <lightning-button variant="success" label="Save" 
+                              title="Successful action" onclick={save} 
+                              class="slds-m-left_x-small"></lightning-button>
+            <!-- <button type="button" onclick={prodInfo} class="slds-button slds-button_brand">prod info</button> -->
         </div>
     </template>
     <template if:false={loaded}>
