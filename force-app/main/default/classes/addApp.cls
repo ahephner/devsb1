@@ -22,7 +22,7 @@ public with sharing class addApp {
                           system.debug('temp ' + temp);
                           if(temp.Application__c != null){
                              //ap.Id = temp.Id;
-                             ap.Product__c = temp.product__c;
+                             ap.Product__c = temp.Id;
                              ap.Application__c = temp.Application__c; 	
                              ap.Rate2__c = temp.Rate2__c;
                              ap.Note__c = temp.Note__c; 

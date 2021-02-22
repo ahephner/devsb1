@@ -23,4 +23,8 @@
         <fieldName>areaId</fieldName>
         <description>To pass selected area id along</description> 
     </lightningMessageFields>
+        <lightningMessageFields>
+        <fieldName>updateTable</fieldName>
+        <description>Boolean to tell the dataTable to refresh</description> 
+    </lightningMessageFields>
 </LightningMessageChannel>

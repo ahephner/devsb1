@@ -1,8 +1,10 @@
 import { LightningElement, wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 import addApplication from '@salesforce/apex/addApp.addApplication';
+import addProducts from '@salesforce/apex/addApp.addProducts';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -65,14 +67,14 @@ export default class ProductTable extends LightningElement {
         }
 
         //get area info for the product calculations
-       handleArea(x){  
-        areaInfo({ai:x})
-            .then((resp)=>{
-                this.areaSQft = resp[0].Area_Sq_Feet__c
-                this.areaUM = resp[0].Pref_U_of_M__c
-                console.log('areaCall '+this.areaSQft);
-            })
-        }
+        handleArea(x){  
+            areaInfo({ai:x})
+                .then((resp)=>{
+                    this.areaSQft = resp[0].Area_Sq_Feet__c
+                    this.areaUM = resp[0].Pref_U_of_M__c
+                    //console.log('areaCall '+this.areaSQft);
+                })
+            }
 
 //get set new product family/category search
     get pfOptions(){
@@ -163,8 +165,6 @@ export default class ProductTable extends LightningElement {
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
-        //this.selectedProducts = mess.detail;       
-         //console.log('this areaUM '+ this.areaUM);
          
         this.selectedProducts = mess.detail.map(item=>{
             return {...item, 
@@ -182,11 +182,45 @@ export default class ProductTable extends LightningElement {
 
     }
     save(prod){
-        console.log('appName ' + this.appName);
-        console.log('areaId ' + this.areaId);
-        console.log('appDate ' + this.appDate);
-        console.log('prod ' + prod.detail);
+        this.selectedProducts = prod.detail; 
+        let params = {
+            appName: this.appName,
+            appArea: this.areaId,
+            appDate: this.appDate
+        }
+        addApplication({wrapper:params})
+            .then((resp)=>{
+                this.appId = resp.Id;
+                this.selectedProducts.forEach((x)=> x.Application__c = this.appId)
+                let products = JSON.stringify(this.selectedProducts);
+                console.log('products '+products);
 
-        this.closeModal(); 
+                addProducts({products:products})
+                    .then(()=>{
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Success',
+                                message: 'Application created '+ this.appName,
+                                variant: 'success',
+                            }),
+                        ); 
+                        this.appName = '';
+                        this.areaId = '';
+                        this.appDate = '';
+                        this.selectedProducts = [];    
+                    }).catch((error)=>{
+                        console.log(JSON.stringify(error))
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Error adding app',
+                                message: 'Did you select an Area and enter a App Name?',
+                                variant: 'error'
+                            }) 
+                        ) 
+                        this.closeModal(); 
+                    })
+            })
+
+         
     }
 }
