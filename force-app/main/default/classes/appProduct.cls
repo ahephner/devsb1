@@ -51,7 +51,7 @@ public class appProduct {
             
     }
     //get area details when adding to the program 
-    @AuraEnabled
+    @AuraEnabled(Cacheable=true)
     public static list<Area__c> areaInfo(string ai){
         list<area__c> a = [select Area_Sq_Feet__c, name, Pref_U_of_M__c from area__c where id =:ai limit 1 ];
         //system.debug(a);

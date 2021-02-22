@@ -1,16 +1,22 @@
 import { LightningElement, wire } from 'lwc';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
+import areaInfo from '@salesforce/apex/appProduct.areaInfo';
+import addApplication from '@salesforce/apex/addApp.addApplication';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
+    //controls what component is up
     exposed = false;
     dateName = false;
     productList = false; 
+    productRates = false;
     subscritption = null; 
+    //searching product table
     searchKey = ''; 
     pf ='All';
     cat = "All"; 
-    areaSelected; 
+    areaSelected;
+    areaId;  
     count = 0; 
     //App Info
     appName;
@@ -19,7 +25,7 @@ export default class ProductTable extends LightningElement {
     numbApps;
     daysApart;
     customInsert = false; 
-
+    selectedProducts = []; 
 
     @wire(MessageContext)
         messageContext; 
@@ -35,11 +41,15 @@ export default class ProductTable extends LightningElement {
             }
         }
 //handle the message
+//then call get the area info for the product conversions 
         handleMessage(message){
             //console.log('handling ' +message.connector);
             this.exposed = message.connector;
             this.areaSelected = message.message; 
             this.dateName = true;
+            this.areaId = message.areaId;
+            this.handleArea(this.areaId)
+            
         }
 //life cycle hooks
         unsubscribeFromMessageChannel(){
@@ -54,6 +64,15 @@ export default class ProductTable extends LightningElement {
             this.unsubscribeFromMessageChannel(); 
         }
 
+        //get area info for the product calculations
+       handleArea(x){  
+        areaInfo({ai:x})
+            .then((resp)=>{
+                this.areaSQft = resp[0].Area_Sq_Feet__c
+                this.areaUM = resp[0].Pref_U_of_M__c
+                console.log('areaCall '+this.areaSQft);
+            })
+        }
 
 //get set new product family/category search
     get pfOptions(){
@@ -94,6 +113,7 @@ export default class ProductTable extends LightningElement {
         //for now I have to turn both off. May make sense to either A. clear all values in the components first
         this.dateName = false;
         this.productList = false; 
+        this.productRates = false; 
     }
     nextProdList(){
         this.dateName = false;
@@ -124,13 +144,49 @@ export default class ProductTable extends LightningElement {
         // console.log('app name ' + this.appName + ' date '+this.appDate);
         // console.log('numbApps ' +this.numbApps + ' interval '+this.interval);
         // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
-        
-        
-        
+  
     }
-    save(){
-        this.count += 1; 
-        console.log('count ' + this.count);
+    //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
+    //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
+    pref = (areaUm, type)=>{ 
+        // eslint-disable-next-line no-return-assign
+        console.log('areaUM '+areaUm+ ' type '+type);
         
+        return areaUm ==='M' && type==='Dry' ?  'LB/M':
+        areaUm ==='M' && type==='Liquid' ?  'OZ/M':
+        areaUm ==='Acre' && type==='Dry' ?  'LB/Acre':
+        areaUm ==='Acre' && type==='Liquid' ?  'OZ/Acre':
+         ''
+    }
+    //gathers products from appSelectProd then maps over to set values for the appRatePrice that are need for the math functions
+    //the pref uses the above function to set the unit of measure automatically for the user
+    gatherProducts(mess){
+        this.productList = false;
+        this.productRates = true; 
+        //this.selectedProducts = mess.detail;       
+         //console.log('this areaUM '+ this.areaUM);
+         
+        this.selectedProducts = mess.detail.map(item=>{
+            return {...item, 
+               Rate2__c: 0,
+               Application__c: '',
+               Note__c: '' ,
+               Units_Required__c: '0',
+               Unit_Area__c: this.pref(this.areaUM, item.Product_Type__c),  
+               Unit_Price__c: "0",
+               Margin__c: "0", 
+               Total_Price__c: "0",
+               Area__c: ''
+            }
+        } );
+
+    }
+    save(prod){
+        console.log('appName ' + this.appName);
+        console.log('areaId ' + this.areaId);
+        console.log('appDate ' + this.appDate);
+        console.log('prod ' + prod.detail);
+
+        this.closeModal(); 
     }
 }

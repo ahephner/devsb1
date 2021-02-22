@@ -56,8 +56,15 @@
               <!-- <c-app-product-list></c-app-product-list> -->
               <template if:true={productList}>
                   <c-app-select-prod onclose={closeModal}
-                                     onmove={closeModal}></c-app-select-prod>
+                                     onmove={gatherProducts}></c-app-select-prod>
               </template>    
+
+              <template if:true={productRates}>
+                <c-app-rate-price selection={selectedProducts}
+                                  area-size={areaSQft}
+                                  onsave={save}
+                                  oncancel={closeModal}></c-app-rate-price>
+              </template>
             </div>
               <!-- <footer class="slds-modal__footer">
                 <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>

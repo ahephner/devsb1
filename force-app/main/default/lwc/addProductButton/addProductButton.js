@@ -18,7 +18,6 @@ export default class AddProductButton extends LightningElement {
     //get area options
     get areaOptions(){
         //console.log('recordId '+this.recordId);
-        
         return this.areaList.data; 
     }
     //used to select area plus alert the user in the comp. Will use this to verify an area was set before products added
@@ -27,6 +26,7 @@ export default class AddProductButton extends LightningElement {
         //areaName = e.target.areaOptions.find(opt => opt.value === e.detail.value).label; 
         //Wrong I was trying to call my areaOptions not what the system has as target.options
         this.selectedLabel = e.target.options.find(opt => opt.value === e.detail.value).label;
+
         this.titleText += this.selectedLabel        
     }
 
@@ -41,7 +41,8 @@ export default class AddProductButton extends LightningElement {
         if(this.area){
             const payload = {
                 connector: true,
-                message: this.selectedLabel
+                message: this.selectedLabel,
+                areaId: this.area
             }
             publish(this.messageContext, Program_Builder, payload); 
        }else{

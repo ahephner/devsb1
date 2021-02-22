@@ -1,12 +1,13 @@
 <template>
     <lightning-card  variant="Narrow"  title="Application Name and Date" icon-name="utility:event">
-        
-        <lightning-input type="text" variant="standard" 
-            name="appName" label="Application Name" onchange={setName}
-            required placeholder="type here..."></lightning-input>
+        <div class='slds-grid'>
+            <lightning-input type="text" variant="standard" class='slds-size_2-of-6'
+                name="appName" label="Application Name" onchange={setName}
+                required placeholder="type here..."></lightning-input>
 
-        <lightning-input type="date" name="appDate" 
-            label="Application Date" required onchange={setDate}></lightning-input>
+            <lightning-input type="date" name="appDate" class='slds-size_2-of-6 slds-m-left_small'
+                label="Application Date" required onchange={setDate}></lightning-input>
+        </div>
         <!--footer on the top card here-->
         <div class="slds-docked-form-footer">
             <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
