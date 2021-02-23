@@ -2,7 +2,7 @@
 
 import { LightningElement, api, wire, track } from 'lwc';
 import searchProduct from '@salesforce/apex/appProduct.searchProduct'
-
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 const columnsList = [
     {type: 'button', 
      initialWidth: 75,typeAttributes:{
@@ -97,11 +97,19 @@ export default class AppSelectProd extends LightningElement {
         //then get all the fields need for pricing. 
         next(){
             //this.selection = new Set(this.selection);
+            if(this.selection.length < 1){
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'No Products Selected',
+                    message: 'Please select at least one product',
+                    variant: 'error'
+                }));
+            }else{
             this.selection = this.copy.filter(cItem => this.selection.some(sItem => cItem.Id === sItem.id));
             
             this.dispatchEvent(new CustomEvent('move',{
                 detail: this.selection
             }));  
+        }
         }
 
         cancel(){

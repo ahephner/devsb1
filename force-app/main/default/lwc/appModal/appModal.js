@@ -79,6 +79,14 @@ export default class AppModal extends LightningElement {
          
     }
     saveArea(){
+        if(this.areaName === '' || this.areaName ===undefined){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Missing Information',
+                    message: 'Please enter an area name', 
+                    variant: 'error',
+                })); 
+        }else{
         const fields ={}; 
         fields[NAME_FIELD.fieldApiName] = this.areaName;
         fields[DATE_FIELD.fieldApiName] = this.areaDate;
@@ -117,5 +125,6 @@ export default class AppModal extends LightningElement {
                 console.log(JSON.stringify(error))
             );
         });
+    }
 }
 }

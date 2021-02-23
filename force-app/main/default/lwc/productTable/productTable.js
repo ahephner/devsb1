@@ -1,8 +1,11 @@
 import { LightningElement, wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 import addApplication from '@salesforce/apex/addApp.addApplication';
+import addProducts from '@salesforce/apex/addApp.addProducts';
+import multiInsert from '@salesforce/apex/addApp.multiInsert';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -11,6 +14,7 @@ export default class ProductTable extends LightningElement {
     productList = false; 
     productRates = false;
     subscritption = null; 
+    firstApp = true; 
     //searching product table
     searchKey = ''; 
     pf ='All';
@@ -48,8 +52,10 @@ export default class ProductTable extends LightningElement {
             this.areaSelected = message.message; 
             this.dateName = true;
             this.areaId = message.areaId;
-            this.handleArea(this.areaId)
-            
+            //control flow for when trying to call refresh apex
+            if(this.firstApp === true){
+                this.handleArea(this.areaId)
+            }
         }
 //life cycle hooks
         unsubscribeFromMessageChannel(){
@@ -65,14 +71,14 @@ export default class ProductTable extends LightningElement {
         }
 
         //get area info for the product calculations
-       handleArea(x){  
-        areaInfo({ai:x})
-            .then((resp)=>{
-                this.areaSQft = resp[0].Area_Sq_Feet__c
-                this.areaUM = resp[0].Pref_U_of_M__c
-                console.log('areaCall '+this.areaSQft);
-            })
-        }
+        handleArea(x){  
+            areaInfo({ai:x})
+                .then((resp)=>{
+                    this.areaSQft = resp[0].Area_Sq_Feet__c
+                    this.areaUM = resp[0].Pref_U_of_M__c
+                    //console.log('areaCall '+this.areaSQft);
+                })
+            }
 
 //get set new product family/category search
     get pfOptions(){
@@ -120,7 +126,7 @@ export default class ProductTable extends LightningElement {
         this.productList = true; 
     }
 
-    //set Name Date
+    //set Name Date get values from appNameDate
     setNameDate(mess){
         this.appName = mess.detail.name;
         this.appDate = mess.detail.date;
@@ -128,24 +134,10 @@ export default class ProductTable extends LightningElement {
         this.interval = mess.detail.spread;
         this.dateName = false;
         this.productList = true; 
-        //console.log('appName '+ this.appName);
+        //console.log('spread '+ this.interval);
         
     }
-//custom insert will allow for on the insert to use apex function that clones
-    setCustNameDate(mess){
-        this.appName = mess.detail.name;
-        this.appDate = mess.detail.date;
-        this.numbApps = mess.detail.numb;
-        this.interval = mess.detail.time;
-        this.daysApart = mess.detail.time; 
-        this.customInsert = true; 
-        this.dateName = false;
-        this.productList = true;
-        // console.log('app name ' + this.appName + ' date '+this.appDate);
-        // console.log('numbApps ' +this.numbApps + ' interval '+this.interval);
-        // console.log('days apart ' +this.daysApart + 'customInsert '+this.customInsert);
-  
-    }
+
     //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
     //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
     pref = (areaUm, type)=>{ 
@@ -163,8 +155,6 @@ export default class ProductTable extends LightningElement {
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
-        //this.selectedProducts = mess.detail;       
-         //console.log('this areaUM '+ this.areaUM);
          
         this.selectedProducts = mess.detail.map(item=>{
             return {...item, 
@@ -182,11 +172,62 @@ export default class ProductTable extends LightningElement {
 
     }
     save(prod){
-        console.log('appName ' + this.appName);
-        console.log('areaId ' + this.areaId);
-        console.log('appDate ' + this.appDate);
-        console.log('prod ' + prod.detail);
+        this.firstApp = false; 
+        this.selectedProducts = prod.detail; 
+        let params = {
+            appName: this.appName,
+            appArea: this.areaId,
+            appDate: this.appDate
+        }
+        addApplication({wrapper:params})
+            .then((resp)=>{
+                this.appId = resp.Id;
+                this.selectedProducts.forEach((x)=> x.Application__c = this.appId)
+                let products = JSON.stringify(this.selectedProducts);
+                //console.log('products '+products);
 
-        this.closeModal(); 
+                addProducts({products:products})
+                    .then(()=>{
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Success',
+                                message: 'Application created '+ this.appName,
+                                variant: 'success',
+                            }),
+                        );      
+                    }).then(()=>{
+                        console.log('interval '+this.interval);
+                        
+                        if(this.interval !='once'){
+                            multiInsert({appId:this.appId, occurance:this.numbApps, daysBetween: this.interval})
+                        }
+                    }).then(()=>{
+                        const payload = {
+                            updateTable: true
+                        }
+                        publish(this.messageContext, Program_Builder, payload);
+                        //console.log('sending '+ payload.updateTable);
+                        
+                    }).then(()=>{
+                        this.firstApp = true; 
+                        this.closeModal(); 
+                        this.appName = '';
+                        this.areaId = '';
+                        this.appDate = '';
+                        this.selectedProducts = [];
+                    }).catch((error)=>{
+                        console.log(JSON.stringify(error))
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Error adding app',
+                                message: 'Did you select an Area and enter a App Name?',
+                                variant: 'error'
+                            }) 
+                        ) 
+                        this.closeModal(); 
+                    })
+            })
+
+         
     }
 }
