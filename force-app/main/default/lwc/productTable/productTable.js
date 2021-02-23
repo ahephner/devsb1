@@ -14,6 +14,7 @@ export default class ProductTable extends LightningElement {
     productList = false; 
     productRates = false;
     subscritption = null; 
+    firstApp = true; 
     //searching product table
     searchKey = ''; 
     pf ='All';
@@ -51,8 +52,10 @@ export default class ProductTable extends LightningElement {
             this.areaSelected = message.message; 
             this.dateName = true;
             this.areaId = message.areaId;
-            this.handleArea(this.areaId)
-            
+            //control flow for when trying to call refresh apex
+            if(this.firstApp === true){
+                this.handleArea(this.areaId)
+            }
         }
 //life cycle hooks
         unsubscribeFromMessageChannel(){
@@ -169,6 +172,7 @@ export default class ProductTable extends LightningElement {
 
     }
     save(prod){
+        this.firstApp = false; 
         this.selectedProducts = prod.detail; 
         let params = {
             appName: this.appName,
@@ -192,10 +196,20 @@ export default class ProductTable extends LightningElement {
                             }),
                         );      
                     }).then(()=>{
+                        console.log('interval '+this.interval);
+                        
                         if(this.interval !='once'){
                             multiInsert({appId:this.appId, occurance:this.numbApps, daysBetween: this.interval})
                         }
                     }).then(()=>{
+                        const payload = {
+                            updateTable: true
+                        }
+                        publish(this.messageContext, Program_Builder, payload);
+                        //console.log('sending '+ payload.updateTable);
+                        
+                    }).then(()=>{
+                        this.firstApp = true; 
                         this.closeModal(); 
                         this.appName = '';
                         this.areaId = '';

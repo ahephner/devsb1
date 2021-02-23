@@ -2,7 +2,7 @@ import { LightningElement } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class AppNameDate extends LightningElement {
     hiddenNumberBox = false;
-    interval ='1';
+    interval ='once';
     numbApps = 1; 
     //name date vars
     appName;

@@ -33,7 +33,18 @@ export default class AppDataTable extends LightningElement {
     appList;
     copy;
     subscription= null;   
-
+    
+    //lifestyle hooks for messageService
+    connectedCallback(){
+        this.subscribeToMessage();
+    }
+    disconnectedCallback(){
+        this.unsubscribeFromMessageChannel(); 
+    }
+    unsubscribeFromMessageChannel(){
+        unsubscribe(this.subscritption);
+        this.subscritption = null; 
+}
 //subscribe for refresh
     @wire(MessageContext)
     messageContext;
@@ -70,10 +81,6 @@ export default class AppDataTable extends LightningElement {
         }
     }
 
-    unsubscribeFromMessageChannel(){
-        unsubscribe(this.subscritption);
-        this.subscritption = null; 
-}
                 //search table 
     look(searchTerm){
         this.appList = this.copy; 
