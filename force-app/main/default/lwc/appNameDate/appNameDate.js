@@ -1,5 +1,5 @@
 import { LightningElement } from 'lwc';
-
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class AppNameDate extends LightningElement {
     hiddenNumberBox = false;
     interval ='1';
@@ -81,8 +81,18 @@ handleOption(event){
         // console.log('custTimeApart '+this.custDaysApart);
         this.dispatchEvent(new CustomEvent('cancel'));   
     }
-
     next(){
+        if(this.appName === undefined || this.appName === '' || this.appDate === undefined || this.appDate === ''){
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Enter Name and Date',
+                    message: 'Make sure you have a name and date',
+                    variant: 'error'
+                }));
+        }else{
+            this.infoIsValid();
+        }
+    }
+    infoIsValid(){
         if(this.interval === 'custom'){
             const spread = this.custSpreadBetweenApps * this.custDaysApart; 
             this.dispatchEvent(new CustomEvent('namedate', {
