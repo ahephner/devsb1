@@ -1,5 +1,7 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import appProducts from '@salesforce/apex/appProduct.appProducts'; 
+import { deleteRecord } from 'lightning/uiRecordApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -7,14 +9,15 @@ export default class UpdateRatePrice extends LightningElement {
     updateAppId;
     areaId; 
     areaName;
-    prodlist;
+    @track prodlist;
     error; 
     loaded=false; 
     areaSize;
-    appTotalPrice; 
+    appTotalPrice;
+
     connectedCallback(){
         this.loadProducts();
-        console.log('calling') 
+        //console.log('calling') 
     }
     get unitArea(){
         return [
@@ -38,13 +41,22 @@ export default class UpdateRatePrice extends LightningElement {
                 
             // });
             this.appName = resp[0].Application__r.Name;
-            this.appDate = resp[0].Application__r.Date__c; 
-            this.updateAppId = resp[0].Application__c; 
+            console.log('appName '+this.appName);
+            this.appDate = resp[0].Application__r.Date__c;
+            console.log('appDate '+this.appDate); 
+            this.updateAppId = resp[0].Application__c;
+            console.log('updateAppId '+this.updateAppId); 
             this.areaId = resp[0].Application__r.Area__c
-            this.areaName = resp[0].Area__c 
+            console.log('areaId '+this.areaId);
+            this.areaName = resp[0].Area__c
+            console.log('areaName '+this.areaName); 
+            console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
+            
 //need for doing math later
             this.areaSize= parseInt(resp[0].Application__r.Area__r.Area_Sq_Feet__c)
-            this.appTotalPrice = this.newProds.map(el=> el.Total_Price__c).reduce(this.appTotal)
+            //Not setting total price in the save function so nothing here to pull down yet
+            //the other way uses a pb or workflow rule need to update that with SF dec tools. 
+            //this.appTotalPrice = this.resp.map(el=> el.Total_Price__c).reduce(this.appTotal)
             
         }).catch((error)=> {
             this.error = error;
@@ -52,6 +64,124 @@ export default class UpdateRatePrice extends LightningElement {
             
         })
     }
+
+//updating value functions below
+        newAppName(e){
+            this.appName = e.detail.value;
+        }
+
+        newAppDate(e){
+            this.appDate = e.detail.value; 
+        }
+
+        newRate(e){
+            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            
+            window.clearTimeout(this.delay);
+             // eslint-disable-next-line @lwc/lwc/no-async-operation
+            this.delay = setTimeout(()=>{
+                this.prodlist[index].Rate2__c = e.detail.value;
+                console.log('ua '+this.prodlist[index].Unit_Area__c);
+                
+                if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
+                    this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Size__c )    
+                    this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2);
+                    console.log('info = '+this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Size__c);
+                    
+                }
+                
+            },500 ) 
+           }
+
+           handleUnitArea(e){
+            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            console.log('index ' +index + ' detail '+e.detail.value );
+            
+            this.prodlist[index].Unit_Area__c = e.detail.value;
+            
+            if(this.prodlist[index].Rate2__c > 0){
+             this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Size__c );
+             this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+            }
+        }
+
+        appTotal = (t, nxt)=> (t+nxt);
+           lineTotal = (units, charge)=> (units * charge).toFixed(2);
+           newPrice(e){
+            window.clearTimeout(this.delay);
+            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+
+            this.delay = setTimeout(()=>{
+                this.prodlist[index].Unit_Price__c = e.detail.value;
+                this.prodlist[index].Unit_Price__c = Number(this.prodlist[index].Unit_Price__c);
+                //console.log(typeof this.prodlist[index].Unit_Price__c +' unit Type');          
+                    
+                    if(this.prodlist[index].Unit_Price__c > 0){
+                    this.prodlist[index].Margin__c = Number((1 - (this.prodlist[index].Average_Cost__c /this.prodlist[index].Unit_Price__c))*100).toFixed(2)
+                    this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+                    
+                    this.appTotalPrice = this.prodlist.map(el=>Number(el.Total_Price__c)).reduce(this.appTotal)
+                    console.log('newPrice if ' + this.appTotalPrice);
+                }else{
+                    this.prodlist[index].Margin__c = 0;                
+                    this.prodlist[index].Margin__c = this.prodlist[index].Margin__c.toFixed(2)
+                    this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+                    //console.log(this.prodlist[index].Total_Price__c, 'here price');
+                    this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                    console.log('price else '+ this.appTotalPrice);
+                }
+                }, 1000)
+           }
+           newMargin(m){
+                window.clearTimeout(this.delay)
+                    let index = this.prodlist.findIndex(prod => prod.Id === m.target.name)
+                    // eslint-disable-next-line @lwc/lwc/no-async-operation
+                    this.delay = setTimeout(()=>{
+                            this.prodlist[index].Margin__c = Number(m.detail.value);
+                            if(1- this.prodlist[index].Margin__c/100 > 0){
+                                this.prodlist[index].Unit_Price__c = Number(this.prodlist[index].Average_Cost__c /(1- this.prodlist[index].Margin__c/100)).toFixed(2);
+                                this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+                                this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                            console.log('margin if ' +this.appTotalPrice);
+                            }else{
+                                this.prodlist[index].Unit_Price__c = 0;
+                                this.prodlist[index].Unit_Price__c = this.prodlist[index].Unit_Price__c.toFixed(2);
+                                this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)   
+                                this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                                console.log('margin else ' +this.appTotalPrice);
+                                
+                            }
+                },1500)
+            }
+//remove product from app
+removeProd(x){
+    const row = x.target.name
+    let cf = confirm('Do you want to delete this product');
+    if(cf === true){
+        deleteRecord(row)
+            .then(()=>{
+                let index = this.prodlist.findIndex(prod => prod.Id === row);
+                this.prodlist.splice(index, 1)
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success', 
+                        message: 'Product Removed', 
+                        variant: 'success'
+                    }) 
+                )
+            })
+            .catch(error => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error deleting record',
+                        message: JSON.stringify(error),
+                        variant: 'error'
+                    })
+                )
+            })
+    }
+    
+}
 
     cancel(){
         this.dispatchEvent(new CustomEvent('cancel'))

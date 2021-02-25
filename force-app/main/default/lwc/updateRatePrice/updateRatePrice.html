@@ -1,7 +1,17 @@
 <template>
- <lightning-card  variant="Narrow"  title="Edit Rates/Pricing" icon-name="standard:account">
+ <lightning-card  variant="Narrow"  title="Edit Rates/Pricing" icon-name="utility:utility:adjust_value">
     <template if:true={loaded}>
-    <div class='slds-grid'>
+        <div class='slds-grid'>
+            <div class='slds-col slds-size_2-of-6'>
+                <lightning-input type="text" variant="standard" value={appName} 
+                                 name="name" label="App Name"  onchange={newAppName}></lightning-input>
+            </div>
+            <div class='slds-size_2-of-6 slds-m-left_small'>
+                <lightning-input type="date" variant="standard" value={appDate} 
+                                 name="name" label="App Name" onchange={newAppDate}></lightning-input>
+            </div>
+        </div>
+    <div class='slds-grid slds-m-top_small'>
         <div class='slds-col slds-size_11-of-12'>  
             <template for:each={prodlist} for:item="sp" >
                <div key={sp.Id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid'>
@@ -42,12 +52,15 @@
                         <lightning-input type="number" name="input4" formatter="currency"
                                          readonly value={sp.Total_Price__c} label="Total Price" ></lightning-input>
                     </div>
-                     
+                    <div class='slds-col slds-size_1-of-12'>
+                        <lightning-icon icon-name="utility:close" name={sp.Id} size='small' class='hover'
+                                        alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon>
+                    </div>
                </div>
             </template>
         </div>
         <div class='slds-col slds-size_1-of-12'>
-            <h1>App Total: {appName}</h1>
+            <h1>App Total: {appTotalPrice}</h1>
         </div>
     </div>
         <!--footer-->
