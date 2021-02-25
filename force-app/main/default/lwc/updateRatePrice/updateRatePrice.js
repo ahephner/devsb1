@@ -41,16 +41,16 @@ export default class UpdateRatePrice extends LightningElement {
                 
             // });
             this.appName = resp[0].Application__r.Name;
-            console.log('appName '+this.appName);
+            //console.log('appName '+this.appName);
             this.appDate = resp[0].Application__r.Date__c;
-            console.log('appDate '+this.appDate); 
+            //console.log('appDate '+this.appDate); 
             this.updateAppId = resp[0].Application__c;
-            console.log('updateAppId '+this.updateAppId); 
+            //console.log('updateAppId '+this.updateAppId); 
             this.areaId = resp[0].Application__r.Area__c
-            console.log('areaId '+this.areaId);
+            //console.log('areaId '+this.areaId);
             this.areaName = resp[0].Area__c
-            console.log('areaName '+this.areaName); 
-            console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
+            //console.log('areaName '+this.areaName); 
+            //console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
             
 //need for doing math later
             this.areaSize= parseInt(resp[0].Application__r.Area__r.Area_Sq_Feet__c)
@@ -74,6 +74,11 @@ export default class UpdateRatePrice extends LightningElement {
             this.appDate = e.detail.value; 
         }
 
+//this will set the number of required units based on rate. 
+        unitsRequired = (uOFM, rate, areaS, unitS) => {
+            return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*areaS))/unitS) : Math.ceil(((rate*areaS)/unitS))
+        }
+//get new rate for the product
         newRate(e){
             let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
             
@@ -84,9 +89,9 @@ export default class UpdateRatePrice extends LightningElement {
                 console.log('ua '+this.prodlist[index].Unit_Area__c);
                 
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
-                    this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Size__c )    
+                    this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c )    
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2);
-                    console.log('info = '+this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Size__c);
+                    console.log('info = '+this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c);
                     
                 }
                 
@@ -100,7 +105,7 @@ export default class UpdateRatePrice extends LightningElement {
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
             if(this.prodlist[index].Rate2__c > 0){
-             this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Size__c );
+             this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c );
              this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
             }
         }
@@ -117,7 +122,7 @@ export default class UpdateRatePrice extends LightningElement {
                 //console.log(typeof this.prodlist[index].Unit_Price__c +' unit Type');          
                     
                     if(this.prodlist[index].Unit_Price__c > 0){
-                    this.prodlist[index].Margin__c = Number((1 - (this.prodlist[index].Average_Cost__c /this.prodlist[index].Unit_Price__c))*100).toFixed(2)
+                    this.prodlist[index].Margin__c = Number((1 - (this.prodlist[index].Product_Cost__c /this.prodlist[index].Unit_Price__c))*100).toFixed(2)
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                     
                     this.appTotalPrice = this.prodlist.map(el=>Number(el.Total_Price__c)).reduce(this.appTotal)
@@ -139,7 +144,7 @@ export default class UpdateRatePrice extends LightningElement {
                     this.delay = setTimeout(()=>{
                             this.prodlist[index].Margin__c = Number(m.detail.value);
                             if(1- this.prodlist[index].Margin__c/100 > 0){
-                                this.prodlist[index].Unit_Price__c = Number(this.prodlist[index].Average_Cost__c /(1- this.prodlist[index].Margin__c/100)).toFixed(2);
+                                this.prodlist[index].Unit_Price__c = Number(this.prodlist[index].Product_Cost__c /(1- this.prodlist[index].Margin__c/100)).toFixed(2);
                                 this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                                 this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
                             console.log('margin if ' +this.appTotalPrice);
