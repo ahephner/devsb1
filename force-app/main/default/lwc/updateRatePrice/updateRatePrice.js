@@ -2,6 +2,8 @@ import { LightningElement, api, track } from 'lwc';
 import appProducts from '@salesforce/apex/appProduct.appProducts'; 
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import updateApplication from '@salesforce/apex/addApp.updateApplication';
+import updateProducts from '@salesforce/apex/addApp.updateProducts';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -187,7 +189,43 @@ removeProd(x){
     }
     
 }
+//Update name and products
+    update(){
+        this.loaded = false;
+        console.log('name and date and id' +this.appName +' '+ this.appDate+' '+this.appId);
+        
+        let params = {
+            appName: this.appName,
+            appDate: this.appDate
+        }
 
+        updateApplication({wrapper: params, id:this.appId})
+            .then(()=>{
+                let products = JSON.stringify(this.prodlist);
+                console.log('products '+ products);
+                
+                updateProducts({products:products})
+            }).then(()=>{
+                this.prodlist = [];
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title:'Success',
+                        message:'Updated Products',
+                        variant:'success'
+                    })
+                )
+                this.cancel();
+            }).catch((error)=>{
+                console.log(JSON.stringify(error))
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Error adding app',
+                        message: JSON.stringify(error),
+                        variant: 'error'
+                    })  
+                ) 
+            })
+        }
     cancel(){
         this.dispatchEvent(new CustomEvent('cancel'))
     }
