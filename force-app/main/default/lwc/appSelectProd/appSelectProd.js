@@ -1,6 +1,6 @@
 //go to https://github.com/ahephner/lwc_Comm_Examples/tree/main/dataTableExample for more dataTable example stuff like buttons mapping data
 
-import { LightningElement, api, wire, track } from 'lwc';
+import { LightningElement, wire, track } from 'lwc';
 import searchProduct from '@salesforce/apex/appProduct.searchProduct'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 const columnsList = [
@@ -27,8 +27,41 @@ export default class AppSelectProd extends LightningElement {
     columnsList = columnsList; 
     prod; 
     error; 
+    searchKey;
+    pf = 'All';
+    cat = 'All';
     //needs to be @track so we can follow reactive properties on an array or obj in childern
     @track selection = [];
+
+    //get set new product family/category search
+    get pfOptions(){
+        return [
+            {label: 'All', value:'All'}, 
+            {label: 'Foliar-Pak', value:'Foliar-Pak'},
+            {label: 'BASF', value:'BASF'}
+        ]
+    }
+    get catOptions(){
+        return [
+            {label: 'All', value: 'All'}, 
+            {label: 'Herbicide', value:'Chemicals-Herbicide'},
+            {label: 'Fungicide', value:'Chemicals-Fungicide'},
+            {label: 'Insecticide', value:'Chemicals-Insecticide'},
+            {label: 'PGR', value:'Chemicals-Growth Regulator'}, 
+        ]
+    }
+    nameChange(event){
+        this.searchKey = event.target.value.toLowerCase();
+        console.log(this.searchKey);
+        
+      }
+      pfChange(event){
+          this.pf = event.detail.value; 
+      }
+  
+      catChange(e){
+          this.cat = e.detail.value; 
+      }
 
     @wire(searchProduct)
      wiredProduct({error, data}){
@@ -49,20 +82,19 @@ export default class AppSelectProd extends LightningElement {
 //runs the filter on the product table. Is called from the parent because the inputs are currently on the header. 
 //this needs to be removed from teh parent and added to this components markup 
 //uses the copy object to update the products shown before the filters are run. To make sure all data is taken into account before narrowing what is shown
-     @api
-     searchProd(searchKey, pf, cat){
-         
+     
+     search(){
          this.prod = this.copy;
-         //console.log('==search selection '+ this.selection);
+         console.log('==search selection '+ this.searchKey);
          //this.selectedRows= this.selection; 
-         searchKey = searchKey.toLowerCase();
-         if(searchKey === '' && pf === 'All' && cat ==='All'){
-            this.prod = this.copy;
-         }else if(searchKey != '' && pf === 'All' && cat ==='All'){
-         this.prod = this.prod.filter(x=> x.Product_Name__c.toLowerCase().includes(searchKey) || x.Name.toLowerCase().includes(searchKey))
-         }else if(searchKey === '' && pf != 'All' || cat != 'All'){
-             this.prod = this.prod.filter(x => x.Product_Family__c === pf || x.Subcategory__c === cat)
-         }   
+         
+         if(this.searchKey === '' && this.pf === 'All' && this.cat ==='All'){
+                this.prod = this.copy;
+            }else if(this.searchKey != '' && this.pf === 'All' && this.cat ==='All'){
+                this.prod = this.prod.filter(x=> x.Product_Name__c.toLowerCase().includes(this.searchKey) || x.Name.toLowerCase().includes(this.searchKey))
+            }else if(this.searchKey === '' || this.searchKey === undefined && this.pf != 'All' || this.cat != 'All'){
+                this.prod = this.prod.filter(x => x.Product_Family__c === this.pf || x.Subcategory__c === this.cat)
+            }   
         }
 //Handles adding the products to this.Selection array when the green add button is hit on the product table
         handleRowAction(e){

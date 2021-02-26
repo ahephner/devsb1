@@ -35,4 +35,12 @@
         <fieldName>appId</fieldName>
         <description>appId of selected application</description> 
     </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>addProd</fieldName>
+        <description>boolean tells updateTable to show add product screen</description> 
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>updateProd</fieldName>
+        <description>boolean tells updateTable to show rate pricing update screen</description> 
+    </lightningMessageFields>
 </LightningMessageChannel>

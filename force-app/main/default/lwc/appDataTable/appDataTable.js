@@ -8,6 +8,7 @@ import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 //table actions bottom of file shows how to handle
 const actions = [
     { label: 'Show details', name: 'show_details' },
+    {label:'Add Products', name:'add_products'},
     { label: 'Delete', name: 'delete' },
 ];
 
@@ -127,12 +128,22 @@ export default class AppDataTable extends LightningElement {
             case 'show_details':
                 const payload = {
                     updateProdTable: true,
+                    addProd: false,
+                    updateProd: true,
                     appId: row
                 }
                 publish(this.messageContext, Program_Builder, payload); 
-                console.log('hello?');
+                
                 
                 break;
+            case 'add_products': 
+                const payload2 = {
+                    updateProdTable: true,
+                    addProd: true,
+                    updateProd: false,
+                    appId: row
+                }
+                publish(this.messageContext, Program_Builder, payload2);
                 
             default:
         }

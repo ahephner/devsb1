@@ -15,37 +15,7 @@
               </header>
 <!--this is the search info for products. Needs moved to appProductList comp-->
               <div class="slds-modal__content slds-p-around_medium  prodBody" id="modal-content-id-1">
-                <template if:true={productList}> 
-                <div class="slds-grid">
-                    <div class='slds-col slds-size_3-of-8'>
-                        <lightning-input type="text" variant="standard" 
-                                         name="name" label="Product" 
-                                         placeholder="Search for products.."
-                                         onchange={searchProd}></lightning-input>
-                    </div>
-                    <div class='slds-col slds-size_2-of-8'>
-                        <lightning-combobox
-                            name="prodFamily"
-                            label="Product Family"
-                            value={pf}
-                            placeholder="Select Progress"
-                            options={pfOptions}
-                            onchange={pfChange} ></lightning-combobox>
-                    </div>
-                    <div class='slds-col slds-size_2-of-8'>
-                        <lightning-combobox
-                        name="cat"
-                        label="Category"
-                        value={cat}
-                        placeholder="Select Progress"
-                        options={catOptions}
-                        onchange={catChange} ></lightning-combobox>
-                    </div>
-                    <div class='slds-col slds-size_1-of-8 slds-m-top_large slds-m-left_small'>   
-                        <lightning-button variant="brand" label="Search" title="Search" onclick={search}></lightning-button>
-                    </div>
-                </div>
-              </template>
+
 <!--here is the name date screen-->
                 <template if:true={dateName}>
                   <c-app-name-date oncancel={closeModal}
