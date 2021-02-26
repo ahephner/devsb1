@@ -27,7 +27,8 @@ public with sharing class addApp {
                            ap.Rate2__c = temp.Rate2__c;
                            ap.Note__c = temp.Note__c; 
                            ap.Unit_Area__c = temp.Unit_Area__c;
-                           ap.Unit_Price__c = temp.Unit_Price__c; 
+                           ap.Unit_Price__c = temp.Unit_Price__c;
+                           ap.Margin__c = temp.Margin__c;  
                             //system.debug('product id '+ ap.Product__c);
                             prodList.add(ap);
                         }

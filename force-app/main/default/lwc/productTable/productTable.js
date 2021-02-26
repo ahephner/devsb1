@@ -14,7 +14,7 @@ export default class ProductTable extends LightningElement {
     productList = false; 
     productRates = false;
     subscritption = null; 
-    firstApp = true; 
+    //firstApp = true; 
     //searching product table
     searchKey = ''; 
     pf ='All';
@@ -53,8 +53,11 @@ export default class ProductTable extends LightningElement {
             this.dateName = true;
             this.areaId = message.areaId;
             //control flow for when trying to call refresh apex
-            if(this.firstApp === true){
-                this.handleArea(this.areaId)
+            //if an issue look at the reset below I changed to undefined used to be ''
+            if(this.areaId){
+               this.handleArea(this.areaId)
+               //console.log('areaId '+this.areaId);
+               
             }
         }
 //life cycle hooks
@@ -172,7 +175,7 @@ export default class ProductTable extends LightningElement {
 
     }
     save(prod){
-        this.firstApp = false; 
+       // this.firstApp = false; 
         this.selectedProducts = prod.detail; 
         let params = {
             appName: this.appName,
@@ -209,10 +212,11 @@ export default class ProductTable extends LightningElement {
                         //console.log('sending '+ payload.updateTable);
                         
                     }).then(()=>{
-                        this.firstApp = true; 
+                        //this.firstApp = true; 
                         this.closeModal(); 
                         this.appName = '';
-                        this.areaId = '';
+                        //this may be an issue was = ''; 
+                        this.areaId = undefined;
                         this.appDate = '';
                         this.selectedProducts = [];
                     }).catch((error)=>{

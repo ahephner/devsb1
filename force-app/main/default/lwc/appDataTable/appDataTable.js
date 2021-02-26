@@ -3,7 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
 import { deleteRecord } from 'lightning/uiRecordApi';
-import { APPLICATION_SCOPE,MessageContext,subscribe, unsubscribe} from 'lightning/messageService';
+import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 //table actions bottom of file shows how to handle
 const actions = [
@@ -125,7 +125,12 @@ export default class AppDataTable extends LightningElement {
             }
                 break;
             case 'show_details':
-                console.log('Edit Clicked')
+                const payload = {
+                    updateProdTable: true,
+                    appId: row
+                }
+                publish(this.messageContext, Program_Builder, payload); 
+                console.log('hello?');
                 
                 break;
                 
