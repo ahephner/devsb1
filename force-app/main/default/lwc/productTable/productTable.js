@@ -15,10 +15,7 @@ export default class ProductTable extends LightningElement {
     productRates = false;
     subscritption = null; 
     //firstApp = true; 
-    //searching product table
-    searchKey = ''; 
-    pf ='All';
-    cat = "All"; 
+    //searching product table 
     areaSelected;
     areaId;  
     count = 0; 
@@ -82,40 +79,12 @@ export default class ProductTable extends LightningElement {
                     //console.log('areaCall '+this.areaSQft);
                 })
             }
+//how to call a function from a child comp. if tracking values in parent 
+    // search(){
+    //      //this.template.querySelector('c-app-product-list').searchProd(this.searchKey, this.pf, this.cat);
+    //      this.template.querySelector('c-app-select-prod').searchProd(this.searchKey, this.pf, this.cat);   
+    // }
 
-//get set new product family/category search
-    get pfOptions(){
-        return [
-            {label: 'All', value:'All'}, 
-            {label: 'Foliar-Pak', value:'Foliar-Pak'},
-            {label: 'BASF', value:'BASF'}
-        ]
-    }
-    get catOptions(){
-        return [
-            {label: 'All', value: 'All'}, 
-            {label: 'Herbicide', value:'Chemicals-Herbicide'},
-            {label: 'Fungicide', value:'Chemicals-Fungicide'},
-            {label: 'Insecticide', value:'Chemicals-Insecticide'},
-            {label: 'PGR', value:'Chemicals-Growth Regulator'}, 
-        ]
-    }
-
-    search(){
-         //this.template.querySelector('c-app-product-list').searchProd(this.searchKey, this.pf, this.cat);
-         this.template.querySelector('c-app-select-prod').searchProd(this.searchKey, this.pf, this.cat);   
-    }
-    ///! Uncomment these if we want to change the values each time they change
-    searchProd(event){
-      this.searchKey = event.target.value;
-    }
-    pfChange(event){
-        this.pf = event.detail.value; 
-    }
-
-    catChange(e){
-        this.cat = e.detail.value; 
-    }
 //close modal
     closeModal(){
         this.exposed = false; 
@@ -174,8 +143,7 @@ export default class ProductTable extends LightningElement {
         } );
 
     }
-    save(prod){
-       // this.firstApp = false; 
+    save(prod){ 
         this.selectedProducts = prod.detail; 
         let params = {
             appName: this.appName,
@@ -199,7 +167,7 @@ export default class ProductTable extends LightningElement {
                             }),
                         );      
                     }).then(()=>{
-                        console.log('interval '+this.interval);
+                        //console.log('interval '+this.interval);
                         
                         if(this.interval !='once'){
                             multiInsert({appId:this.appId, occurance:this.numbApps, daysBetween: this.interval})
