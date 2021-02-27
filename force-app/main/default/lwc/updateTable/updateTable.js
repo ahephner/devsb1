@@ -2,7 +2,14 @@ import { LightningElement, wire } from 'lwc';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecord } from 'lightning/uiRecordApi';
+import AREA from '@salesforce/schema/Application__c.Area__c';
+import SQFT from '@salesforce/schema/Application__c.Area__r.Area_Sq_Feet__c';
+
+
 import addProducts from '@salesforce/apex/addApp.addProducts';
+
+const fields = [AREA, SQFT]
 export default class UpdateTable extends LightningElement {
     updateExposed = false;
     loaded = false; 
@@ -11,6 +18,8 @@ export default class UpdateTable extends LightningElement {
     addProduct = false; 
     appId; 
     selectedProducts = [];
+    areaId;
+    sqFt; 
     @wire(MessageContext)
     messageContext; 
 //subscribe to message channel
@@ -48,7 +57,29 @@ export default class UpdateTable extends LightningElement {
     disconnectedCallback(){
         this.unsubscribeFromMessageChannel(); 
     }
-
+//get the areaInfo need for making calculations in the pricing
+@wire(getRecord,{recordId:'$appId', fields: fields})
+wiredareaInfo({error,data}){
+    if (error) {
+        let message = 'Unknown error';
+        if (Array.isArray(error.body)) {
+            message = error.body.map(e => e.message).join(', ');
+        } else if (typeof error.body.message === 'string') {
+            message = error.body.message;
+        }
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Error loading contact',
+                message,
+                variant: 'error',
+            }),
+        );
+    }else if(data){
+        //console.log(data.fields.Area__r.value.fields.Area_Sq_Feet__c.value);
+        this.sqFt = data.fields.Area__r.value.fields.Area_Sq_Feet__c.value;
+        this.areaId = data.fields.Area__c.value;   
+    }
+}
     handleProds(mess){
         this.addProduct = false;
         this.addPrice = true; 
@@ -62,7 +93,7 @@ export default class UpdateTable extends LightningElement {
                Unit_Price__c: "0",
                Margin__c: "0", 
                Total_Price__c: "0",
-               Area__c: ''
+               Area__c: this.areaId
             }
         });    
     }
@@ -98,10 +129,7 @@ export default class UpdateTable extends LightningElement {
             })
     }
 
- 
-
-
     closeModal(){
-        this.updateExposed = false; 
+        this.updateExposed = false;  
     }
 }

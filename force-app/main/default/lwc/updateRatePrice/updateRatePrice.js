@@ -1,9 +1,10 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import appProducts from '@salesforce/apex/appProduct.appProducts'; 
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
+
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -16,7 +17,9 @@ export default class UpdateRatePrice extends LightningElement {
     loaded=false; 
     areaSize;
     appTotalPrice;
-
+    sqft
+    area
+    
     connectedCallback(){
         this.loadProducts();
         //console.log('calling') 
@@ -29,7 +32,8 @@ export default class UpdateRatePrice extends LightningElement {
             {label: 'LB/Acre', value:'LB/Acre'}
         ];
     }
-
+ 
+  
     loadProducts(){
         appProducts({app: this.appId})
         .then((resp)=>{
@@ -189,6 +193,7 @@ removeProd(x){
     }
     
 }
+
 //Update name and products
     update(){
         this.loaded = false;
@@ -228,5 +233,6 @@ removeProd(x){
         }
     cancel(){
         this.dispatchEvent(new CustomEvent('cancel'))
+        
     }
 }
