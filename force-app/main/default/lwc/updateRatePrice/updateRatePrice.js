@@ -37,7 +37,7 @@ export default class UpdateRatePrice extends LightningElement {
     loadProducts(){
         appProducts({app: this.appId})
         .then((resp)=>{
-            console.log('running '+resp);
+            //console.log('running '+resp);
             this.loaded = true; 
             this.prodlist = resp;
             // console.log('test ' +resp[0].Application__r.Name);

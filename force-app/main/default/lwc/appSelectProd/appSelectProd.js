@@ -23,7 +23,7 @@ const columnsList = [
     type:'currency', cellAttributes:{alignment:'center'}},
 ]
 export default class AppSelectProd extends LightningElement {
-    loaded = false
+    @track loaded = false; 
     columnsList = columnsList; 
     prod; 
     error; 
@@ -32,7 +32,10 @@ export default class AppSelectProd extends LightningElement {
     cat = 'All';
     //needs to be @track so we can follow reactive properties on an array or obj in childern
     @track selection = [];
-
+    renderedCallback(){
+        console.log('call back');
+        
+    }
     //get set new product family/category search
     get pfOptions(){
         return [
@@ -66,18 +69,26 @@ export default class AppSelectProd extends LightningElement {
     @wire(searchProduct)
      wiredProduct({error, data}){
      if(data){
-         this.loaded = true;
+         console.log('loaded top or wire '+this.loaded);
+         
          this.prod = data;  
         // this.prod = data.map(item=>{
         //      let selectColor = item.Average_Cost__c < 10 ? 'none':"slds-theme_success"
         //      return  {...item, 'select': false, 'selectColor':selectColor }
         //  }); 
-         this.copy = data 
-         console.log(1, this.copy); 
-        }else{
+         this.copy = data  
+         this.doneLoad(); 
+        }else if(error){
             this.error = error;
             console.log(JSON.stringify(this.error)); 
         }
+        
+     }
+     doneLoad(){
+         window.clearTimeout(this.delay); 
+         this.delay = setTimeout(()=>{
+             this.loaded = true; 
+         },2000)
      }
 //runs the filter on the product table. Is called from the parent because the inputs are currently on the header. 
 //this needs to be removed from teh parent and added to this components markup 
@@ -85,7 +96,7 @@ export default class AppSelectProd extends LightningElement {
      
      search(){
          this.prod = this.copy;
-         console.log('==search selection '+ this.searchKey);
+         //console.log('==search selection '+ this.searchKey);
          //this.selectedRows= this.selection; 
          
          if(this.searchKey === '' && this.pf === 'All' && this.cat ==='All'){
@@ -136,15 +147,18 @@ export default class AppSelectProd extends LightningElement {
                     variant: 'error'
                 }));
             }else{
+            this.loaded = false; 
             this.selection = this.copy.filter(cItem => this.selection.some(sItem => cItem.Id === sItem.id));
             
             this.dispatchEvent(new CustomEvent('move',{
                 detail: this.selection
             }));  
+            
         }
         }
 
         cancel(){
+            this.loaded = false; 
             this.dispatchEvent(new CustomEvent('close'));
         }
 
