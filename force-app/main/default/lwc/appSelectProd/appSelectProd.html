@@ -1,4 +1,9 @@
 <template>
+    <template if:false={loaded}>
+        <lightning-spinner 
+            alternative-text="Loading" 
+            size="large"></lightning-spinner>
+    </template>
     <template if:true={loaded}>
         <div class="slds-grid">
             <div class='slds-col slds-size_3-of-8'>
@@ -48,10 +53,5 @@
         <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
         <button type="button" onclick={next} class="slds-button slds-button_brand">Next</button>
     </div>
-    </template>
-    <template if:false={loaded}>
-        <lightning-spinner 
-            alternative-text="Loading" 
-            size="large"></lightning-spinner>
     </template>
 </template>

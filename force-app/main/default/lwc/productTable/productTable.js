@@ -129,7 +129,8 @@ export default class ProductTable extends LightningElement {
         this.productRates = true; 
          
         this.selectedProducts = mess.detail.map(item=>{
-            return {...item, 
+            return {...item,
+               Product__c: item.Id,  
                Rate2__c: 0,
                Application__c: '',
                Note__c: '' ,
@@ -155,7 +156,7 @@ export default class ProductTable extends LightningElement {
                 this.appId = resp.Id;
                 this.selectedProducts.forEach((x)=> x.Application__c = this.appId)
                 let products = JSON.stringify(this.selectedProducts);
-                //console.log('products '+products);
+                console.log('products '+products);
 
                 addProducts({products:products})
                     .then(()=>{
@@ -189,13 +190,19 @@ export default class ProductTable extends LightningElement {
                         this.selectedProducts = [];
                     }).catch((error)=>{
                         console.log(JSON.stringify(error))
+                        let message = 'Unknown error';
+                        if (Array.isArray(error.body)) {
+                            message = error.body.map(e => e.message).join(', ');
+                        } else if (typeof error.body.message === 'string') {
+                            message = error.body.message;
+                        }
                         this.dispatchEvent(
                             new ShowToastEvent({
-                                title: 'Error adding app',
-                                message: 'Did you select an Area and enter a App Name?',
-                                variant: 'error'
-                            }) 
-                        ) 
+                                title: 'Error loading contact',
+                                message,
+                                variant: 'error',
+                            }),
+                        );
                         this.closeModal(); 
                     })
             })
