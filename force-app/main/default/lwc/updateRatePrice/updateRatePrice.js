@@ -201,7 +201,8 @@ removeProd(x){
         
         let params = {
             appName: this.appName,
-            appDate: this.appDate
+            appDate: this.appDate,
+            appArea: this.areaId
         }
 
         updateApplication({wrapper: params, id:this.appId})
