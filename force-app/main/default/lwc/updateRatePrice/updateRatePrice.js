@@ -116,7 +116,7 @@ export default class UpdateRatePrice extends LightningElement {
             }
         }
 
-        appTotal = (t, nxt)=> (t+nxt);
+        appTotal = (t, nxt)=> (t+nxt).toFixed(2);
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
             window.clearTimeout(this.delay);
