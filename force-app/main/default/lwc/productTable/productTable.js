@@ -114,7 +114,7 @@ export default class ProductTable extends LightningElement {
     //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
     pref = (areaUm, type)=>{ 
         // eslint-disable-next-line no-return-assign
-        console.log('areaUM '+areaUm+ ' type '+type);
+        //console.log('areaUM '+areaUm+ ' type '+type);
         
         return areaUm ==='M' && type==='Dry' ?  'LB/M':
         areaUm ==='M' && type==='Liquid' ?  'OZ/M':
