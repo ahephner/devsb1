@@ -55,8 +55,15 @@ export default class AppSelectProd extends LightningElement {
     }
     nameChange(event){
         this.searchKey = event.target.value.toLowerCase();
-        console.log(this.searchKey);
-        
+        //console.log(this.searchKey);
+      }
+      handleKey(evt){
+          if(!this.searchKey){
+              //console.log('sk '+this.searchKey);
+              return;
+          }
+          if(evt.key === 'Enter')
+              this.search();  
       }
       pfChange(event){
           this.pf = event.detail.value; 
@@ -99,7 +106,7 @@ export default class AppSelectProd extends LightningElement {
          //console.log('==search selection '+ this.searchKey);
          //this.selectedRows= this.selection; 
          
-         if(this.searchKey === '' && this.pf === 'All' && this.cat ==='All'){
+         if(this.searchKey === '' ||!this.search  && this.pf === 'All' && this.cat ==='All'){
                 this.prod = this.copy;
             }else if(this.searchKey != '' && this.pf === 'All' && this.cat ==='All'){
                 this.prod = this.prod.filter(x=> x.Product_Name__c.toLowerCase().includes(this.searchKey) || x.Name.toLowerCase().includes(this.searchKey))
