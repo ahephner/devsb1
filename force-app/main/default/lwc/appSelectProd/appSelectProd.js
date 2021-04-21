@@ -57,6 +57,8 @@ export default class AppSelectProd extends LightningElement {
         this.searchKey = event.target.value.toLowerCase();
         //console.log(this.searchKey);
       }
+
+      //handle enter key tagged. maybe change to this.searhKey === undefined
       handleKey(evt){
           if(!this.searchKey){
               //console.log('sk '+this.searchKey);
