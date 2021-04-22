@@ -1,0 +1,13 @@
+<template>
+    <lightning-card>
+        <lightning-combobox name="areas"
+                                label="Select Areas"
+                                placeholder="select areas for pdf"
+                                options={areaOptions}
+                                onchange={handleChange}></lightning-combobox>
+    
+        <lightning-button variant="base" label="Save" onclick={createPDF}></lightning-button>
+
+    </lightning-card>
+    
+</template>

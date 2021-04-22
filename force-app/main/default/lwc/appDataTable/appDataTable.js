@@ -1,10 +1,13 @@
-import { LightningElement, wire, api } from 'lwc';
+import { LightningElement, wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
+import getAreas from '@salesforce/apex/appProduct.getAreas';
+import savePDF_File from '@salesforce/apex/AttachPDFContoller2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
+
 //table actions bottom of file shows how to handle
 const actions = [
     { label: 'Show details', name: 'show_details' },
@@ -33,11 +36,16 @@ export default class AppDataTable extends LightningElement {
     query;
     appList;
     copy;
+    //used to pass areaId to pdf creator
+    areaId; 
+    //expose customer copy button
+    getCopy = false; 
     subscription= null;   
-    
+    loaded = false
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
+        this.loaded = true; 
     }
     disconnectedCallback(){
         this.unsubscribeFromMessageChannel(); 
@@ -58,12 +66,13 @@ export default class AppDataTable extends LightningElement {
                     {scope:APPLICATION_SCOPE})
             }
         } 
+
     @wire(getApps, {recordId: '$recordId'})
         wiredList(result){
             //console.log('app table recordID', this.recordId)
             this.wiredAppList = result; 
             if(result.data){
-                console.log('result '+result.data);
+                
                 this.appList = result.data; 
                 this.copy = result.data; 
                 this.error = undefined; 
@@ -73,6 +82,26 @@ export default class AppDataTable extends LightningElement {
             }
 
         }
+//get areas for searching the table by area
+//this was a pain to get to work. Since returned data is immutable have to make a copy then you can add to it    
+    @wire(getAreas, {recordId: '$recordId'})
+        areaList
+
+        get areaOptions(){
+            //console.log('recordId '+this.recordId);
+            if(this.areaList.data != undefined){
+            var ops = this.areaList.data.map(el =>{
+                return {...el}
+            })
+            ops.unshift({label:'All', value:'All'})
+            //console.log('ops '+ops);
+            }
+
+            return ops;
+            //if there are issues in the future
+            //you can replace the above with return this.areaList.data
+        }
+    
     //getUpdate
     handleUpdate(mess){
         console.log('yes?');
@@ -81,16 +110,32 @@ export default class AppDataTable extends LightningElement {
             return refreshApex(this.wiredAppList);
         }
     }
+    //I found  the search by area to be more helpfull. You can add back search function here
 
-                //search table 
-    look(searchTerm){
-        this.appList = this.copy; 
-        this.query = searchTerm.detail.value.toLowerCase(); 
-        this.appList = this.appList.filter(x => x.Name.toLowerCase().includes(this.query));
-        console.log(this.query);
+    //             //search table 
+    // look(searchTerm){
+    //     this.appList = this.copy; 
+    //     this.query = searchTerm.detail.value.toLowerCase(); 
+    //     this.appList = this.appList.filter(x => x.Name.toLowerCase().includes(this.query));
+    //     //console.log(this.query);
                     
-    }
+    // }
+//search by area
+//set area id to pass to pdf creator
+    selectArea(x){
+        let areaName = x.target.options.find(opt => opt.value === x.detail.value).label;
+        this.areaId = x.detail.value; 
 
+        if(areaName==='All'){
+            this.appList = this.copy
+            this.getCopy = false; 
+        }else{
+            //console.log('areaName2 '+areaName);
+            this.appList = this.copy
+            this.appList = this.appList.filter(x => x.Area_Name__c === areaName)
+            this.getCopy = true; 
+        }
+    }
     //handle table row actions. Delete or pop up to edit. 
     handleRowAction(event) {
         const actionName = event.detail.action.name;
@@ -148,6 +193,37 @@ export default class AppDataTable extends LightningElement {
             default:
         }
 }
+
+//This function calls the apex class that attaches the customer copy to the program 
+ createPDF(){
+     this.loaded = false; 
+    savePDF_File({Id: this.areaId, appId: this.recordId})
+        .then(()=>{
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title:'PDF Created',
+                    message:'Check File Tab',
+                    variant: 'success',
+                }),
+            );
+            this.loaded = true; 
+        }).catch((error)=>{
+            let message = 'Unknown error';
+            if (Array.isArray(error.body)) {
+                message = error.body.map(e => e.message).join(', ');
+            } else if (typeof error.body.message === 'string') {
+                message = error.body.message;
+            }
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error loading contact',
+                    message,
+                    variant: 'error',
+                }),
+            );
+            
+        })
+    }
 
  //handle table sorting sorting
  //Grabbed this from a salesforce example
