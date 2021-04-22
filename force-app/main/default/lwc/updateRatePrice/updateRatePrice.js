@@ -116,7 +116,7 @@ export default class UpdateRatePrice extends LightningElement {
             }
         }
 
-        appTotal = (t, nxt)=> (t+nxt);
+        appTotal = (t, nxt)=> (t+nxt).toFixed(2);
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
             window.clearTimeout(this.delay);
@@ -201,7 +201,8 @@ removeProd(x){
         
         let params = {
             appName: this.appName,
-            appDate: this.appDate
+            appDate: this.appDate,
+            appArea: this.areaId
         }
 
         updateApplication({wrapper: params, id:this.appId})

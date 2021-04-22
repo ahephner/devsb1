@@ -38,7 +38,7 @@ export default class UpdateTable extends LightningElement {
 //handle the message
 //then call get the area info for the product conversions 
     handleMessage(message){
-        console.log('handling ' +message.addProd);
+        console.log('handling new' +message.updateProd);
         this.updateExposed = message.updateProdTable;
         this.appId = message.appId; 
         this.upProdTable = message.updateProd; 

@@ -12,7 +12,7 @@ export default class AppRatePrice extends LightningElement {
            //need to make this private so we can edit this
            set selection(value){
                this.data = JSON.parse(JSON.stringify(value)); 
-                //console.log(this.areaSize);
+                console.log('data ' +this.data);
                 
            }
 //this will set the number of required units based on rate. 
@@ -53,7 +53,7 @@ export default class AppRatePrice extends LightningElement {
 
 //Pricing 
            //this is a reuable functions for pricing and line totals
-           appTotal = (t, nxt)=> (t+nxt);
+           appTotal = (t, nxt)=> (t+nxt).toFixed(2);
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
             window.clearTimeout(this.delay);
