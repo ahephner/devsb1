@@ -1,34 +1,47 @@
 <template>
     <lightning-card  variant="Narrow"  title="Applications" icon-name="utility:note"> 
         <div class="slds-grid  slds-wrap">
+            <template if:false={loaded}>
+                <div class="exampleHolder">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
             <!-- Here is the filtering tools  -->
                 <!-- <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
                     <lightning-input  type="text" label="Search app names" 
                         value={query} onchange={look}></lightning-input >
                 </div> -->
                 <!-- add slds-m-left_small if add back in search terms -->
-                <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
-                        <lightning-combobox
-                        name='box'
-                        class='areaBox'
-                        label="Filter by Area"
-                        value={area}
-                        options={areaOptions}
-                        onchange={selectArea} ></lightning-combobox>
-                </div>
-                <!-- This is the actual table -->
-                <div class="slds-col slds-size_1-of-1 slds-m-top_none">
-                <lightning-datatable
-                        key-field="Id"
-                        data={appList}
-                        columns={columns}
-                        sorted-by={sortBy}
-                        sorted-direction={sortDirection}
-                        onsort={handleSortdata}
-                        onrowaction={handleRowAction}
-                        hide-checkbox-column="true">
-                </lightning-datatable>
-                </div>
+                <template if:true={loaded}>
+                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
+                            <lightning-combobox
+                            name='box'
+                            class='areaBox'
+                            label="Filter by Area"
+                            value={area}
+                            options={areaOptions}
+                            onchange={selectArea} ></lightning-combobox>
+                    </div>
+                    <template if:true={getCopy}>
+                        <div class="slds-col slds-size_1-of-3 slds-m-bottom_none slds-m-top_large">
+                            <lightning-button variant="success" label="Get Customer Copy" title="Successful action"
+                            onclick={createPDF} class="slds-m-left_small"></lightning-button>
+                        </div>
+                    </template>
+                    <!-- This is the actual table -->
+                    <div class="slds-col slds-size_1-of-1 slds-m-top_none">
+                    <lightning-datatable
+                            key-field="Id"
+                            data={appList}
+                            columns={columns}
+                            sorted-by={sortBy}
+                            sorted-direction={sortDirection}
+                            onsort={handleSortdata}
+                            onrowaction={handleRowAction}
+                            hide-checkbox-column="true">
+                    </lightning-datatable>
+                    </div>
+                </template>
         </div>
     </lightning-card>
 </template>
