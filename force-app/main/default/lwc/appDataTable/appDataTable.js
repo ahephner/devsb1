@@ -3,7 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
-import savePDF_File from '@salesforce/apex/AttachPDFContoller2.savePDF_File';
+import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
