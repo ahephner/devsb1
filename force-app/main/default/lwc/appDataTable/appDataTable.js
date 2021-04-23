@@ -103,12 +103,17 @@ export default class AppDataTable extends LightningElement {
         }
     
     //getUpdate
+    //call a timeout to let the database insert multiple apps
+    //then retrieve the new values
     handleUpdate(mess){
-        console.log('yes?');
-        
+        this.loaded = false; 
+        window.clearTimeout(this.delay);
         if(mess.updateTable === true){
-            return refreshApex(this.wiredAppList);
+            this.delay = setTimeout(()=>{
+                return refreshApex(this.wiredAppList);
+            },2000) 
         }
+        this.loaded = true; 
     }
     //I found  the search by area to be more helpfull. You can add back search function here
 
