@@ -115,7 +115,7 @@ export default class AppRatePrice extends LightningElement {
            //flow
            save(){
               // console.log('save clicked '+this.data);
-               
+               this.loaded = false;
                this.dispatchEvent(new CustomEvent('save',{
                     detail: this.data
                }));    
