@@ -50,10 +50,29 @@
                      
                      
                          <lightning-input 
-                         class="slds-col slds-m-right_xx-small slds-size_2-of-3 " 
+                         class="slds-col slds-m-right_xx-small slds-size_1-of-3 " 
                          type="number" name='weeksApart' 
                          label="Total Additional Occurences"
                          onchange={totalApps}></lightning-input>
+
+                         <lightning-button class="slds-col slds-m-right_xx-small slds-m-top_large slds-size_1-of-3 "
+                          label="Preview" title="Non-primary action" 
+                          onclick={handlePreview} ></lightning-button>
+
+                          <template if:true={showPreview}>
+                            <div class='slds-col slds-m-top_medium slds-size_2-of-4'>
+                              <p>
+                                  <b>{preview}</b>
+                              </p>
+                            </div>
+                            <div class='slds-col slds-m-top_medium slds-size_1-of-4'>
+                                <template if:true={dates} for:each={dates} for:item="date" >
+                                   <li key={date.id}>
+                                        {date.name}
+                                   </li>
+                                </template>
+                              </div>  
+                          </template>
                     </div>
             
                 </template>
