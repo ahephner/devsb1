@@ -1,4 +1,4 @@
-import { LightningElement } from 'lwc';
+import { LightningElement,track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class AppNameDate extends LightningElement {
     hiddenNumberBox = false;
@@ -12,7 +12,12 @@ export default class AppNameDate extends LightningElement {
     custNumberApps; 
     custSpreadBetweenApps; 
     custDaysApart
-
+    showPreview = false; 
+    preview;
+    nxt;
+    total;
+    //dates;
+    @track dateRange = [];  
     get numOptions(){
         return [
             {label:'Does Not Repeat', value: 'once'},
@@ -30,6 +35,10 @@ export default class AppNameDate extends LightningElement {
 
     setDate(e){
         this.appDate = e.detail.value;  
+        console.log(typeof this.appDate);
+        console.log(this.appDate);
+        
+        
     }
     handleNewNumbApps(e){
         this.numbApps = e.detail.value; 
@@ -74,6 +83,45 @@ handleOption(event){
         
     }
 
+    //this is the function that returns the preview string; 
+    //note not great programing but it works....
+buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
+    const d = new Date(firstDate);
+    this.dateRange = [{id:0, name:firstDate}];
+     console.log('timeBetween '+timeBetween);
+     
+     this.nxt = (repeats * timeBetween)
+     const left = Number(totalApp)-1;
+      this.total = Number(totalApp)+1;  
+     var mult = 1;
+    for (let i = 1; i<= totalApp; i++){
+         d.setDate(d.getDate() + this.nxt)
+         let day = new Date(d); 
+         console.log('day '+d);
+         
+         this.dateRange=[
+            ...this.dateRange,{
+               id:mult, name:day
+            }
+        ]
+         mult ++; 
+         
+
+    }  
+
+    return this.dateRange
+}
+    //this shows preview
+    handlePreview(){
+        this.showPreview = true;
+        this.buildPreview(this.appDate,this.custSpreadBetweenApps,this.custDaysApart, this.custNumberApps );
+        //this is when I was returning multiple values
+        // var call = this.buildPreview(this.appDate,this.custSpreadBetweenApps,this.custDaysApart, this.custNumberApps );
+        // this.preview = call[0];
+        // this.dates = call.splice(1);
+
+    }
+
 //flow
     cancel(){
         // console.log('spread '+ this.custSpreadBetweenApps);
@@ -116,3 +164,34 @@ handleOption(event){
         
     }
 }
+
+// buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
+//     this.dateRange = [];
+//     const d = new Date(firstDate);
+//      console.log('timeBetween '+timeBetween);
+     
+//      this.nxt = (repeats * timeBetween)
+//      const left = Number(totalApp)-1;
+//       this.total = Number(totalApp)+1;  
+//      var mult = 0;
+//     for (let i = 0; i<= totalApp; i++){
+//          let nxt =  Number(i*timeBetween)
+//          console.log('nxt ' +nxt)
+//          console.log('date '+d);
+         
+//          d.setDate(d.getDate() + nxt)
+//          let day = new Date(d); 
+//          console.log('day '+d);
+         
+//          this.dateRange=[
+//             ...this.dateRange,{
+//                id:mult, name:day
+//             }
+//         ]
+//          mult ++; 
+         
+
+//     }  
+
+//     return this.dateRange
+// }

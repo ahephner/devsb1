@@ -50,10 +50,32 @@
                      
                      
                          <lightning-input 
-                         class="slds-col slds-m-right_xx-small slds-size_2-of-3 " 
+                         class="slds-col slds-m-right_xx-small slds-size_1-of-3 " 
                          type="number" name='weeksApart' 
                          label="Total Additional Occurences"
                          onchange={totalApps}></lightning-input>
+
+                         <lightning-button class="slds-col slds-m-right_xx-small slds-m-top_large slds-size_1-of-3 "
+                          label="Preview" title="Non-primary action" 
+                          onclick={handlePreview} ></lightning-button>
+
+                          <template if:true={showPreview}>
+                            <div class='slds-col slds-m-top_medium slds-size_2-of-4'>
+                              <p>
+                                  <b>The first app is on <lightning-formatted-date-time value={appDate} time-zone="UTC"></lightning-formatted-date-time>. &nbsp;
+                                     The next app will be {nxt} days after the first. You can see a preview of the dates of the applications on the right. 
+                                    You will be inserting {total} amount of apps. Note! -> You can always adjust the individual dates after inserting. </b>
+                              </p>
+                            </div>
+                            <div class='slds-col slds-m-top_medium slds-m-left_medium slds-size_1-of-4'>
+                                <h5>App Date Preview</h5>
+                                <template if:true={dateRange} for:each={dateRange} for:item="date" >
+                                   <li key={date.id}>
+                                        <lightning-formatted-date-time value={date.name} time-zone="UTC"></lightning-formatted-date-time>
+                                   </li>
+                                </template>
+                              </div>  
+                          </template>
                     </div>
             
                 </template>
