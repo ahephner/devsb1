@@ -1,6 +1,6 @@
 //this is a straight copy of attachpdfcontroller which is called by a button on the area
 //this has been refactored to be called from a lwc and attach the new copy to the program not the area
-public class AttachPDFContoller2 {
+public class AttachPDFController2 {
     @AuraEnabled
  public static string savePDF_File(string Id, string appId) {
     	
