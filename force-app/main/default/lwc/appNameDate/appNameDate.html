@@ -62,13 +62,16 @@
                           <template if:true={showPreview}>
                             <div class='slds-col slds-m-top_medium slds-size_2-of-4'>
                               <p>
-                                  <b>{preview}</b>
+                                  <b>The first app is on <lightning-formatted-date-time value={appDate} time-zone="UTC"></lightning-formatted-date-time>. &nbsp;
+                                     The next app will be {nxt} days after the first. You can see a preview of the dates of the applications on the right. 
+                                    You will be inserting {total} amount of apps. Note! -> You can always adjust the individual dates after inserting. </b>
                               </p>
                             </div>
-                            <div class='slds-col slds-m-top_medium slds-size_1-of-4'>
-                                <template if:true={dates} for:each={dates} for:item="date" >
+                            <div class='slds-col slds-m-top_medium slds-m-left_medium slds-size_1-of-4'>
+                                <h5>App Date Preview</h5>
+                                <template if:true={dateRange} for:each={dateRange} for:item="date" >
                                    <li key={date.id}>
-                                        {date.name}
+                                        <lightning-formatted-date-time value={date.name} time-zone="UTC"></lightning-formatted-date-time>
                                    </li>
                                 </template>
                               </div>  
