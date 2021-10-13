@@ -105,7 +105,7 @@ export default class AppSelectProd extends LightningElement {
      
      search(){
          this.prod = this.copy;
-         //console.log('==search selection '+ this.searchKey);
+         console.log('==search selection '+ this.pf);
          //this.selectedRows= this.selection; 
          
          if(this.searchKey === '' ||!this.search  && this.pf === 'All' && this.cat ==='All'){

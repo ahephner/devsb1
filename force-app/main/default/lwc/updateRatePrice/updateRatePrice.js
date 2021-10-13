@@ -41,6 +41,7 @@ export default class UpdateRatePrice extends LightningElement {
             this.loaded = true; 
             this.prodlist = resp;
             // console.log('test ' +resp[0].Application__r.Name);
+            console.log(this.prodlist);
             
             // resp.forEach(element => {
             //     console.log(element);
@@ -55,7 +56,9 @@ export default class UpdateRatePrice extends LightningElement {
             this.areaId = resp[0].Application__r.Area__c
             //console.log('areaId '+this.areaId);
             this.areaName = resp[0].Area__c
-            //console.log('areaName '+this.areaName); 
+            this.appTotalPrice = resp[0].Application__r.Total_Price__c; 
+            //console.log('type of total price '+ typeof resp[0].Total_Price__c);
+            
             //console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
             
 //need for doing math later
