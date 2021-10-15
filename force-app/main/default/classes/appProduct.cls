@@ -23,17 +23,33 @@ public class appProduct {
  //}
 //need to make it that if the searchKey is blank nothing happens
 //probally better in js    
-@AuraEnabled
-  public static Product__c[] searchProduct(string searchKey){
+@AuraEnabled 
+  public static Product__c[] searchProduct(string searchKey, string cat, string family){
       string searchterm = '%' + searchKey + '%'; 
-      system.debug(searchKey);
+      string category = cat; 
+      string pf = family; 
+      system.debug(searchTerm);
       String query = 'Select '
                 + ' Id, Name, Product_Name__c, Product_Status__c,Average_Cost__c, Product_Family__c, Subcategory__c, '
                 + ' Size__c, Product_Type__c'
-                + ' From Product__c Where Include_in_Programs__c =True AND Active__c = True and '
-                + ' (name like :searchTerm or product_name__c like :searchTerm)';
-               
-                
+                + ' From Product__c Where Include_in_Programs__c =True AND Active__c = True and '; 
+                 
+      if(!searchterm.contains('null') && category == 'All' && pf == 'All'){
+          query += ' (name like :searchTerm or product_name__c like :searchTerm)';
+      }else if (!searchterm.contains('null') && category != 'All' && pf == 'All'){
+          query += ' (name like :searchTerm or product_name__c like :searchTerm) and subcategory__c =:category';
+      }else if(!searchterm.contains('null') && category == 'All' && pf != 'All'){
+          query += ' (name like :searchTerm or product_name__c like :searchTerm) and Product_Family__c =:pf';
+      }else if (searchterm.contains('null') && category != 'All' && pf == 'All'){
+          query += ' subcategory__c =:category';
+      }else if(searchterm.contains('null') && category == 'All' && pf != 'All'){
+          query += ' Product_Family__c =:pf';
+      }else if(searchterm.contains('null') && category != 'All' && pf != 'All'){
+          query += ' Product_Family__c =:pf and subcategory__c =:category'; 
+      }else{
+         
+      }		 
+       system.debug(query);	 
       return Database.query(query); 
   } 
   

@@ -81,9 +81,8 @@ export default class AppSelectProd extends LightningElement {
 
       search(){
         this.loaded = false; 
-       console.log('search key '+this.searchKey);
        
-        searchProduct({searchKey: this.searchKey })
+        searchProduct({searchKey: this.searchKey, cat: this.cat, family: this.pf })
         .then((result) => {
             this.prod = result;
             this.error = undefined;
@@ -94,25 +93,12 @@ export default class AppSelectProd extends LightningElement {
             
         })
         .finally(() => {
+            this.searchKey = undefined; 
             this.loaded = true; 
         })
         
       }
-    // @wire(searchProduct, {searchKey: '$searchKey'})
-    //  wiredProduct({error, data}){
-    //  if(data){
-         
-         
-    //      this.prod = data;  
-    //      this.copy = data
-           
-    //      this.doneLoad(); 
-    //     }else if(error){
-    //         this.error = error;
-    //         console.log(JSON.stringify(this.error)); 
-    //     }
-        
-    //  }
+   
      doneLoad(){
          window.clearTimeout(this.delay); 
          this.delay = setTimeout(()=>{
