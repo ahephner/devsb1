@@ -3,6 +3,7 @@
 import { LightningElement, wire, track } from 'lwc';
 import searchProduct from '@salesforce/apex/appProduct.searchProduct'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
 const columnsList = [
     {type: 'button', 
      initialWidth: 75,typeAttributes:{
@@ -32,9 +33,8 @@ export default class AppSelectProd extends LightningElement {
     cat = 'All';
     //needs to be @track so we can follow reactive properties on an array or obj in childern
     @track selection = [];
-    renderedCallback(){
-        console.log('call back');
-        
+    connectedCallback(){
+        this.loaded = true; 
     }
     //get set new product family/category search
     get pfOptions(){
@@ -50,9 +50,13 @@ export default class AppSelectProd extends LightningElement {
             {label: 'Herbicide', value:'Chemicals-Herbicide'},
             {label: 'Fungicide', value:'Chemicals-Fungicide'},
             {label: 'Insecticide', value:'Chemicals-Insecticide'},
-            {label: 'PGR', value:'Chemicals-Growth Regulator'}, 
+            {label: 'PGR', value:'Chemicals-Growth Regulator'},
+            {label: 'Granular Pre-emerge', value:'Granular Pre-emergents'}, 
+            {label: 'Foliar & Soluble', value: 'Foliar & Soluble'}
         ]
     }
+
+
     nameChange(event){
         this.searchKey = event.target.value.toLowerCase();
         //console.log(this.searchKey);
@@ -75,24 +79,40 @@ export default class AppSelectProd extends LightningElement {
           this.cat = e.detail.value; 
       }
 
-    @wire(searchProduct)
-     wiredProduct({error, data}){
-     if(data){
-         console.log('loaded top or wire '+this.loaded);
-         
-         this.prod = data;  
-        // this.prod = data.map(item=>{
-        //      let selectColor = item.Average_Cost__c < 10 ? 'none':"slds-theme_success"
-        //      return  {...item, 'select': false, 'selectColor':selectColor }
-        //  }); 
-         this.copy = data  
-         this.doneLoad(); 
-        }else if(error){
+      search(){
+        this.loaded = false; 
+       console.log('search key '+this.searchKey);
+       
+        searchProduct({searchKey: this.searchKey })
+        .then((result) => {
+            this.prod = result;
+            this.error = undefined;
+        })
+        .catch((error) => {
             this.error = error;
-            console.log(JSON.stringify(this.error)); 
-        }
+            console.log(this.error);
+            
+        })
+        .finally(() => {
+            this.loaded = true; 
+        })
         
-     }
+      }
+    // @wire(searchProduct, {searchKey: '$searchKey'})
+    //  wiredProduct({error, data}){
+    //  if(data){
+         
+         
+    //      this.prod = data;  
+    //      this.copy = data
+           
+    //      this.doneLoad(); 
+    //     }else if(error){
+    //         this.error = error;
+    //         console.log(JSON.stringify(this.error)); 
+    //     }
+        
+    //  }
      doneLoad(){
          window.clearTimeout(this.delay); 
          this.delay = setTimeout(()=>{
@@ -102,19 +122,42 @@ export default class AppSelectProd extends LightningElement {
 //runs the filter on the product table. Is called from the parent because the inputs are currently on the header. 
 //this needs to be removed from teh parent and added to this components markup 
 //uses the copy object to update the products shown before the filters are run. To make sure all data is taken into account before narrowing what is shown
-     
-     search(){
-         this.prod = this.copy;
-         console.log('==search selection '+ this.pf);
-         //this.selectedRows= this.selection; 
+
+    //  search(){
+    //      this.prod = this.copy;  
+    //      //this.selectedRows= this.selection; 
          
-         if(this.searchKey === '' ||!this.search  && this.pf === 'All' && this.cat ==='All'){
-                this.prod = this.copy;
-            }else if(this.searchKey != '' && this.pf === 'All' && this.cat ==='All'){
-                this.prod = this.prod.filter(x=> x.Product_Name__c.toLowerCase().includes(this.searchKey) || x.Name.toLowerCase().includes(this.searchKey))
-            }else if(this.searchKey === '' || this.searchKey === undefined && this.pf != 'All' || this.cat != 'All'){
-                this.prod = this.prod.filter(x => x.Product_Family__c === this.pf || x.Subcategory__c === this.cat)
-            }   
+    //      if(this.searchKey === '' ||!this.search && this.cat ==='All'){
+    //             this.prod = this.copy;
+    //         }else if(this.searchKey != '' &&  this.cat ==='All'){
+    //             this.prod = this.prod.filter(x=> x.Product_Name__c.toLowerCase().includes(this.searchKey) || x.Name.toLowerCase().includes(this.searchKey))
+    //         }else if(this.searchKey === '' || this.searchKey === undefined &&  this.cat != 'All'){
+    //             this.prod = this.prod.filter(x =>  x.Subcategory__c === this.cat)
+    //         }else if(this.searchKey != '' &&  this.cat !='All'){
+    //             console.log('both');
+    //             console.log('cat '+this.cat);
+    //             console.log('search string '+ this.searchKey);
+                
+    //             //this.prod = this.handleMultiple(this.searchKey, this.cat);
+    //             this.pod = this.prod.filter(x =>x.Product_Name__c.toLowerCase().includes(this.searchKey)  && x.Subcategory__c === this.cat )
+    //         }   
+    //     }
+
+        handleMultiple(x , y){
+            var x = {
+                Product_Name__c: x,
+                Subcategory__c: y
+            }
+          
+            console.log(this.prod)
+            // prod = this.prod.filter(function(item){
+            //     for (var key in x) {
+            //         console.log(x[key])
+            //    if (item[key].toLowerCase().includes(x[key]))
+            //      return true;
+            //  }
+            //  return false;
+            // })
         }
 //Handles adding the products to this.Selection array when the green add button is hit on the product table
         handleRowAction(e){

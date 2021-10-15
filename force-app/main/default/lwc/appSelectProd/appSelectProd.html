@@ -4,7 +4,7 @@
             alternative-text="Loading" 
             size="large"></lightning-spinner>
     </template>
-    <template if:true={loaded}>
+    <template if:true={loaded}> 
         <div class="slds-grid">
             <div class='slds-col slds-size_3-of-8'>
                 <lightning-input type="text" variant="standard" 
@@ -13,7 +13,7 @@
                                  onchange={nameChange}
                                  onkeydown={handleKey}></lightning-input>
             </div>
-            <div class='slds-col slds-size_2-of-8'>
+             <div class='slds-col slds-size_2-of-8'>
                 <lightning-combobox
                     name="prodFamily"
                     label="Product Family"
@@ -21,7 +21,7 @@
                     placeholder="Select Progress"
                     options={pfOptions}
                     onchange={pfChange} ></lightning-combobox>
-            </div>
+            </div> 
             <div class='slds-col slds-size_2-of-8'>
                 <lightning-combobox
                 name="cat"
