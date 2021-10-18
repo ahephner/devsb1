@@ -3,6 +3,10 @@
 import { LightningElement, wire, track } from 'lwc';
 import searchProduct from '@salesforce/apex/appProduct.searchProduct'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import PROD_OBJECT from '@salesforce/schema/Product__c';
+import { getPicklistValues } from 'lightning/uiObjectInfoApi';
+import prodFamily from '@salesforce/schema/Product__c.Product_Family__c';
 
 const columnsList = [
     {type: 'button', 
@@ -27,7 +31,8 @@ export default class AppSelectProd extends LightningElement {
     @track loaded = false; 
     columnsList = columnsList; 
     prod; 
-    error; 
+    error;
+    pfOptions;  
     searchKey;
     pf = 'All';
     cat = 'All';
@@ -37,13 +42,23 @@ export default class AppSelectProd extends LightningElement {
         this.loaded = true; 
     }
     //get set new product family/category search
-    get pfOptions(){
-        return [
-            {label: 'All', value:'All'}, 
-            {label: 'Foliar-Pak', value:'Foliar-Pak'},
-            {label: 'BASF', value:'BASF'}
-        ]
-    }
+  @wire(getObjectInfo,{objectApiName: PROD_OBJECT})
+        prodInfo
+    @wire(getPicklistValues,
+        {
+            recordTypeId: '$prodInfo.data.defaultRecordTypeId',
+            fieldApiName: prodFamily
+        })
+        wiredPickListValues({data, error}){
+            if(data){
+                this.pfOptions = data.values;
+                console.log('picklist '+this.pfOptions[1]);
+                
+            }else if(error){
+                console.log(error)
+            }
+        }
+        
     get catOptions(){
         return [
             {label: 'All', value: 'All'}, 
@@ -56,10 +71,10 @@ export default class AppSelectProd extends LightningElement {
         ]
     }
 
-
+   
     nameChange(event){
         this.searchKey = event.target.value.toLowerCase();
-        //console.log(this.searchKey);
+        console.log(this.FAMILYOPTIONS);
       }
 
       //handle enter key tagged. maybe change to this.searhKey === undefined
@@ -72,7 +87,9 @@ export default class AppSelectProd extends LightningElement {
               this.search();  
       }
       pfChange(event){
-          this.pf = event.detail.value; 
+          this.pf = event.detail.value;
+          console.log(this.pf);
+           
       }
   
       catChange(e){
@@ -105,46 +122,8 @@ export default class AppSelectProd extends LightningElement {
              this.loaded = true; 
          },2000)
      }
-//runs the filter on the product table. Is called from the parent because the inputs are currently on the header. 
-//this needs to be removed from teh parent and added to this components markup 
-//uses the copy object to update the products shown before the filters are run. To make sure all data is taken into account before narrowing what is shown
 
-    //  search(){
-    //      this.prod = this.copy;  
-    //      //this.selectedRows= this.selection; 
-         
-    //      if(this.searchKey === '' ||!this.search && this.cat ==='All'){
-    //             this.prod = this.copy;
-    //         }else if(this.searchKey != '' &&  this.cat ==='All'){
-    //             this.prod = this.prod.filter(x=> x.Product_Name__c.toLowerCase().includes(this.searchKey) || x.Name.toLowerCase().includes(this.searchKey))
-    //         }else if(this.searchKey === '' || this.searchKey === undefined &&  this.cat != 'All'){
-    //             this.prod = this.prod.filter(x =>  x.Subcategory__c === this.cat)
-    //         }else if(this.searchKey != '' &&  this.cat !='All'){
-    //             console.log('both');
-    //             console.log('cat '+this.cat);
-    //             console.log('search string '+ this.searchKey);
-                
-    //             //this.prod = this.handleMultiple(this.searchKey, this.cat);
-    //             this.pod = this.prod.filter(x =>x.Product_Name__c.toLowerCase().includes(this.searchKey)  && x.Subcategory__c === this.cat )
-    //         }   
-    //     }
 
-        handleMultiple(x , y){
-            var x = {
-                Product_Name__c: x,
-                Subcategory__c: y
-            }
-          
-            console.log(this.prod)
-            // prod = this.prod.filter(function(item){
-            //     for (var key in x) {
-            //         console.log(x[key])
-            //    if (item[key].toLowerCase().includes(x[key]))
-            //      return true;
-            //  }
-            //  return false;
-            // })
-        }
 //Handles adding the products to this.Selection array when the green add button is hit on the product table
         handleRowAction(e){
             const rowAction = e.detail.action.name; 
