@@ -1,7 +1,8 @@
 //go to https://github.com/ahephner/lwc_Comm_Examples/tree/main/dataTableExample for more dataTable example stuff like buttons mapping data
 
 import { LightningElement, wire, track } from 'lwc';
-import searchProduct from '@salesforce/apex/appProduct.searchProduct'
+//import searchProduct from '@salesforce/apex/appProduct.searchProduct'
+import searchProduct from '@salesforce/apex/appProduct.searchProduct2'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import PROD_OBJECT from '@salesforce/schema/Product__c';
@@ -11,26 +12,26 @@ import prodFamily from '@salesforce/schema/Product__c.Product_Family__c';
 const columnsList = [
     {type: 'button', 
      initialWidth: 75,typeAttributes:{
-        label: 'Add',
+        label: {fieldName:'rowLabel'},
         name: 'Add',
         title: 'Add',
         disabled: false,
-        value: 'add',
-        variant: 'success'
+        value: {fieldName: 'rowValue'},
+        variant: {fieldName:'rowVariant'}
     }, 
     cellAttributes: {
         style: 'transform: scale(0.75)'}
     },
-    {label: 'Name', fieldName:'Product_Name__c', cellAttributes:{alignment:'left'}},
-    {label: 'Code', fieldName:'Name', cellAttributes:{alignment:'center'}},
+    {label: 'Name', fieldName:'Name', cellAttributes:{alignment:'left'}},
+    {label: 'Code', fieldName:'Code', cellAttributes:{alignment:'center'}},
     {label: 'Status', fieldName:'Product_Status__c', cellAttributes:{alignment:'center'}},
-    {label: 'Avg Cost', fieldName:'Average_Cost__c', 
+    {label: 'Suggested Price', fieldName:'Price', 
     type:'currency', cellAttributes:{alignment:'center'}},
 ]
 export default class AppSelectProd extends LightningElement {
     @track loaded = false; 
     columnsList = columnsList; 
-    prod; 
+    @track prod = []; 
     error;
     pfOptions;  
     searchKey;
@@ -74,7 +75,7 @@ export default class AppSelectProd extends LightningElement {
    
     nameChange(event){
         this.searchKey = event.target.value.toLowerCase();
-        console.log(this.FAMILYOPTIONS);
+        
       }
 
       //handle enter key tagged. maybe change to this.searhKey === undefined
@@ -98,10 +99,21 @@ export default class AppSelectProd extends LightningElement {
 
       search(){
         this.loaded = false; 
-       
+       console.log('sk '+this.searchKey); 
         searchProduct({searchKey: this.searchKey, cat: this.cat, family: this.pf })
         .then((result) => {
-            this.prod = result;
+            this.prod = result.map(item=>{
+                let rowLabel = 'Add';
+                let rowValue = 'Add'; 
+                let rowVariant = 'success';
+                let Name = item.Product2.Name;
+                let Code = item.Product2.ProductCode;
+                let Product_Status__c = item.Product2.Product_Status__c;
+                let Price = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
+                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price} 
+
+            });
+            console.log(JSON.stringify(this.prod))
             this.error = undefined;
         })
         .catch((error) => {
@@ -127,15 +139,24 @@ export default class AppSelectProd extends LightningElement {
 //Handles adding the products to this.Selection array when the green add button is hit on the product table
         handleRowAction(e){
             const rowAction = e.detail.action.name; 
-            const rowName = e.detail.row.Product_Name__c;
+            const rowName = e.detail.row.Name;
             const rowId = e.detail.row.Id;
+            //const rowProdType = e.detail.row.Product_Type__c;
             if(rowAction ==='Add'){
+                let index = this.prod.findIndex(x => x.Id === rowId)
+                console.log({index})
+                this.prod[index].rowLabel = 'X';
+                this.prod[index].rowValue = 'remove';
+                this.prod[index].rowVariant = 'destructive'
                 this.selection = [
                     ...this.selection,{
-                        id: rowId,
-                        name: rowName
+                        Id: rowId,
+                        Name: rowName
                     }
-                ]
+                ]  
+                this.prod = [...this.prod]
+            }else if(rowAction==='remove'){
+                console.log('remove');
                 
             }
         }
@@ -157,6 +178,7 @@ export default class AppSelectProd extends LightningElement {
         //then get all the fields need for pricing. 
         next(){
             //this.selection = new Set(this.selection);
+            
             if(this.selection.length < 1){
                 this.dispatchEvent(new ShowToastEvent({
                     title: 'No Products Selected',
@@ -165,8 +187,10 @@ export default class AppSelectProd extends LightningElement {
                 }));
             }else{
             this.loaded = false; 
-            this.selection = this.copy.filter(cItem => this.selection.some(sItem => cItem.Id === sItem.id));
+            console.log(1, JSON.stringify(this.selection))
             
+            //this.selection = this.selection.filter(cItem => this.selection.some(sItem => cItem.Id === sItem.id));
+            //console.log(2, JSON.stringify(this.selection))
             this.dispatchEvent(new CustomEvent('move',{
                 detail: this.selection
             }));  

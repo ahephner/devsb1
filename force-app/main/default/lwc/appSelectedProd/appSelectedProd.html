@@ -1,19 +1,20 @@
 <template>
     <lightning-card  variant="Narrow"  title="Selected Products" icon-name="utility:cart">
-        <template if:true={selection}>
+        <template if:true={prodSelected}>
             <ul class='slds-m-top-small'>
                 <template for:each={selection} for:item="sp" >
                    <li key={sp.id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small'>
                     <lightning-icon icon-name="utility:close" name={sp.id} size='small' class='hover'
                     alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon>
-                    <span class="slds-p-left_small">{sp.name}</span>
+                    <span class="slds-p-left_small">{sp.Name}</span>
                    </li>
                 </template>
             </ul>
         </template>
-        <template if:false={selection}>
+        <template if:false={prodSelected}>
             <div class='slds-m-around_large slds-align_absolute-center'>
                 <h4>Added Products will appear here</h4>
+                <br/>
                 <h6>We will add rates and pricing after this</h6>
             </div>
         </template>

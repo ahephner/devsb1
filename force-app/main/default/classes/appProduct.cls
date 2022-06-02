@@ -79,4 +79,50 @@ public class appProduct {
       //system.debug('here are the products ' +prods);
       return prods; 
   }
+  //Product Search
+	@AuraEnabled(cacheable = true) 
+    public static PricebookEntry[] searchProduct2(string searchKey, string cat, string family){
+      string searchterm = '%' + searchKey + '%'; 
+      string category = cat; 
+      string pf = family; 
+      string pbId = '01s410000077vSKAAY';  
+      //will need for full
+      //string pClass = 'Simple';
+            String query = 'Select Id,'
+                + '  Product2.ProductCode, Product2.Name, Product2.Product_Status__c, Product2.Product_Family__c, Product2.Subcategory__c, Product2.Ship_Weight__c, Product2.Pallet_Qty__c,'
+                + '  Product2.Floor_Type__c, Product2.Floor_Price__c, Product2.Last_Purchase_Price__c, Agency_Product__c, product2.Total_Product_Items__c, Product2.Temp_Unavailable__c,'
+          		+ ' Floor_Price__c, Level_1_UserView__c, Level_One_Margin__c, Level_2_UserView__c, Level_2_Margin__c, Product_Cost__c, Product2.Temp_Mess__c'
+                + ' From PricebookEntry Where IsActive = True and Pricebook2Id =: pbId  AND' ; 
+     //AND Product2.ProductClass =:pClass
+      if(!searchterm.contains('null') && category == 'All' && pf == 'All'){
+          //system.debug('1');
+          query += ' (Product2.ProductCode like :searchTerm or Product2.Name like :searchTerm)';
+         /// system.debug('2');
+      }else if (!searchterm.contains('null') && category != 'All' && pf == 'All'){
+          //system.debug('3');
+          query += ' (Product2.ProductCode like :searchTerm or Product2.Name like :searchTerm) and Product2.subcategory__c =:category';
+      }else if(!searchterm.contains('null') && category == 'All' && pf != 'All'){
+          //system.debug('4');
+          query += ' (Product2.ProductCode like :searchTerm or Product2.Name like :searchTerm) and Product2.Product_Family__c =:pf';
+      }else if(!searchterm.contains('null') && category != 'All' && pf != 'All'){
+          //system.debug('5');
+          query += ' (Product2.ProductCode like :searchTerm or Product2.Name like :searchTerm) and Product2.Product_Family__c =:pf and Product2.subcategory__c =:category';
+      }else if (searchterm.contains('null') && category != 'All' && pf == 'All'){
+          //system.debug('6');
+          query += ' Product2.subcategory__c =:category';
+      }else if(searchterm.contains('null')  && category == 'All' && pf != 'All'){
+          //system.debug('7');
+          query += ' Product2.Product_Family__c =:pf';
+      }else if(searchterm.contains('null') && category != 'All' && pf != 'All'){
+          //system.debug('8');
+          query += ' Product2.Product_Family__c =:pf and Product2.subcategory__c =:category'; 
+      }else{
+ 
+      }	
+        query += ' order by Product_Status__c  desc nulls last';     	 
+       
+       list<PricebookEntry> results = Database.query(query);
+	    	
+      return results;
+    }
 }

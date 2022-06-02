@@ -1,4 +1,4 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
@@ -26,7 +26,7 @@ export default class ProductTable extends LightningElement {
     numbApps;
     daysApart;
     customInsert = false; 
-    selectedProducts = []; 
+   @track selectedProducts = []; 
 
     @wire(MessageContext)
         messageContext; 
@@ -127,10 +127,14 @@ export default class ProductTable extends LightningElement {
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
+         var handle = mess.detail
+         console.log({handle});
          
-        this.selectedProducts = mess.detail.map(item=>{
+         this.selectedProducts = mess.detail.map(item=>{
+            
             return {...item,
-               Product__c: item.Id,  
+               Product__c: item.Id,
+               Product_Name__c: item.Name,   
                Rate2__c: 0,
                Application__c: '',
                Note__c: '' ,
