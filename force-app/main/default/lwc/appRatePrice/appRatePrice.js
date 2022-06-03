@@ -56,29 +56,31 @@ export default class AppRatePrice extends LightningElement {
            appTotal = (t, nxt)=> (t+nxt).toFixed(2);
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
-            window.clearTimeout(this.delay);
-            let index = this.data.findIndex(prod => prod.Id === e.target.name);
-
-            this.delay = setTimeout(()=>{
-                this.data[index].Unit_Price__c = e.detail.value;
-                this.data[index].Unit_Price__c = Number(this.data[index].Unit_Price__c);
-                //console.log(typeof this.data[index].Unit_Price__c +' unit Type');          
-                    
-                    if(this.data[index].Unit_Price__c > 0){
-                    this.data[index].Margin__c = Number((1 - (this.data[index].Average_Cost__c /this.data[index].Unit_Price__c))*100).toFixed(2)
-                    this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
-                    
-                    this.appTotalPrice = this.data.map(el=>Number(el.Total_Price__c)).reduce(this.appTotal)
-                    console.log('newPrice if ' + this.appTotalPrice);
-                }else{
-                    this.data[index].Margin__c = 0;                
-                    this.data[index].Margin__c = this.data[index].Margin__c.toFixed(2)
-                    this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
-                    //console.log(this.data[index].Total_Price__c, 'here price');
-                    this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
-                    console.log('price else '+ this.appTotalPrice);
-                }
-                }, 1000)
+                window.clearTimeout(this.delay);
+                let index = this.data.findIndex(prod => prod.Id === e.target.name);
+                console.log(JSON.stringify(this.data))
+                console.log({index}, e.target.name);
+                
+                this.delay = setTimeout(()=>{
+                    this.data[index].Unit_Price__c = e.detail.value;
+                    this.data[index].Unit_Price__c = Number(this.data[index].Unit_Price__c);
+                    //console.log(typeof this.data[index].Unit_Price__c +' unit Type');          
+                        
+                        if(this.data[index].Unit_Price__c > 0){
+                        this.data[index].Margin__c = Number((1 - (this.data[index].Cost /this.data[index].Unit_Price__c))*100).toFixed(2)
+                        this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                        
+                       // this.appTotalPrice = this.data.map(el=>Number(el.Total_Price__c)).reduce(this.appTotal)
+                        console.log('newPrice if ' + this.appTotalPrice);
+                    }else{
+                        this.data[index].Margin__c = 0;                
+                        this.data[index].Margin__c = this.data[index].Margin__c.toFixed(2)
+                        this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                        //console.log(this.data[index].Total_Price__c, 'here price');
+                        //this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                        console.log('price else '+ this.appTotalPrice);
+                    }
+                    }, 1000)
            }
            newMargin(m){
                 window.clearTimeout(this.delay)
@@ -87,15 +89,15 @@ export default class AppRatePrice extends LightningElement {
                     this.delay = setTimeout(()=>{
                             this.data[index].Margin__c = Number(m.detail.value);
                             if(1- this.data[index].Margin__c/100 > 0){
-                                this.data[index].Unit_Price__c = Number(this.data[index].Average_Cost__c /(1- this.data[index].Margin__c/100)).toFixed(2);
+                                this.data[index].Unit_Price__c = Number(this.data[index].Cost /(1- this.data[index].Margin__c/100)).toFixed(2);
                                 this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
-                                this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                                //this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
                             console.log('margin if ' +this.appTotalPrice);
                             }else{
                                 this.data[index].Unit_Price__c = 0;
                                 this.data[index].Unit_Price__c = this.data[index].Unit_Price__c.toFixed(2);
                                 this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)   
-                                this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                                //this.appTotalPrice = this.data.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
                                 console.log('margin else ' +this.appTotalPrice);
                                 
                             }

@@ -108,9 +108,12 @@ export default class AppSelectProd extends LightningElement {
                 let rowVariant = 'success';
                 let Name = item.Product2.Name;
                 let Code = item.Product2.ProductCode;
+                let nVal = item.Product2.N__c;
+                let pVal = item.Product2.P__c;
+                let kVale = item.Product2.K__c;
                 let Product_Status__c = item.Product2.Product_Status__c;
                 let Price = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
-                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price} 
+                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price, nVal, pVal, kVale} 
 
             });
             console.log(JSON.stringify(this.prod))
@@ -137,21 +140,39 @@ export default class AppSelectProd extends LightningElement {
 
 
 //Handles adding the products to this.Selection array when the green add button is hit on the product table
-        handleRowAction(e){
+        handleRowAction(e){            
             const rowAction = e.detail.action.name; 
             const rowName = e.detail.row.Name;
             const rowId = e.detail.row.Id;
-            //const rowProdType = e.detail.row.Product_Type__c;
+            const rowProdType = e.detail.row.Product_Type__c;
+            const rowUnitPrice = e.detail.row.Level_2_UserView__c;
+            const rowFlrPrice = e.detail.row.Floor_Price__c; 
+            const rowMargin = e.detail.row.Level_2_Margin__c;
+            const rowAgency = e.detail.row.Agency_Product__c;
+            const rowCost = e.detail.row.Product_Cost__c;
+            const rowSize = e.detail.row.Product_Size__c; 
+            const rowN = e.detail.row.nVal;
+            const rowP = e.detail.row.pVal;
+            const rowK = e.detail.row.kVal; 
             if(rowAction ==='Add'){
                 let index = this.prod.findIndex(x => x.Id === rowId)
-                console.log({index})
                 this.prod[index].rowLabel = 'X';
-                this.prod[index].rowValue = 'remove';
+                this.prod[index].rowAction = 'remove';
                 this.prod[index].rowVariant = 'destructive'
                 this.selection = [
                     ...this.selection,{
                         Id: rowId,
-                        Name: rowName
+                        Name: rowName,
+                        Product_Type__c: rowProdType,
+                        unitPrice: rowUnitPrice,
+                        floorPrice: rowFlrPrice,
+                        unitCost: rowCost,
+                        margin: rowMargin,
+                        agency: rowAgency,
+                        nVal: rowN,
+                        pVal: rowP,
+                        kVal: rowK,
+                        size: rowSize
                     }
                 ]  
                 this.prod = [...this.prod]
