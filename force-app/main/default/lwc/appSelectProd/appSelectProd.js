@@ -144,6 +144,7 @@ export default class AppSelectProd extends LightningElement {
             const rowAction = e.detail.action.name; 
             const rowName = e.detail.row.Name;
             const rowId = e.detail.row.Id;
+            const rowProduct = e.detail.row.Product2Id; 
             const rowProdType = e.detail.row.Product_Type__c;
             const rowUnitPrice = e.detail.row.Level_2_UserView__c;
             const rowFlrPrice = e.detail.row.Floor_Price__c; 
@@ -154,6 +155,7 @@ export default class AppSelectProd extends LightningElement {
             const rowN = e.detail.row.nVal;
             const rowP = e.detail.row.pVal;
             const rowK = e.detail.row.kVal; 
+            console.log(e.detail.Product2Id)
             if(rowAction ==='Add'){
                 let index = this.prod.findIndex(x => x.Id === rowId)
                 this.prod[index].rowLabel = 'X';
@@ -163,6 +165,7 @@ export default class AppSelectProd extends LightningElement {
                     ...this.selection,{
                         Id: rowId,
                         Name: rowName,
+                        Product__c: rowProduct, 
                         Product_Type__c: rowProdType,
                         unitPrice: rowUnitPrice,
                         floorPrice: rowFlrPrice,
@@ -176,6 +179,8 @@ export default class AppSelectProd extends LightningElement {
                     }
                 ]  
                 this.prod = [...this.prod]
+                console.log({rowProduct})
+                console.log(JSON.stringify(this.selection))
             }else if(rowAction==='remove'){
                 console.log('remove');
                 

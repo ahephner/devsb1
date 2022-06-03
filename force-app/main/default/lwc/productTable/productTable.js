@@ -133,7 +133,7 @@ export default class ProductTable extends LightningElement {
          this.selectedProducts = mess.detail.map(item=>{
             
             return {...item,
-               Product__c: item.Id,
+               Product__c: item.Product__c,
                Product_Name__c: item.Name,   
                Rate2__c: 0,
                Application__c: '',
@@ -149,7 +149,7 @@ export default class ProductTable extends LightningElement {
                Area__c: ''
             }
         } );
-
+       
     }
     save(prod){ 
         this.selectedProducts = prod.detail; 
