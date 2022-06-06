@@ -39,9 +39,12 @@ export default class UpdateRatePrice extends LightningElement {
         .then((resp)=>{
             //console.log('running '+resp);
             this.loaded = true; 
-            this.prodlist = resp;
+            this.prodlist = resp.map(item =>{
+                let allowEdit = item.Product__r.Agency_Pricing__c ? item.Product__r.Agency_Pricing__c : item.Product__r.Agency_Pricing__c
+                return {...item, allowEdit}
+            });
             // console.log('test ' +resp[0].Application__r.Name);
-            console.log(this.prodlist);
+            
             
             // resp.forEach(element => {
             //     console.log(element);
@@ -69,7 +72,7 @@ export default class UpdateRatePrice extends LightningElement {
             
         }).catch((error)=> {
             this.error = error;
-            console.log('error '+this.error);
+            console.log('error '+JSON.stringify(this.error));
             
         })
     }
@@ -84,8 +87,8 @@ export default class UpdateRatePrice extends LightningElement {
         }
 
 //this will set the number of required units based on rate. 
-        unitsRequired = (uOFM, rate, areaS, unitS) => {
-            return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*areaS))/unitS) : Math.ceil(((rate*areaS)/unitS))
+        unitsRequired = (uOFM, rate, areaS, unitSize) => {
+            return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*areaS))/unitSize) : Math.ceil(((rate*areaS)/unitSize))
         }
 //get new rate for the product
         newRate(e){

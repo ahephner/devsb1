@@ -127,9 +127,8 @@ export default class ProductTable extends LightningElement {
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
-         let handle = mess.detail
-         console.log({handle});
-         
+        
+        
          this.selectedProducts = mess.detail.map(item=>{
             
             return {...item,
@@ -138,12 +137,12 @@ export default class ProductTable extends LightningElement {
                Rate2__c: 0,
                Application__c: '',
                Note__c: '' ,
-               Units_Required__c: '0',
+               Units_Required__c: 1,
                Unit_Area__c: this.pref(this.areaUM, item.Product_Type__c),  
                Unit_Price__c: item.agency ? item.floorPrice : item.unitPrice,
                Cost: item.unitCost, 
                Margin__c: item.agency ? "" : item.margin, 
-               Total_Price__c: "0",
+               Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
                size: item.size,
                allowEdit: item.agency ? true : false,
                Area__c: ''

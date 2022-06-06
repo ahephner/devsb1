@@ -22,7 +22,7 @@
                         <lightning-input  type="number"  step="0.01" label="Rate"
                         name={sp.Id} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
                     </div>   
-                    <div class="slds-col slds-size_1-of-12">
+                    <div class="slds-col slds-size_2-of-12">
                         <lightning-combobox
                         name={sp.Id}
                         label="Unit Area"
@@ -33,18 +33,18 @@
                         required
                         ></lightning-combobox> 
                     </div>
-                    <div class="slds-col slds-size_1-of-12">
+                    <div class="slds-col slds-size_2-of-12">
                         <lightning-input class='liquid' type="number"  
                                         label="Unit Price" name={sp.Id} 
                                         value={sp.Unit_Price__c} onchange={newPrice} 
-                                        formatter="currency" step="0.01"></lightning-input>
+                                        formatter="currency" step="0.01" read-only={sp.allowEdit}></lightning-input>
                     </div>
-                    <div class="slds-col slds-size_1-of-12">
+                    <div class="slds-col slds-size_2-of-12">
                         <lightning-input class='liquid' type="number"  
                                         label="Margin%" name={sp.Id} 
-                                        value={sp.Margin__c} onchange={newMargin} step="0.01" ></lightning-input>
+                                        value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit} ></lightning-input>
                     </div> 
-                    <div class='slds-col slds-size_1-of-12'>
+                    <div class='slds-col slds-size_2-of-12'>
                         <lightning-input type="number" name="input4" 
                                          readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
                     </div>
@@ -61,6 +61,12 @@
         </div>
         <div class='slds-col slds-size_3-of-12'>
             <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
+                    <h5>Fertility Info:</h5>
+                    <ul>
+                        <li>N:</li>
+                        <li>P:</li>
+                        <li>K:</li>
+                    </ul>        
         </div>
     </div>
         <!--footer-->
