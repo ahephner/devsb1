@@ -19,7 +19,7 @@ export default class UpdateRatePrice extends LightningElement {
     appTotalPrice;
     sqft
     area
-    
+    addMore = false; 
     connectedCallback(){
         this.loadProducts();
         //console.log('calling') 
@@ -76,7 +76,9 @@ export default class UpdateRatePrice extends LightningElement {
             
         })
     }
-
+    addProducts(){
+        this.addMore = true; 
+    }
 //updating value functions below
         newAppName(e){
             this.appName = e.detail.value;

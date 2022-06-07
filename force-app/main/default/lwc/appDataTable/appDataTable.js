@@ -11,7 +11,7 @@ import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 //table actions bottom of file shows how to handle
 const actions = [
     { label: 'Show details', name: 'show_details' },
-    {label:'Add Products', name:'add_products'},
+    // {label:'Add Products', name:'add_products'},
     { label: 'Delete', name: 'delete' },
 ];
 

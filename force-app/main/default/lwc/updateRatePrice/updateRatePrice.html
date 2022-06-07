@@ -1,12 +1,19 @@
 <template>
- <lightning-card  variant="Narrow"  title="Edit Rates/Pricing" icon-name="utility:utility:adjust_value">
+ 
     <template if:true={loaded}>
-        <!-- <div class="slds-grid">
+        <template if:true={addMore}>
             <div class="slds-col slds-size_1-of-1">
-                <c-app-select-prod onclose={closeModal}
-                                            onmove={handleProds}></c-app-select-prod>
+                <c-update-add-product 
+                                            ></c-update-add-product>
                 </div>
-        </div> -->
+        </template>
+        
+       <template if:false={addMore}> 
+            <div class="slds-align_absolute-center">
+                <lightning-button-group>
+                    <lightning-button label="Add Product" onclick={addProducts} variant="success"></lightning-button>
+                </lightning-button-group>
+            </div>   
         <div class='slds-grid'>
             <div class='slds-col slds-size_2-of-6'>
                 <lightning-input type="text" variant="standard" value={appName} 
@@ -58,7 +65,7 @@
                     </div>
                     <div class='slds-col slds-size_1-of-12'>
                         <lightning-input type="number" name="input4" formatter="currency"
-                                         readonly value={sp.Total_Price__c} label="Total Price" ></lightning-input>
+                                         readonly value={sp.Total_Price__c} label="Line Total" ></lightning-input>
                     </div>
                </div>
             </template>
@@ -73,6 +80,7 @@
                     </ul>        
         </div>
     </div>
+    </template>    
         <!--footer-->
 <div class="slds-docked-form-footer">
     <lightning-button variant="destructive" label="Cancel" 
@@ -89,5 +97,5 @@
         alternative-text="Loading" 
         size="large"></lightning-spinner>
 </template>
-</lightning-card>
+
 </template>
