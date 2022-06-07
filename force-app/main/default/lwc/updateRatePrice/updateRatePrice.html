@@ -1,6 +1,12 @@
 <template>
  <lightning-card  variant="Narrow"  title="Edit Rates/Pricing" icon-name="utility:utility:adjust_value">
     <template if:true={loaded}>
+        <!-- <div class="slds-grid">
+            <div class="slds-col slds-size_1-of-1">
+                <c-app-select-prod onclose={closeModal}
+                                            onmove={handleProds}></c-app-select-prod>
+                </div>
+        </div> -->
         <div class='slds-grid'>
             <div class='slds-col slds-size_2-of-6'>
                 <lightning-input type="text" variant="standard" value={appName} 
@@ -14,9 +20,11 @@
     <div class='slds-grid slds-m-top_small'>
         <div class='slds-col slds-size_9-of-12'>  
             <template for:each={prodlist} for:item="sp" >
-               <div key={sp.Id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid'>
-                    <div class="slds-col slds-size_2-of-12">
-                        <p class='pName'>{sp.Product_Name__c}</p>
+               <div key={sp.Id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid  '>
+                    <div class="slds-col slds-size_2-of-12 pName">
+                        <lightning-icon icon-name="utility:close" name={sp.Id} size='xx-small' class='hover'
+                                        alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon>
+                        <p>{sp.Product_Name__c}</p>
                     </div>
                     <div class="slds-col slds-size_1-of-12">
                         <lightning-input  type="number"  step="0.01" label="Rate"
@@ -51,10 +59,6 @@
                     <div class='slds-col slds-size_1-of-12'>
                         <lightning-input type="number" name="input4" formatter="currency"
                                          readonly value={sp.Total_Price__c} label="Total Price" ></lightning-input>
-                    </div>
-                    <div class='slds-col slds-size_1-of-12'>
-                        <lightning-icon icon-name="utility:close" name={sp.Id} size='small' class='hover'
-                                        alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon>
                     </div>
                </div>
             </template>

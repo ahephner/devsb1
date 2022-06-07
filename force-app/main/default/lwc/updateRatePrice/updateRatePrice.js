@@ -4,7 +4,7 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-
+import { appTotal } from 'c/helper';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -103,6 +103,7 @@ export default class UpdateRatePrice extends LightningElement {
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
                     this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c )    
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2);
+                    this.appTotalPrice = appTotal(this.prodlist)
                     console.log('info = '+this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c);
                     
                 }
@@ -122,7 +123,7 @@ export default class UpdateRatePrice extends LightningElement {
             }
         }
 
-        appTotal = (t, nxt)=> (t+nxt).toFixed(2);
+        
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
             window.clearTimeout(this.delay);
@@ -137,14 +138,14 @@ export default class UpdateRatePrice extends LightningElement {
                     this.prodlist[index].Margin__c = Number((1 - (this.prodlist[index].Product_Cost__c /this.prodlist[index].Unit_Price__c))*100).toFixed(2)
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                     
-                    this.appTotalPrice = this.prodlist.map(el=>Number(el.Total_Price__c)).reduce(this.appTotal)
+                    this.appTotalPrice = appTotal(this.prodlist)
                     console.log('newPrice if ' + this.appTotalPrice);
                 }else{
                     this.prodlist[index].Margin__c = 0;                
                     this.prodlist[index].Margin__c = this.prodlist[index].Margin__c.toFixed(2)
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                     //console.log(this.prodlist[index].Total_Price__c, 'here price');
-                    this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                    this.appTotalPrice = appTotal(this.prodlist)
                     console.log('price else '+ this.appTotalPrice);
                 }
                 }, 1000)
@@ -158,14 +159,13 @@ export default class UpdateRatePrice extends LightningElement {
                             if(1- this.prodlist[index].Margin__c/100 > 0){
                                 this.prodlist[index].Unit_Price__c = Number(this.prodlist[index].Product_Cost__c /(1- this.prodlist[index].Margin__c/100)).toFixed(2);
                                 this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
-                                this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
-                            console.log('margin if ' +this.appTotalPrice);
+                                this.appTotalPrice = appTotal(this.prodlist)
+                            
                             }else{
                                 this.prodlist[index].Unit_Price__c = 0;
                                 this.prodlist[index].Unit_Price__c = this.prodlist[index].Unit_Price__c.toFixed(2);
                                 this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)   
-                                this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
-                                console.log('margin else ' +this.appTotalPrice);
+                                this.appTotalPrice = this.appTotalPrice = appTotal(this.prodlist)
                                 
                             }
                 },1500)
