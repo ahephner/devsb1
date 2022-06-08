@@ -6,6 +6,7 @@ import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 import addApplication from '@salesforce/apex/addApp.addApplication';
 import addProducts from '@salesforce/apex/addApp.addProducts';
 import multiInsert from '@salesforce/apex/addApp.multiInsert';
+import {pref} from 'c/helper';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -110,18 +111,6 @@ export default class ProductTable extends LightningElement {
         
     }
 
-    //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
-    //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
-    pref = (areaUm, type)=>{ 
-        // eslint-disable-next-line no-return-assign
-        //console.log('areaUM '+areaUm+ ' type '+type);
-        
-        return areaUm ==='M' && type==='Dry' ?  'LB/M':
-        areaUm ==='M' && type==='Liquid' ?  'OZ/M':
-        areaUm ==='Acre' && type==='Dry' ?  'LB/Acre':
-        areaUm ==='Acre' && type==='Liquid' ?  'OZ/Acre':
-         ''
-    }
     //gathers products from appSelectProd then maps over to set values for the appRatePrice that are need for the math functions
     //the pref uses the above function to set the unit of measure automatically for the user
     gatherProducts(mess){
@@ -138,7 +127,7 @@ export default class ProductTable extends LightningElement {
                Application__c: '',
                Note__c: '' ,
                Units_Required__c: 1,
-               Unit_Area__c: this.pref(this.areaUM, item.Product_Type__c),  
+               Unit_Area__c: pref(this.areaUM, item.Product_Type__c),  
                Unit_Price__c: item.agency ? item.floorPrice : item.unitPrice,
                Cost: item.unitCost, 
                Margin__c: item.agency ? "" : item.margin, 

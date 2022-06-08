@@ -98,9 +98,12 @@ export default class UpdateAddProduct extends LightningElement {
         }
         
     }
+    closeAdd(){
+        this.dispatchEvent(new CustomEvent('done'))
+    }
     search(){
         this.loaded = false; 
-       console.log('sk '+this.searchKey, 'pf '+this.pf, ' cat '+this.cat); 
+       //console.log('sk '+this.searchKey, 'pf '+this.pf, ' cat '+this.cat); 
         searchProduct({searchKey: this.searchKey, cat: this.cat, family: this.pf })
         .then((result) => {
             this.prod = result.map(item=>{
@@ -129,6 +132,38 @@ export default class UpdateAddProduct extends LightningElement {
             this.searchKey = undefined; 
             this.loaded = true; 
         })
+        
+      }
+      addLineItem(e){
+        const rowAction = e.detail.action.name; 
+        const prodId = e.detail.row.Id; 
+       
+        const newProd={    
+                        rowName: e.detail.row.Name,
+                        rowId : e.detail.row.Id,
+                        rowCode: e.detail.row.Code, 
+                        rowProduct : e.detail.row.Product2Id, 
+                        rowProdType : e.detail.row.Product_Type__c,
+                        rowUnitPrice : e.detail.row.Level_2_UserView__c,
+                        rowFlrPrice : e.detail.row.Floor_Price__c, 
+                        rowMargin : e.detail.row.Level_2_Margin__c,
+                        rowAgency : e.detail.row.Agency_Product__c,
+                        rowCost : e.detail.row.Product_Cost__c,
+                        rowSize : e.detail.row.Product_Size__c, 
+                        rowN : e.detail.row.nVal,
+                        rowP : e.detail.row.pVal,
+                        rowK : e.detail.row.kVal} 
+
+        if(rowAction === 'Add'){
+            let index = this.prod.findIndex(x => x.Id === prodId)
+                this.prod[index].rowLabel = 'X';
+                this.prod[index].rowAction = 'remove';
+                this.prod[index].rowVariant = 'destructive'
+                this.prod = [...this.prod]
+                //const newProd = {rowId, rowName,rowProduct, rowProdType, rowUnitPrice, rowFlrPrice,
+                //                rowMargin, rowAgency, rowCost, rowSize, rowN, rowP, rowK };
+                this.dispatchEvent(new CustomEvent('newprod',{detail:newProd}))
+        }
         
       }    
 }

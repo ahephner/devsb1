@@ -4,7 +4,7 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-import { appTotal } from 'c/helper';
+import { appTotal, alreadyAdded, pref } from 'c/helper';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -19,6 +19,7 @@ export default class UpdateRatePrice extends LightningElement {
     appTotalPrice;
     sqft
     area
+    areaUM
     addMore = false; 
     connectedCallback(){
         this.loadProducts();
@@ -43,7 +44,7 @@ export default class UpdateRatePrice extends LightningElement {
                 let allowEdit = item.Product__r.Agency_Pricing__c ? item.Product__r.Agency_Pricing__c : item.Product__r.Agency_Pricing__c
                 return {...item, allowEdit}
             });
-            // console.log('test ' +resp[0].Application__r.Name);
+             //console.log(JSON.stringify(this.prodlist));
             
             
             // resp.forEach(element => {
@@ -60,6 +61,7 @@ export default class UpdateRatePrice extends LightningElement {
             //console.log('areaId '+this.areaId);
             this.areaName = resp[0].Area__c
             this.appTotalPrice = resp[0].Application__r.Total_Price__c; 
+            this.areaUM = resp[0].Application__r.Area__r.Pref_U_of_M__c; 
             //console.log('type of total price '+ typeof resp[0].Total_Price__c);
             
             //console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
@@ -79,6 +81,9 @@ export default class UpdateRatePrice extends LightningElement {
     addProducts(){
         this.addMore = true; 
     }
+    closeAdd(){
+        this.addMore = false; 
+    }
 //updating value functions below
         newAppName(e){
             this.appName = e.detail.value;
@@ -94,7 +99,7 @@ export default class UpdateRatePrice extends LightningElement {
         }
 //get new rate for the product
         newRate(e){
-            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
             
             window.clearTimeout(this.delay);
              // eslint-disable-next-line @lwc/lwc/no-async-operation
@@ -114,7 +119,7 @@ export default class UpdateRatePrice extends LightningElement {
            }
 
            handleUnitArea(e){
-            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
             console.log('index ' +index + ' detail '+e.detail.value );
             
             this.prodlist[index].Unit_Area__c = e.detail.value;
@@ -129,7 +134,7 @@ export default class UpdateRatePrice extends LightningElement {
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
             window.clearTimeout(this.delay);
-            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
 
             this.delay = setTimeout(()=>{
                 this.prodlist[index].Unit_Price__c = e.detail.value;
@@ -154,7 +159,7 @@ export default class UpdateRatePrice extends LightningElement {
            }
            newMargin(m){
                 window.clearTimeout(this.delay)
-                    let index = this.prodlist.findIndex(prod => prod.Id === m.target.name)
+                    let index = this.prodlist.findIndex(prod => prod.Product_Code__c === m.target.name)
                     // eslint-disable-next-line @lwc/lwc/no-async-operation
                     this.delay = setTimeout(()=>{
                             this.prodlist[index].Margin__c = Number(m.detail.value);
@@ -179,7 +184,7 @@ removeProd(x){
     if(cf === true){
         deleteRecord(row)
             .then(()=>{
-                let index = this.prodlist.findIndex(prod => prod.Id === row);
+                let index = this.prodlist.findIndex(prod => prod.Product_Code__c === row);
                 this.prodlist.splice(index, 1)
                 this.dispatchEvent(
                     new ShowToastEvent({
@@ -201,11 +206,41 @@ removeProd(x){
     }
     
 }
+//catch new prod
+listenNewProd(x){
+        const newProd = x.detail.rowProduct;
+        const alreadyThere = alreadyAdded(newProd, this.prodlist);
+        if(!alreadyThere){
+            this.handleNewProd(x)
+        }else{
+            return; 
+        }
+}
 
+handleNewProd(x){
+    let passed = x.detail.rowProduct;
+    this.prodlist = [...this.prodlist,{
+        Product__c: x.detail.rowProduct,
+        Product_Name__c: x.detail.rowName,
+        Product_Code__c: x.detail.rowCode,   
+        Rate2__c: 0,
+        Application__c: this.updateAppId,
+        Note__c: '' ,
+        Units_Required__c: 1,
+        Unit_Area__c: pref(this.areaUM, x.detail.rowProdType),  
+        Unit_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
+        Cost: x.detail.rowCost, 
+        Margin__c: x.detail.rowAgency ? "" : x.detail.rowMargin, 
+        Total_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
+        Product_Size__c: x.detail.rowSize,
+        allowEdit: x.detail.rowAgency ? true : false,
+        Area__c:  this.areaId
+
+    }]
+}
 //Update name and products
     update(){
         this.loaded = false;
-        console.log('name and date and id' +this.appName +' '+ this.appDate+' '+this.appId);
         
         let params = {
             appName: this.appName,
