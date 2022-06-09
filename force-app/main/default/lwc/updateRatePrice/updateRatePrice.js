@@ -218,8 +218,9 @@ listenNewProd(x){
 }
 
 handleNewProd(x){
-    let passed = x.detail.rowProduct;
+    //let passed = x.detail.rowProduct;
     this.prodlist = [...this.prodlist,{
+        Id: '',
         Product__c: x.detail.rowProduct,
         Product_Name__c: x.detail.rowName,
         Product_Code__c: x.detail.rowCode,   
@@ -229,7 +230,7 @@ handleNewProd(x){
         Units_Required__c: 1,
         Unit_Area__c: pref(this.areaUM, x.detail.rowProdType),  
         Unit_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
-        Cost: x.detail.rowCost, 
+        Product_Cost__c: x.detail.rowCost, 
         Margin__c: x.detail.rowAgency ? "" : x.detail.rowMargin, 
         Total_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
         Product_Size__c: x.detail.rowSize,
@@ -238,6 +239,8 @@ handleNewProd(x){
 
     }]
 }
+
+
 //Update name and products
     update(){
         this.loaded = false;
@@ -250,11 +253,10 @@ handleNewProd(x){
 
         updateApplication({wrapper: params, id:this.appId})
             .then(()=>{
-                let products = JSON.stringify(this.prodlist);
-                console.log('products '+ products);
-                
-                updateProducts({products:products})
-            }).then(()=>{
+               
+                updateProducts({products:this.prodlist})
+            }).then((mess)=>{
+                console.log('mess '+mess)
                 this.prodlist = [];
                 this.dispatchEvent(
                     new ShowToastEvent({
