@@ -78,9 +78,11 @@ export default class UpdateRatePrice extends LightningElement {
             
         })
     }
+    @api
     addProducts(){
         this.addMore = true; 
     }
+    @api
     closeAdd(){
         this.addMore = false; 
     }
@@ -242,6 +244,7 @@ handleNewProd(x){
 
 
 //Update name and products
+    @api 
     update(){
         this.loaded = false;
         

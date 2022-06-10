@@ -10,11 +10,6 @@
         </template>
         
        <template if:false={addMore}> 
-            <div class="slds-align_absolute-center">
-                <lightning-button-group>
-                    <lightning-button label="Add Product" onclick={addProducts} variant="success"></lightning-button>
-                </lightning-button-group>
-            </div>   
         <div class='slds-grid'>
             <div class='slds-col slds-size_2-of-6'>
                 <lightning-input type="text" variant="standard" value={appName} 
@@ -83,7 +78,7 @@
     </div>
     </template>    
         <!--footer-->
-<div class="slds-docked-form-footer">
+<!-- <div class="slds-docked-form-footer">
     <lightning-button variant="destructive" label="Cancel" 
                       title="Cancel" onclick={cancel} 
                       class="slds-m-left_x-small"></lightning-button>
@@ -91,7 +86,7 @@
                       title="Successful action" onclick={update} 
                       class="slds-m-left_x-small"></lightning-button>
     
-</div>
+</div> -->
 </template>
 <template if:false={loaded}>
     <lightning-spinner 

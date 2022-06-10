@@ -13,20 +13,24 @@
               <template if:true={loaded}>
                 <div class="slds-modal__content slds-p-around_medium  prodBody" id="modal-content-id-1">
                   <template if:true={upProdTable}>
+                    <div class="slds-align_absolute-center">
+                      <template if:true={showButton}>
+                        <lightning-button-group>
+                            <lightning-button label="Add Product" onclick={addProducts} variant="success"></lightning-button>
+                        </lightning-button-group>
+                      </template>
+                  </div>
                     <c-update-rate-price app-id={appId}
                                         oncancel={closeModal}
                     ></c-update-rate-price>
                   </template>
-                  <template if:true={addProduct}>
-                      <c-app-select-prod onclose={closeModal}
-                                        onmove={handleProds}></c-app-select-prod>
-                  </template>
-                  <template if:true={addPrice}>
-                      <c-app-rate-price selection={selectedProducts}
-                                        onsave={save}
-                                        oncancel={closeModal}></c-app-rate-price>
-                  </template>
               </div>
+              <footer class="slds-modal__footer ">
+                <div class="btnGroup">
+                  <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+                  <button class="slds-button slds-button_brand" onclick={handleNext}>{buttonText}</button>
+                </div>
+              </footer>
              </template>
              <template if:false={loaded}>
               <lightning-spinner 
