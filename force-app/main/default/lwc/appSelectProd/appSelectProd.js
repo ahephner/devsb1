@@ -1,6 +1,6 @@
 //go to https://github.com/ahephner/lwc_Comm_Examples/tree/main/dataTableExample for more dataTable example stuff like buttons mapping data
 
-import { LightningElement, wire, track } from 'lwc';
+import { LightningElement, wire, track, api } from 'lwc';
 //import searchProduct from '@salesforce/apex/appProduct.searchProduct'
 import searchProduct from '@salesforce/apex/appProduct.searchProduct2'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -198,10 +198,12 @@ export default class AppSelectProd extends LightningElement {
             //console.log(this.selection);
             
         }
+
         //control flow here 
         //can't call set here. A set does not evaluate an array of objects like I was thinking it sees
         // {id: 1, name:'AJ'} != {id:1, name:'AJ'} as true
         //then get all the fields need for pricing. 
+        @api
         next(){
             //this.selection = new Set(this.selection);
             
@@ -211,16 +213,15 @@ export default class AppSelectProd extends LightningElement {
                     message: 'Please select at least one product',
                     variant: 'error'
                 }));
+                return false; 
             }else{
             this.loaded = false; 
-            console.log(1, JSON.stringify(this.selection))
-            
             //this.selection = this.selection.filter(cItem => this.selection.some(sItem => cItem.Id === sItem.id));
             //console.log(2, JSON.stringify(this.selection))
             this.dispatchEvent(new CustomEvent('move',{
                 detail: this.selection
             }));  
-            
+            return true; 
         }
         }
 

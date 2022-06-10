@@ -1,4 +1,4 @@
-import { LightningElement,track } from 'lwc';
+import { LightningElement,track,api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class AppNameDate extends LightningElement {
     hiddenNumberBox = false;
@@ -129,6 +129,7 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
         // console.log('custTimeApart '+this.custDaysApart);
         this.dispatchEvent(new CustomEvent('cancel'));   
     }
+    @api
     next(){
         if(this.appName === undefined || this.appName === '' || this.appDate === undefined || this.appDate === ''){
                 this.dispatchEvent(new ShowToastEvent({
@@ -136,8 +137,10 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
                     message: 'Make sure you have a name and date',
                     variant: 'error'
                 }));
+                return false; 
         }else{
             this.infoIsValid();
+            return true; 
         }
     }
     infoIsValid(){

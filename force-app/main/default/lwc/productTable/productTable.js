@@ -27,6 +27,7 @@ export default class ProductTable extends LightningElement {
     numbApps;
     daysApart;
     customInsert = false; 
+    currentStage = 'appInfo'
    @track selectedProducts = []; 
 
     @wire(MessageContext)
@@ -70,7 +71,28 @@ export default class ProductTable extends LightningElement {
         disconnectedCallback(){
             this.unsubscribeFromMessageChannel(); 
         }
-
+        move(stage){
+            stage = this.currentStage;
+            switch(stage){
+                case 'appInfo':
+                    let go = this.template.querySelector('c-app-name-date').next();
+                    go ? this.currentStage = 'selectProd' : '';
+                    break;
+                case 'selectProd':
+                    console.log(3, this.currentStage)
+                    let ok = this.template.querySelector('c-app-select-prod').next();
+                    console.log({ok})
+                    ok ? this.currentStage = 'ratePrice' : ''
+                    console.log(4, this.currentStage)
+                    break;
+                case 'ratePrice':
+                    let final = this.template.querySelector('c-app-rate-price').save();
+                    console.log({final})
+                    final ? this.currentStage = 'appInfo': '';
+                    console.log(5, this.currentStage)
+                    break;
+            }
+        }
         //get area info for the product calculations
         handleArea(x){  
             areaInfo({ai:x})

@@ -124,6 +124,7 @@ export default class AppRatePrice extends LightningElement {
             }
         }
            //flow
+           @api
            save(){
                
                this.loaded = false; 
@@ -133,6 +134,7 @@ export default class AppRatePrice extends LightningElement {
                     detail: this.data
                }));    
                //this.loaded = true; 
+               return true;
            }
 
            cancel(){
