@@ -3,5 +3,10 @@
 }
 
 .pName{
-    margin-top: 2rem; 
+    margin-top: 2rem;
+    display:flex;  
+}
+
+.reqUnits{
+    padding-left: 10%;
 }

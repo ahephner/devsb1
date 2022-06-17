@@ -33,10 +33,12 @@
                                   oncancel={closeModal}></c-app-rate-price>
               </template>
             </div>
-              <!-- <footer class="slds-modal__footer">
-                <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
-                <button class="slds-button slds-button_brand" onclick={save}>Save</button>
-              </footer> -->
+              <footer class="slds-modal__footer ">
+                <div class="btnGroup">
+                  <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+                  <button class="slds-button slds-button_brand" onclick={move}>Next</button>
+                </div>
+              </footer>
             </div>
           </section>
           <div class="slds-backdrop slds-backdrop_open"></div>

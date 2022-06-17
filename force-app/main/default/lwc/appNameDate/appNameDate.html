@@ -8,11 +8,7 @@
             <lightning-input type="date" name="appDate" class='slds-size_2-of-6 slds-m-left_small'
                 label="Application Date" required onchange={setDate}></lightning-input>
         </div>
-        <!--footer on the top card here-->
-        <div class="slds-docked-form-footer">
-            <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
-            <button type="button" onclick={next} class="slds-button slds-button_brand">Next</button>
-        </div>
+
         <lightning-card variant='Narrow' title="Occurences">
             <div class="slds-grid slds-m-left_small">
                 <div class='slds-col slds-size_2-of-3 slds-m-around_x-small"'>
@@ -79,7 +75,11 @@
                     </div>
             
                 </template>
-            
         </lightning-card>
     </lightning-card>
+           <!-- footer on the top card here -->
+                            <!-- <div slot="footer" class="slds-docked-form-footer">
+                                <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
+                                <button type="button" onclick={next} class="slds-button slds-button_brand">Next</button>
+                            </div> -->
 </template>

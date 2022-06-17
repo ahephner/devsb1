@@ -1,4 +1,4 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
@@ -6,6 +6,7 @@ import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 import addApplication from '@salesforce/apex/addApp.addApplication';
 import addProducts from '@salesforce/apex/addApp.addProducts';
 import multiInsert from '@salesforce/apex/addApp.multiInsert';
+import {pref} from 'c/helper';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -26,7 +27,8 @@ export default class ProductTable extends LightningElement {
     numbApps;
     daysApart;
     customInsert = false; 
-    selectedProducts = []; 
+    currentStage = 'appInfo'
+   @track selectedProducts = []; 
 
     @wire(MessageContext)
         messageContext; 
@@ -69,7 +71,28 @@ export default class ProductTable extends LightningElement {
         disconnectedCallback(){
             this.unsubscribeFromMessageChannel(); 
         }
-
+        move(stage){
+            stage = this.currentStage;
+            switch(stage){
+                case 'appInfo':
+                    let go = this.template.querySelector('c-app-name-date').next();
+                    go ? this.currentStage = 'selectProd' : '';
+                    break;
+                case 'selectProd':
+                    console.log(3, this.currentStage)
+                    let ok = this.template.querySelector('c-app-select-prod').next();
+                    console.log({ok})
+                    ok ? this.currentStage = 'ratePrice' : ''
+                    console.log(4, this.currentStage)
+                    break;
+                case 'ratePrice':
+                    let final = this.template.querySelector('c-app-rate-price').save();
+                    console.log({final})
+                    final ? this.currentStage = 'appInfo': '';
+                    console.log(5, this.currentStage)
+                    break;
+            }
+        }
         //get area info for the product calculations
         handleArea(x){  
             areaInfo({ai:x})
@@ -110,39 +133,33 @@ export default class ProductTable extends LightningElement {
         
     }
 
-    //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
-    //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
-    pref = (areaUm, type)=>{ 
-        // eslint-disable-next-line no-return-assign
-        //console.log('areaUM '+areaUm+ ' type '+type);
-        
-        return areaUm ==='M' && type==='Dry' ?  'LB/M':
-        areaUm ==='M' && type==='Liquid' ?  'OZ/M':
-        areaUm ==='Acre' && type==='Dry' ?  'LB/Acre':
-        areaUm ==='Acre' && type==='Liquid' ?  'OZ/Acre':
-         ''
-    }
     //gathers products from appSelectProd then maps over to set values for the appRatePrice that are need for the math functions
     //the pref uses the above function to set the unit of measure automatically for the user
     gatherProducts(mess){
         this.productList = false;
         this.productRates = true; 
-         
-        this.selectedProducts = mess.detail.map(item=>{
+        
+        
+         this.selectedProducts = mess.detail.map(item=>{
+            
             return {...item,
-               Product__c: item.Id,  
+               Product__c: item.Product__c,
+               Product_Name__c: item.Name,   
                Rate2__c: 0,
                Application__c: '',
                Note__c: '' ,
-               Units_Required__c: '0',
-               Unit_Area__c: this.pref(this.areaUM, item.Product_Type__c),  
-               Unit_Price__c: "0",
-               Margin__c: "0", 
-               Total_Price__c: "0",
+               Units_Required__c: 1,
+               Unit_Area__c: pref(this.areaUM, item.Product_Type__c),  
+               Unit_Price__c: item.agency ? item.floorPrice : item.unitPrice,
+               Cost: item.unitCost, 
+               Margin__c: item.agency ? "" : item.margin, 
+               Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
+               size: item.size,
+               allowEdit: item.agency ? true : false,
                Area__c: ''
             }
         } );
-
+       
     }
     save(prod){ 
         this.selectedProducts = prod.detail; 

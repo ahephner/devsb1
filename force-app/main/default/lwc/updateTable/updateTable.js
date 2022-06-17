@@ -15,11 +15,12 @@ export default class UpdateTable extends LightningElement {
     loaded = false; 
     subscritption = null; 
     upProdTable = false;
-    addProduct = false; 
+    showButton = true; 
     appId; 
     selectedProducts = [];
     areaId;
     sqFt; 
+    buttonText = 'Save';
     @wire(MessageContext)
     messageContext; 
 //subscribe to message channel
@@ -44,6 +45,7 @@ export default class UpdateTable extends LightningElement {
         this.upProdTable = message.updateProd; 
         this.addProduct = message.addProd; 
         this.loaded = true;
+        this.buttonText = 'Save'
     }
 //life cycle hooks
     unsubscribeFromMessageChannel(){
@@ -80,22 +82,27 @@ wiredareaInfo({error,data}){
         this.areaId = data.fields.Area__c.value;   
     }
 }
-    handleProds(mess){
-        this.addProduct = false;
-        this.addPrice = true; 
-        this.selectedProducts = mess.detail.map(item=>{
-            return {...item, 
-               Rate2__c: 0,
-               Application__c: this.appId,
-               Note__c: '' ,
-               Units_Required__c: '0',
-               Unit_Area__c: '',  
-               Unit_Price__c: "0",
-               Margin__c: "0", 
-               Total_Price__c: "0",
-               Area__c: this.areaId
-            }
-        });    
+    addProducts(){
+        this.buttonText = 'Done';
+        this.showButton = false; 
+        this.template.querySelector('c-update-rate-price').addProducts();
+    }
+
+    handleNext(){
+        let txt = this.buttonText; 
+        switch (txt) {
+            case 'Save':
+                this.showButton = true; 
+                this.template.querySelector('c-update-rate-price').update();
+                break;
+            case 'Done':
+                this.showButton = true;
+                this.buttonText = 'Save';
+                this.template.querySelector('c-update-rate-price').closeAdd();
+                break
+            default:
+                break;
+        }
     }
 
     save(products){
@@ -131,5 +138,7 @@ wiredareaInfo({error,data}){
 
     closeModal(){
         this.updateExposed = false;  
+        this.showButton = true;
+        this.buttonText = 'Save'; 
     }
 }

@@ -4,7 +4,7 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-
+import { appTotal, alreadyAdded, pref } from 'c/helper';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -19,7 +19,8 @@ export default class UpdateRatePrice extends LightningElement {
     appTotalPrice;
     sqft
     area
-    
+    areaUM
+    addMore = false; 
     connectedCallback(){
         this.loadProducts();
         //console.log('calling') 
@@ -39,9 +40,12 @@ export default class UpdateRatePrice extends LightningElement {
         .then((resp)=>{
             //console.log('running '+resp);
             this.loaded = true; 
-            this.prodlist = resp;
-            // console.log('test ' +resp[0].Application__r.Name);
-            console.log(this.prodlist);
+            this.prodlist = resp.map(item =>{
+                let allowEdit = item.Product__r.Agency_Pricing__c ? item.Product__r.Agency_Pricing__c : item.Product__r.Agency_Pricing__c
+                return {...item, allowEdit}
+            });
+             //console.log(JSON.stringify(this.prodlist));
+            
             
             // resp.forEach(element => {
             //     console.log(element);
@@ -57,6 +61,7 @@ export default class UpdateRatePrice extends LightningElement {
             //console.log('areaId '+this.areaId);
             this.areaName = resp[0].Area__c
             this.appTotalPrice = resp[0].Application__r.Total_Price__c; 
+            this.areaUM = resp[0].Application__r.Area__r.Pref_U_of_M__c; 
             //console.log('type of total price '+ typeof resp[0].Total_Price__c);
             
             //console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
@@ -69,11 +74,18 @@ export default class UpdateRatePrice extends LightningElement {
             
         }).catch((error)=> {
             this.error = error;
-            console.log('error '+this.error);
+            console.log('error '+JSON.stringify(this.error));
             
         })
     }
-
+    @api
+    addProducts(){
+        this.addMore = true; 
+    }
+    @api
+    closeAdd(){
+        this.addMore = false; 
+    }
 //updating value functions below
         newAppName(e){
             this.appName = e.detail.value;
@@ -84,12 +96,12 @@ export default class UpdateRatePrice extends LightningElement {
         }
 
 //this will set the number of required units based on rate. 
-        unitsRequired = (uOFM, rate, areaS, unitS) => {
-            return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*areaS))/unitS) : Math.ceil(((rate*areaS)/unitS))
+        unitsRequired = (uOFM, rate, areaS, unitSize) => {
+            return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*areaS))/unitSize) : Math.ceil(((rate*areaS)/unitSize))
         }
 //get new rate for the product
         newRate(e){
-            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
             
             window.clearTimeout(this.delay);
              // eslint-disable-next-line @lwc/lwc/no-async-operation
@@ -100,6 +112,7 @@ export default class UpdateRatePrice extends LightningElement {
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
                     this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c )    
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2);
+                    this.appTotalPrice = appTotal(this.prodlist)
                     console.log('info = '+this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c);
                     
                 }
@@ -108,7 +121,7 @@ export default class UpdateRatePrice extends LightningElement {
            }
 
            handleUnitArea(e){
-            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
             console.log('index ' +index + ' detail '+e.detail.value );
             
             this.prodlist[index].Unit_Area__c = e.detail.value;
@@ -119,11 +132,11 @@ export default class UpdateRatePrice extends LightningElement {
             }
         }
 
-        appTotal = (t, nxt)=> (t+nxt).toFixed(2);
+        
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
             window.clearTimeout(this.delay);
-            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
 
             this.delay = setTimeout(()=>{
                 this.prodlist[index].Unit_Price__c = e.detail.value;
@@ -134,35 +147,34 @@ export default class UpdateRatePrice extends LightningElement {
                     this.prodlist[index].Margin__c = Number((1 - (this.prodlist[index].Product_Cost__c /this.prodlist[index].Unit_Price__c))*100).toFixed(2)
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                     
-                    this.appTotalPrice = this.prodlist.map(el=>Number(el.Total_Price__c)).reduce(this.appTotal)
+                    this.appTotalPrice = appTotal(this.prodlist)
                     console.log('newPrice if ' + this.appTotalPrice);
                 }else{
                     this.prodlist[index].Margin__c = 0;                
                     this.prodlist[index].Margin__c = this.prodlist[index].Margin__c.toFixed(2)
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                     //console.log(this.prodlist[index].Total_Price__c, 'here price');
-                    this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
+                    this.appTotalPrice = appTotal(this.prodlist)
                     console.log('price else '+ this.appTotalPrice);
                 }
                 }, 1000)
            }
            newMargin(m){
                 window.clearTimeout(this.delay)
-                    let index = this.prodlist.findIndex(prod => prod.Id === m.target.name)
+                    let index = this.prodlist.findIndex(prod => prod.Product_Code__c === m.target.name)
                     // eslint-disable-next-line @lwc/lwc/no-async-operation
                     this.delay = setTimeout(()=>{
                             this.prodlist[index].Margin__c = Number(m.detail.value);
                             if(1- this.prodlist[index].Margin__c/100 > 0){
                                 this.prodlist[index].Unit_Price__c = Number(this.prodlist[index].Product_Cost__c /(1- this.prodlist[index].Margin__c/100)).toFixed(2);
                                 this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
-                                this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
-                            console.log('margin if ' +this.appTotalPrice);
+                                this.appTotalPrice = appTotal(this.prodlist)
+                            
                             }else{
                                 this.prodlist[index].Unit_Price__c = 0;
                                 this.prodlist[index].Unit_Price__c = this.prodlist[index].Unit_Price__c.toFixed(2);
                                 this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)   
-                                this.appTotalPrice = this.prodlist.map(el=> Number(el.Total_Price__c)).reduce(this.appTotal)
-                                console.log('margin else ' +this.appTotalPrice);
+                                this.appTotalPrice = this.appTotalPrice = appTotal(this.prodlist)
                                 
                             }
                 },1500)
@@ -174,7 +186,7 @@ removeProd(x){
     if(cf === true){
         deleteRecord(row)
             .then(()=>{
-                let index = this.prodlist.findIndex(prod => prod.Id === row);
+                let index = this.prodlist.findIndex(prod => prod.Product_Code__c === row);
                 this.prodlist.splice(index, 1)
                 this.dispatchEvent(
                     new ShowToastEvent({
@@ -196,11 +208,45 @@ removeProd(x){
     }
     
 }
+//catch new prod
+listenNewProd(x){
+        const newProd = x.detail.rowProduct;
+        const alreadyThere = alreadyAdded(newProd, this.prodlist);
+        if(!alreadyThere){
+            this.handleNewProd(x)
+        }else{
+            return; 
+        }
+}
+
+handleNewProd(x){
+    //let passed = x.detail.rowProduct;
+    this.prodlist = [...this.prodlist,{
+        Id: '',
+        Product__c: x.detail.rowProduct,
+        Product_Name__c: x.detail.rowName,
+        Product_Code__c: x.detail.rowCode,   
+        Rate2__c: 0,
+        Application__c: this.updateAppId,
+        Note__c: '' ,
+        Units_Required__c: 1,
+        Unit_Area__c: pref(this.areaUM, x.detail.rowProdType),  
+        Unit_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
+        Product_Cost__c: x.detail.rowCost, 
+        Margin__c: x.detail.rowAgency ? "" : x.detail.rowMargin, 
+        Total_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
+        Product_Size__c: x.detail.rowSize,
+        allowEdit: x.detail.rowAgency ? true : false,
+        Area__c:  this.areaId
+
+    }]
+}
+
 
 //Update name and products
+    @api 
     update(){
         this.loaded = false;
-        console.log('name and date and id' +this.appName +' '+ this.appDate+' '+this.appId);
         
         let params = {
             appName: this.appName,
@@ -210,11 +256,10 @@ removeProd(x){
 
         updateApplication({wrapper: params, id:this.appId})
             .then(()=>{
-                let products = JSON.stringify(this.prodlist);
-                console.log('products '+ products);
-                
-                updateProducts({products:products})
-            }).then(()=>{
+               
+                updateProducts({products:this.prodlist})
+            }).then((mess)=>{
+                console.log('mess '+mess)
                 this.prodlist = [];
                 this.dispatchEvent(
                     new ShowToastEvent({

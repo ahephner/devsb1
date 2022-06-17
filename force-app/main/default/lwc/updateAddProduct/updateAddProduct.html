@@ -4,7 +4,7 @@
             alternative-text="Loading" 
             size="large"></lightning-spinner>
     </template>
-    <template if:true={loaded}> 
+    <template if:true={loaded}>
         <div class="slds-grid">
             <div class='slds-col slds-size_3-of-8'>
                 <lightning-input type="text" variant="standard" 
@@ -31,28 +31,22 @@
                 options={catOptions}
                 onchange={catChange} ></lightning-combobox>
             </div>
-            <div class='slds-col slds-size_1-of-8 slds-m-top_large slds-m-left_small'>   
-                <lightning-button variant="brand" label="Search" title="Search" onclick={search}></lightning-button>
+            <div class='slds-col slds-size_1-of-8 slds-m-top_large slds-m-left_small'>
+                <lightning-button-group>
+                    <lightning-button variant="brand" label="Search" title="Search" onclick={search}></lightning-button>
+                </lightning-button-group>   
             </div>
         </div>
         <div class='slds-grid'>
-            <div class='slds-col slds-size_2-of-3'>
+            <div class='slds-col slds-size_3-of-3'>
                 <lightning-datatable
                     key-field="Id"
                     data={prod}
                     hide-checkbox-column
-                    columns={columnsList}
-                    onrowaction={handleRowAction}>
+                    columns={columns}
+                    onrowaction={addLineItem}>
                 </lightning-datatable>
             </div>
-            <div class='slds-col slds-size_1-of-3'>
-                <c-app-selected-prod selection={selection}
-                                     onupdate={handleRemove}></c-app-selected-prod>
-            </div>
-    </div>
-    <!-- <div class="slds-docked-form-footer">
-        <button type="button" onclick={cancel} class="slds-button slds-button_neutral">Cancel</button>
-        <button type="button" onclick={next} class="slds-button slds-button_brand">Next</button>
-    </div> -->
+        </div>
     </template>
 </template>

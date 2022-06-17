@@ -18,6 +18,7 @@ private class test_appProduct {
      r1.Product_Status__c = 'Stock';
      r1.Average_Cost__c = 4.00; 
      r1.Product_Type__c = 'Liquid';
+     r1.Product_Family__c = 'FMC';
       
      r2.Product_Name__c='Product 2';
      r2.Primary_Category__c = 'Chemicals';
@@ -27,7 +28,8 @@ private class test_appProduct {
      r2.Product_Status__c = 'Stock';
      r2.Average_Cost__c = 3.00;
      r2.Product_Type__c = 'Liquid';
-      
+     r2.Product_Family__c = 'FMC'; 
+     
      r3.Product_Name__c='Product 3';
      r3.Primary_Category__c = 'Chemicals';
      r3.Subcategory__c ='Chemicals-Herbicide';
@@ -36,7 +38,7 @@ private class test_appProduct {
      r3.Product_Status__c = 'Stock';
      r3.Average_Cost__c = 2.00;
      r3.Product_Type__c = 'Liquid';
-      
+     r3.Product_Family__c = 'FMC'; 
      r4.Product_Name__c='Product 4';
      r4.Primary_Category__c = 'Chemicals';
      r4.Subcategory__c ='Chemicals-Fungicide';
@@ -149,9 +151,14 @@ private class test_appProduct {
     @istest
     static void testSearch(){
 	test.startTest();
-        list<product__c> x = appProduct.searchProduct();
+        list<product__c> prodSearch = appProduct.searchProduct('product', 'All', 'All');
+        list<product__c> searchCatSearch = appProduct.searchProduct('product', 'Chemicals-Herbicide', 'All');
+        list<product__c> searchFamSearch = appProduct.searchProduct('product', 'All', 'FMC');
+        list<product__c> catSearch = appProduct.searchProduct('null', 'Chemicals-Herbicide', 'All');
+        list<product__c> famSearch = appProduct.searchProduct('null', 'All', 'FMC');
+        list<product__c> prodFamSearch = appProduct.searchProduct('null', 'Chemicals-Herbicide', 'FMC');
      test.stopTest();
-        system.assertNotEquals(0, x.size());
+        system.assertNotEquals(0, prodSearch.size());
     }
     //here is how would test if we reverse and decide to pass params back to apex
   //  @isTest
