@@ -10,11 +10,32 @@ export default class Calculator extends LightningElement {
     prevNumb;
     curtText = 0;
     useSecond = false; 
+    eventListening; 
     // renderedCallback(){
     //     this.numberButtons = this.template.querySelectorAll('[data-number]');
     //     this.operationButtons = this.template.querySelectorAll('[data-operation]')
     // }
+    // connectedCallback(){
+    //     this.startEventListener(); 
+    // }
+    // startEventListener(){
+    //     if(!this.eventListening){
+    //         console.log('listening')
+    //         window.addEventListener('keydown', this.watchKeyDown,{
+    //             once:false,
+    //         }) 
+    //         this.eventListening = true; 
+    //     }
+    // }
+    // watchKeyDown = (event) => {
+    //     let key = event.key; 
+    //     console.log({key})
+    //  }
 
+    // endEventListener(){
+    //     this.eventListening = false; 
+    //     window.removeEventListener('keydown', this.watchKeyDown);
+    // }
     numbInput(e){
         if(!this.useSecond){
             this.curtText = this.curtText === 0 ? '' :this.curtText;
