@@ -4,7 +4,7 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-import { appTotal, alreadyAdded, pref } from 'c/helper';
+import { appTotal, alreadyAdded, pref } from 'c/programBuilderHelper';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 

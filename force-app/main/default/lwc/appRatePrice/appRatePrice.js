@@ -1,5 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
-import {appTotal} from 'c/helper';
+import {appTotal} from 'c/programBuilderHelper';
 export default class AppRatePrice extends LightningElement {
            @track data; 
            @api areaSize;
@@ -13,7 +13,7 @@ export default class AppRatePrice extends LightningElement {
            //need to make this private so we can edit this
            set selection(value){
                this.data = JSON.parse(JSON.stringify(value)); 
-                console.log('data ' +this.data);
+                console.log('data ' +JSON.stringify(this.data));
                 
            }
 //this will set the number of required units based on rate. 

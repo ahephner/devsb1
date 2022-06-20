@@ -6,7 +6,7 @@ import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 import addApplication from '@salesforce/apex/addApp.addApplication';
 import addProducts from '@salesforce/apex/addApp.addProducts';
 import multiInsert from '@salesforce/apex/addApp.multiInsert';
-import {pref} from 'c/helper';
+import {pref} from 'c/programBuilderHelper';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -139,7 +139,6 @@ export default class ProductTable extends LightningElement {
         this.productList = false;
         this.productRates = true; 
         
-        
          this.selectedProducts = mess.detail.map(item=>{
             
             return {...item,
@@ -156,7 +155,9 @@ export default class ProductTable extends LightningElement {
                Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
                size: item.size,
                allowEdit: item.agency ? true : false,
-               Area__c: ''
+               Area__c: '',
+               isFert: item.isFert,
+               galLb: item.galWeight
             }
         } );
        

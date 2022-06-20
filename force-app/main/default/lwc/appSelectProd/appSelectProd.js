@@ -110,10 +110,12 @@ export default class AppSelectProd extends LightningElement {
                 let Code = item.Product2.ProductCode;
                 let nVal = item.Product2.N__c;
                 let pVal = item.Product2.P__c;
-                let kVale = item.Product2.K__c;
+                let kVal = item.Product2.K__c;
+                let isFert = item.Product2.hasFertilizer__c;
+                let galWeight = item.Product2.X1_Gallon_Weight__c;
                 let Product_Status__c = item.Product2.Product_Status__c;
                 let Price = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
-                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price, nVal, pVal, kVale} 
+                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price, nVal, pVal, kVal, isFert, galWeight} 
 
             });
             console.log(JSON.stringify(this.prod))
@@ -155,6 +157,8 @@ export default class AppSelectProd extends LightningElement {
             const rowN = e.detail.row.nVal;
             const rowP = e.detail.row.pVal;
             const rowK = e.detail.row.kVal; 
+            const fert = e.detail.row.isFert; 
+            const galWeight = e.detail.row.galWeight;
             console.log(e.detail.Product2Id)
             if(rowAction ==='Add'){
                 let index = this.prod.findIndex(x => x.Id === rowId)
@@ -175,7 +179,9 @@ export default class AppSelectProd extends LightningElement {
                         nVal: rowN,
                         pVal: rowP,
                         kVal: rowK,
-                        size: rowSize
+                        size: rowSize,
+                        isFert: fert,
+                        galWeight: galWeight
                     }
                 ]  
                 this.prod = [...this.prod]
