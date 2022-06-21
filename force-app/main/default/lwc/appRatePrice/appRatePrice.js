@@ -1,10 +1,13 @@
 import { LightningElement, api, track } from 'lwc';
-import {appTotal} from 'c/programBuilderHelper';
+import {appTotal, calcDryFert, calcLiqFert} from 'c/programBuilderHelper';
 export default class AppRatePrice extends LightningElement {
            @track data; 
            @api areaSize;
            appTotalPrice;  
            loaded = true; 
+           appTotalN = 0
+           appTotalP = 0
+           appTotalK = 0
            
            @api 
            get selection(){
@@ -28,14 +31,19 @@ export default class AppRatePrice extends LightningElement {
              // eslint-disable-next-line @lwc/lwc/no-async-operation
             this.delay = setTimeout(()=>{
                 this.data[index].Rate2__c = e.detail.value;
-                console.log('ua '+this.data[index].Unit_Area__c);
                 
                 if(this.data[index].Unit_Area__c != '' && this.data[index].Unit_Area__c != null){
                     this.data[index].Units_Required__c = this.unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size )    
                     this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2);
                     this.appTotalPrice = appTotal(this.data)
                     console.log('info = '+this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size);
-                    
+                    if(this.data[index].isFert){
+                        let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);
+                        
+                        this.appTotalN = fert.n;
+                        this.appTotalP = fert.p;
+                        this.appTotalK = fert.k; 
+                    } 
                 }
                 
             },500 ) 
@@ -47,10 +55,10 @@ export default class AppRatePrice extends LightningElement {
                
                this.data[index].Unit_Area__c = e.detail.value;
                
-               if(this.data[index].Rate2__c > 0){
-                this.data[index].Units_Required__c = this.unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size );
-                thi .data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
-               }
+            //    if(this.data[index].Rate2__c > 0){
+            //     this.data[index].Units_Required__c = this.unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size );
+            //     thi .data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+            //    }
            }
 
 //Pricing 
