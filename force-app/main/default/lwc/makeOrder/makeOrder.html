@@ -1,0 +1,51 @@
+<template>
+    
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" 
+        aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container">
+              <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeMe}>
+                  <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                  <span class="slds-assistive-text slds-button__icon slds-button__icon_large slds-button_icon-inverse">Close</span>
+                </button>
+                <h5 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Select Applications</h5>
+              </header>
+<!--this is the search info for products. Needs moved to appProductList comp-->
+              <div class="slds-modal__content slds-p-around_medium  prodBody" id="modal-content-id-1">
+                <template if:true={loaded}>
+                        <lightning-datatable
+                        key-field="Id"
+                        data={data}
+                        columns={columns}
+                        sorted-by={sortBy}
+                        sorted-direction={sortDirection}
+                        onsort={handleSortdata}
+                        onrowselection={getSelectedApp}>
+                </lightning-datatable>
+                </template>
+                <template if:false={loaded}>
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_1-of-4">
+                            <!-- <p>It can take a couple of minutes to convert depending the on the size of the program. We will give you a link once we are done!</p> -->
+                            <p><b>FYI NOT FULLY HOOKED UP YET</b></p>
+                        </div>
+                        <div class="slds-col slds-size_2-of-4 loader">Loading...</div>
+                    </div>
+                </template>
+            </div>
+              <footer class="slds-modal__footer ">
+                <div class="btnGroup">
+                  <button class="slds-button slds-button_neutral" onclick={closeMe}>Cancel</button>
+                  <button class="slds-button slds-button_brand" onclick={convert}>Save</button>
+                </div>
+              </footer>
+            </div>
+          </section>
+          <div class="slds-backdrop slds-backdrop_open"></div>
+    <!-- <lightning-card  variant="Narrow"  title="Products" icon-name="standard:account">
+        <lightning-input type="text" variant="standard" name="search" 
+        label="Product" placeholder="type here..."
+        onchange={searchProd}
+        value={searchKey}></lightning-input>
+    </lightning-card> -->
+</template>

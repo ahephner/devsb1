@@ -1,4 +1,8 @@
 <template>
+    <template if:true={showOrder}>
+        <c-make-order onclose={closeOrder}
+                      apps={appList}></c-make-order>
+    </template>
     <lightning-card  variant="Narrow"  title="Applications" icon-name="utility:note"> 
         <div class="slds-grid  slds-wrap">
             <template if:false={loaded}>
@@ -22,12 +26,15 @@
                             options={areaOptions}
                             onchange={selectArea} ></lightning-combobox>
                     </div>
-                    <template if:true={getCopy}>
-                        <div class="slds-col slds-size_1-of-3 slds-m-bottom_none slds-m-top_large">
-                            <lightning-button variant="success" label="Get Customer Copy" title="Successful action"
-                            onclick={createPDF} class="slds-m-left_small"></lightning-button>
-                        </div>
-                    </template>
+                    <lightning-button-group class="slds-col slds-size_1-of-3 slds-m-bottom_none slds-m-top_large">
+                            <lightning-button variant="destructive" label="Make Order" title="Make Order"
+                            onclick={makeOrder} class="slds-m-left_small"></lightning-button>
+                        
+                        <template if:true={getCopy}>
+                                <lightning-button variant="success" label="Get Customer Copy" title="Successful action"
+                                onclick={createPDF}></lightning-button>
+                        </template>
+                    </lightning-button-group>
                     <!-- This is the actual table -->
                     <div class="slds-col slds-size_1-of-1 slds-m-top_none">
                     <lightning-datatable

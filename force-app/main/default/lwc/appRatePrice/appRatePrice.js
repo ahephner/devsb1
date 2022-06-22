@@ -16,7 +16,7 @@ export default class AppRatePrice extends LightningElement {
            //need to make this private so we can edit this
            set selection(value){
                this.data = JSON.parse(JSON.stringify(value)); 
-                console.log('data ' +JSON.stringify(this.data));
+                //console.log('data ' +JSON.stringify(this.data));
                 
            }
 

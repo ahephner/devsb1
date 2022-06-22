@@ -159,7 +159,7 @@ export default class UpdateAddProduct extends LightningElement {
                         galWeight: e.detail.row.galWeight,
                         rowType: e.detail.row.Product_Type__c
                     } 
-console.log(newProd);
+
 
         if(rowAction === 'Add'){
             let index = this.prod.findIndex(x => x.Id === prodId)
