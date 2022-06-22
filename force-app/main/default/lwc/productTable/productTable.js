@@ -79,17 +79,14 @@ export default class ProductTable extends LightningElement {
                     go ? this.currentStage = 'selectProd' : '';
                     break;
                 case 'selectProd':
-                    console.log(3, this.currentStage)
                     let ok = this.template.querySelector('c-app-select-prod').next();
                     console.log({ok})
                     ok ? this.currentStage = 'ratePrice' : ''
-                    console.log(4, this.currentStage)
                     break;
                 case 'ratePrice':
                     let final = this.template.querySelector('c-app-rate-price').save();
                     console.log({final})
                     final ? this.currentStage = 'appInfo': '';
-                    console.log(5, this.currentStage)
                     break;
             }
         }
@@ -115,6 +112,7 @@ export default class ProductTable extends LightningElement {
         this.dateName = false;
         this.productList = false; 
         this.productRates = false; 
+        this.currentStage = 'appInfo'; 
     }
     nextProdList(){
         this.dateName = false;

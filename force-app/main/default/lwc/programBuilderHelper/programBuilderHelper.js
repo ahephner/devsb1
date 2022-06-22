@@ -1,9 +1,12 @@
 const hold = () => console.log('hey');
 
 const appTotal = (prod) =>{
+  console.log(1,prod)
     let total = prod.reduce((a, b)=>{
         return Number(a + (b.Unit_Price__c * b.Units_Required__c))
     }, 0)
+    console.log(2,total);
+    
     total = roundRate(total, 2)
     return total; 
 }
@@ -13,7 +16,10 @@ const alreadyAdded = (newId, list) =>{
     let found = index < 0 ? false : true;
     return found;
 }
-
+//this will set the number of required units based on rate. 
+const unitsRequired = (uOFM, rate, areaS, unitS) => {
+  return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*(areaS/1000)))/unitS) : Math.ceil(((rate*(areaS/1000))/unitS))
+}
  //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
 //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
 const pref = (areaUm, type)=>{ 
@@ -27,7 +33,7 @@ const pref = (areaUm, type)=>{
 
 //const calcDryFert = (numRate,rateType, nit, phos, pot) =>{
 const calcDryFert = (numRate,item) =>{   
-  let x = item;     
+  let x = item; 
   let n = x.nVal > 0 ? x.nVal/100 : 0;
   let p = x.pVal > 0 ? x.pVal/100 : 0; 
   let k = x.kVal > 0 ? x.kVal/100 : 0; 
@@ -73,7 +79,7 @@ const roundRate = (numb, places) =>{
 }
 
 
-export{hold, appTotal, alreadyAdded, pref, calcDryFert, calcLiqFert}
+export{hold, appTotal, alreadyAdded, pref, calcDryFert, calcLiqFert, unitsRequired, roundRate}
 
  
 // let n = calcDFert(prod.Rate2__c, prod.Unit_Area__c, areaSize, prod.nVal, prod.pVal, prod.kVal)

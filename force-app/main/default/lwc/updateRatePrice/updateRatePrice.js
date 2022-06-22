@@ -4,7 +4,7 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-import { appTotal, alreadyAdded, pref } from 'c/programBuilderHelper';
+import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired } from 'c/programBuilderHelper';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -21,6 +21,9 @@ export default class UpdateRatePrice extends LightningElement {
     area
     areaUM
     addMore = false; 
+    appTotalN;
+    appTotalP;
+    appTotalK;
     connectedCallback(){
         this.loadProducts();
         //console.log('calling') 
@@ -42,9 +45,14 @@ export default class UpdateRatePrice extends LightningElement {
             this.loaded = true; 
             this.prodlist = resp.map(item =>{
                 let allowEdit = item.Product__r.Agency_Pricing__c ? item.Product__r.Agency_Pricing__c : item.Product__r.Agency_Pricing__c
-                return {...item, allowEdit}
+                let nVal = item.Product__r.N__c;
+                let pVal = item.Product__r.P__c;
+                let kVal = item.Product__r.K__c;
+                let isFert = item.Product__r.hasFertilizer__c;
+                let galLb = item.Product__r.X1_Gallon_Weight__c
+                return {...item, allowEdit, nVal, pVal, kVal, isFert, galLb}
             });
-             //console.log(JSON.stringify(this.prodlist));
+             console.log(JSON.stringify(this.prodlist));
             
             
             // resp.forEach(element => {
@@ -95,10 +103,7 @@ export default class UpdateRatePrice extends LightningElement {
             this.appDate = e.detail.value; 
         }
 
-//this will set the number of required units based on rate. 
-        unitsRequired = (uOFM, rate, areaS, unitSize) => {
-            return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*areaS))/unitSize) : Math.ceil(((rate*areaS)/unitSize))
-        }
+
 //get new rate for the product
         newRate(e){
             let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
@@ -110,11 +115,16 @@ export default class UpdateRatePrice extends LightningElement {
                 console.log('ua '+this.prodlist[index].Unit_Area__c);
                 
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
-                    this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c )    
+                    this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c )    
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2);
                     this.appTotalPrice = appTotal(this.prodlist)
-                    console.log('info = '+this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c);
-                    
+                   console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSize,4, this.prodlist[index].Product_Size__c)
+                    if(this.prodlist[index].isFert){
+                        let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
+                        this.appTotalN = fert.n;
+                        this.appTotalP = fert.p;
+                        this.appTotalK = fert.k
+                    }
                 }
                 
             },500 ) 
@@ -127,7 +137,7 @@ export default class UpdateRatePrice extends LightningElement {
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
             if(this.prodlist[index].Rate2__c > 0){
-             this.prodlist[index].Units_Required__c = this.unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c );
+             this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c );
              this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
             }
         }
@@ -237,7 +247,13 @@ handleNewProd(x){
         Total_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
         Product_Size__c: x.detail.rowSize,
         allowEdit: x.detail.rowAgency ? true : false,
-        Area__c:  this.areaId
+        Area__c:  this.areaId,
+        nVal: x.detail.rowN,
+        pVal: x.detail.rowP,
+        kVal: x.detail.rowK,
+        isFert: x.detail.isFert,
+        galLb: x.galWeight,
+        Product_Type__c: x.detail.rowType
 
     }]
 }

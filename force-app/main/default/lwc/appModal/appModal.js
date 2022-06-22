@@ -9,13 +9,14 @@ import ACRE_FIELD from '@salesforce/schema/Area__c.Area_Acres__c';
 import TYPE_FIELD from '@salesforce/schema/Area__c.Type__c';  
 import PROGRAM_FIELD from '@salesforce/schema/Area__c.Program__c';  
 import PREFUOFM from '@salesforce/schema/Area__c.Pref_U_of_M__c'; 
-
+import {roundRate} from 'c/programBuilderHelper';
 export default class AppModal extends LightningElement {
     openAppModal = false; 
     note;
     areaName;
     areaDate
-    areaAcres
+    areaAcres = 0
+    feet = 0
     areaType;
     areaId;
     proId;
@@ -60,12 +61,14 @@ export default class AppModal extends LightningElement {
     }
     newFeet(e){
         this.feet = e.detail.value;
-        this.areaAcres = this.feet/43.56
+        this.areaAcres = this.feet/43560
+        this.areaAcres = roundRate(this.areaAcres, 3); 
+        console.log(this.areaAcres)
         
     }
     newAcre(e){
         this.areaAcres = e.detail.value; 
-        this.feet = this.areaAcres * 43.56; 
+        this.feet = this.areaAcres * 43560; 
                     
     }
     newType(e){
