@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import insertOpp from '@salesforce/apex/programToOpportunity.createOpp';
+import insertProd from '@salesforce/apex/programToOpportunity.createOppProduct';
 const columns = [
     { label: 'Name', fieldName: 'Name' },
     { label: 'Area', fieldName: 'Area_Name__c', sortable: "true" },
@@ -20,6 +21,8 @@ export default class MakeOrder extends LightningElement {
     totalprice = 0.00
     link;
     softLoad;
+    msg; 
+    sliderValue;
     connectedCallback(){
         this.data = [...this.apps]
         console.log(this.recordId)
@@ -44,8 +47,16 @@ export default class MakeOrder extends LightningElement {
     }
     async convert(){
         this.loaded = false; 
+        this.msg = 'Gathering Info'
+        this.sliderValue = 25;
         let orders = this.getDetails();
-        let opp = await insertOpp({progId: this.recordId, appId:orders})
+        this.sliderValue = 50;
+        this.msg = 'Saving Header Info'
+        let opp = await insertOpp({progId: this.recordId})
+        this.sliderValue = 75;
+        this.msg = 'Saving Product Info';
+        let saveProd = await insertProd({oppId: opp, appIds:orders})
+        this.sliderValue = 100; 
         this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view` 
         this.softLoad = true    
         }

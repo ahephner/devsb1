@@ -35,9 +35,16 @@
                     <div class="slds-grid">
                         <div class="slds-col slds-size_1-of-4">
                             <!-- <p>It can take a couple of minutes to convert depending the on the size of the program. We will give you a link once we are done!</p> -->
-                            <p><b>FYI NOT FULLY HOOKED UP YET</b></p>
+                            <p><b>FYI NOT FULLY HOOKED UP YET: Currently I am working on {msg}</b></p>
                         </div>
-                        <div class="slds-col slds-size_2-of-4 loader">Loading...</div>
+                        <!-- <div class="slds-col slds-size_2-of-4 loader">Loading...</div> -->
+                        <div class="slds-col slds-size_2-of-4">
+                          <lightning-progress-ring
+                          value={sliderValue}
+                          direction='fill'
+                          variant="base-autocomplete"
+                      ></lightning-progress-ring>
+                        </div>
                     </div>
                   </template>
                   <template if:true={softLoad}>
