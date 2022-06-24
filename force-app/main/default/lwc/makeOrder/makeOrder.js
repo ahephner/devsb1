@@ -1,8 +1,14 @@
 import { LightningElement, api, track } from 'lwc';
+import insertOpp from '@salesforce/apex/programToOpportunity.createOpp';
 const columns = [
     { label: 'Name', fieldName: 'Name' },
     { label: 'Area', fieldName: 'Area_Name__c', sortable: "true" },
-    { label: 'Date', fieldName: 'Date__c', sortable: "true"}
+    { label: 'Date', fieldName: 'Date__c', sortable: "true"},
+    {label: 'Total Price', 
+    fieldName:'Total_Price_ap__c', 
+    type:'currency',
+    sortable:'true',
+    cellAttributes: { alignment: 'center' }}
 ]
 export default class MakeOrder extends LightningElement {
     @api recordId
@@ -11,9 +17,19 @@ export default class MakeOrder extends LightningElement {
     @track selection;
     loaded = true; 
     columns = columns; 
+    totalprice = 0.00
+    link;
+    softLoad;
+    connectedCallback(){
+        this.data = [...this.apps]
+        console.log(this.recordId)
+    }
+    
     getSelectedApp(e){
         this.selection = e.detail.selectedRows
-        console.log(JSON.stringify(this.selection))
+        this.totalprice = this.selection.reduce((x,y)=>{
+            return x + y.Total_Price_ap__c; 
+        },0)
 
     }
     
@@ -23,16 +39,16 @@ export default class MakeOrder extends LightningElement {
         for(let i = 0; i<this.selection.length; i++){
             toOrder.push(this.selection[i].Id);
         }
+        console.log(toOrder)
         return toOrder; 
     }
     async convert(){
         this.loaded = false; 
-        let orders = await this.getDetails();
-        console.log(orders)    
+        let orders = this.getDetails();
+        let opp = await insertOpp({progId: this.recordId, appId:orders})
+        this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view` 
+        this.softLoad = true    
         }
-    connectedCallback(){
-        this.data = [...this.apps]
-    }
     // @api
     // get apps(){
     //     return this.data; 

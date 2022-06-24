@@ -21,6 +21,11 @@ const columns = [
     { label: 'Name', fieldName: 'Name' },
     { label: 'Area', fieldName: 'Area_Name__c', sortable: "true" },
     { label: 'Date', fieldName: 'Date__c', sortable: "true"},
+    {label: 'Total Price', 
+    fieldName:'Total_Price_ap__c', 
+    type:'currency',
+    sortable:'true',
+    cellAttributes: { alignment: 'left' }},
 
     {
         type: 'action',

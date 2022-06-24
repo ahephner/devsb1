@@ -1,7 +1,8 @@
 <template>
     <template if:true={showOrder}>
         <c-make-order onclose={closeOrder}
-                      apps={appList}></c-make-order>
+                      apps={appList}
+                      record-id={recordId}></c-make-order>
     </template>
     <lightning-card  variant="Narrow"  title="Applications" icon-name="utility:note"> 
         <div class="slds-grid  slds-wrap">

@@ -22,11 +22,11 @@ const columnsList = [
     cellAttributes: {
         style: 'transform: scale(0.75)'}
     },
-    {label: 'Name', fieldName:'Name', cellAttributes:{alignment:'left'}},
-    {label: 'Code', fieldName:'Code', cellAttributes:{alignment:'center'}},
-    {label: 'Status', fieldName:'Product_Status__c', cellAttributes:{alignment:'center'}},
+    {label: 'Name', fieldName:'Name', cellAttributes:{alignment:'left'}, "initialWidth": 418},
+    {label: 'Code', fieldName:'Code', cellAttributes:{alignment:'center'}, "initialWidth": 134},
+    {label: 'Status', fieldName:'Product_Status__c', cellAttributes:{alignment:'center'}, "initialWidth": 78},
     {label: 'Suggested Price', fieldName:'Price', 
-    type:'currency', cellAttributes:{alignment:'center'}},
+    type:'currency', cellAttributes:{alignment:'center'}, "initialWidth": 194},
 ]
 export default class AppSelectProd extends LightningElement {
     @track loaded = false; 

@@ -13,6 +13,8 @@
 <!--this is the search info for products. Needs moved to appProductList comp-->
               <div class="slds-modal__content slds-p-around_medium  prodBody" id="modal-content-id-1">
                 <template if:true={loaded}>
+                  <div class="slds-grid">
+                    <div class="slds-col slds-size_2-of-3">
                         <lightning-datatable
                         key-field="Id"
                         data={data}
@@ -21,9 +23,15 @@
                         sorted-direction={sortDirection}
                         onsort={handleSortdata}
                         onrowselection={getSelectedApp}>
-                </lightning-datatable>
+                        </lightning-datatable>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3 slds-m-left_small slds-text-heading_small">
+                       Total Selected Price: <lightning-formatted-number value={totalprice} format-style="currency" currency-code="USD"></lightning-formatted-number>
+                    </div>
+                  </div>
                 </template>
                 <template if:false={loaded}>
+                  <template if:false={softLoad}>
                     <div class="slds-grid">
                         <div class="slds-col slds-size_1-of-4">
                             <!-- <p>It can take a couple of minutes to convert depending the on the size of the program. We will give you a link once we are done!</p> -->
@@ -31,6 +39,10 @@
                         </div>
                         <div class="slds-col slds-size_2-of-4 loader">Loading...</div>
                     </div>
+                  </template>
+                  <template if:true={softLoad}>
+                    <p>Successfully saved opportunity. Click =></p><a href={link} target='_blank'>Link to new opportunity</a> 
+                  </template>
                 </template>
             </div>
               <footer class="slds-modal__footer ">
