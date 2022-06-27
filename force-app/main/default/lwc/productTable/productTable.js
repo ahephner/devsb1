@@ -6,7 +6,7 @@ import areaInfo from '@salesforce/apex/appProduct.areaInfo';
 import addApplication from '@salesforce/apex/addApp.addApplication';
 import addProducts from '@salesforce/apex/addApp.addProducts';
 import multiInsert from '@salesforce/apex/addApp.multiInsert';
-import {pref} from 'c/helper';
+import {pref} from 'c/programBuilderHelper';
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -79,17 +79,14 @@ export default class ProductTable extends LightningElement {
                     go ? this.currentStage = 'selectProd' : '';
                     break;
                 case 'selectProd':
-                    console.log(3, this.currentStage)
                     let ok = this.template.querySelector('c-app-select-prod').next();
                     console.log({ok})
                     ok ? this.currentStage = 'ratePrice' : ''
-                    console.log(4, this.currentStage)
                     break;
                 case 'ratePrice':
                     let final = this.template.querySelector('c-app-rate-price').save();
                     console.log({final})
                     final ? this.currentStage = 'appInfo': '';
-                    console.log(5, this.currentStage)
                     break;
             }
         }
@@ -115,6 +112,7 @@ export default class ProductTable extends LightningElement {
         this.dateName = false;
         this.productList = false; 
         this.productRates = false; 
+        this.currentStage = 'appInfo'; 
     }
     nextProdList(){
         this.dateName = false;
@@ -139,7 +137,6 @@ export default class ProductTable extends LightningElement {
         this.productList = false;
         this.productRates = true; 
         
-        
          this.selectedProducts = mess.detail.map(item=>{
             
             return {...item,
@@ -156,7 +153,9 @@ export default class ProductTable extends LightningElement {
                Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
                size: item.size,
                allowEdit: item.agency ? true : false,
-               Area__c: ''
+               Area__c: '',
+               isFert: item.isFert,
+               galLb: item.galWeight
             }
         } );
        

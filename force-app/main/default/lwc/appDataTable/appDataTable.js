@@ -21,6 +21,11 @@ const columns = [
     { label: 'Name', fieldName: 'Name' },
     { label: 'Area', fieldName: 'Area_Name__c', sortable: "true" },
     { label: 'Date', fieldName: 'Date__c', sortable: "true"},
+    {label: 'Total Price', 
+    fieldName:'Total_Price_ap__c', 
+    type:'currency',
+    sortable:'true',
+    cellAttributes: { alignment: 'left' }},
 
     {
         type: 'action',
@@ -42,6 +47,7 @@ export default class AppDataTable extends LightningElement {
     getCopy = false; 
     subscription= null;   
     loaded = false
+    showOrder = false; 
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
@@ -229,7 +235,13 @@ export default class AppDataTable extends LightningElement {
             
         })
     }
+ makeOrder(){
+    this.showOrder = true; 
+ }
 
+ closeOrder(){
+    this.showOrder = false; 
+ }
  //handle table sorting sorting
  //Grabbed this from a salesforce example
  handleSortdata(event) {
