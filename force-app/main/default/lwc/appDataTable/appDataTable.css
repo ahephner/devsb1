@@ -2,3 +2,9 @@
     display: flex;
     font-weight: bolder;
 }
+
+.hangRight{
+    float: right;
+    margin-right: 2%;
+    margin-top: -2%
+}

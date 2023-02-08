@@ -1,11 +1,11 @@
 const hold = () => console.log('hey');
 
 const appTotal = (prod) =>{
-  console.log(1,prod)
+ 
     let total = prod.reduce((a, b)=>{
         return Number(a + (b.Unit_Price__c * b.Units_Required__c))
     }, 0)
-    console.log(2,total);
+    
     
     total = roundRate(total, 2)
     return total; 
@@ -78,22 +78,21 @@ const roundRate = (numb, places) =>{
     return +(Math.round(numb + `e+${places}`) + `e-${places}`)
 }
 
+const onLoadTotalPrice = (data)=>{
+  let total= data.reduce((x, y)=>{
+                return x + y.Total_Price_ap__c;
+          }, 0);
+      return total; 
+}
 
-export{hold, appTotal, alreadyAdded, pref, calcDryFert, calcLiqFert, unitsRequired, roundRate}
+export{hold, 
+      appTotal, 
+      alreadyAdded, 
+      pref, 
+      calcDryFert, 
+      calcLiqFert, 
+      unitsRequired, 
+      roundRate, 
+      onLoadTotalPrice}
 
  
-// let n = calcDFert(prod.Rate2__c, prod.Unit_Area__c, areaSize, prod.nVal, prod.pVal, prod.kVal)
-
-// //console.log(Array.isArray(n))
-// //console.log(n[0])
-
-// //liquid
-// let liquid = {"Id":"01u2M00000ZBLpJQAX","Name":"FOLIAR-PAK BIO 12-6-6","Product__c":"01t2M0000062XyvQAE","unitPrice":117.28,"floorPrice":69.42,"unitCost":33.32,"margin":71.59,"agency":false,"nVal":11,"pVal":0,"kVal":11,"size":320,"isFert":true,"galWeight":10.58,"Product_Name__c":"FOLIAR-PAK BIO 12-6-6","Rate2__c":6,"Application__c":"","Note__c":"","Units_Required__c":1,"Unit_Area__c":"LB/Acre","Unit_Price__c":117.28,"Cost":33.32,"Margin__c":71.59,"Total_Price__c":117.28,"allowEdit":false,"Area__c":"","galLb":10.4}
-
-
-
-
-
-// const test = calcLFert(liquid.Rate2__c, liquid.Unit_Area__c, areaSize, liquid.nVal, liquid.pVal, liquid.kVal, liquid.galLb)
-
-// console.log(test[0])

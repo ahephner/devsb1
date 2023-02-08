@@ -22,7 +22,14 @@
                         <lightning-icon icon-name="utility:note" alternative-text="note" title="icon"></lightning-icon>
                         <p class="slds-m-left_x-small">Applications</p>
                     </div>
-                    <div class="slds-col slds-size_1-of-2">box 2</div>
+                    <div class="slds-col slds-size_1-of-2 ">
+                        <div class="hangRight">
+                            <p>Program Name: {programName}</p>
+                            <p>Customer Name: {customerName}</p>
+                            <p>Total Price:<lightning-formatted-number value={totalPrice} 
+                                            format-style="currency" currency-code="USD"></lightning-formatted-number></p>
+                        </div>
+                    </div>
                     <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
                             <lightning-combobox
                             name='box'
