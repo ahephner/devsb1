@@ -10,3 +10,7 @@
 .reqUnits{
     padding-left: 10%;
 }
+
+.point{
+    cursor: pointer;
+}

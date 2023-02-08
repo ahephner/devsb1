@@ -148,7 +148,7 @@ export default class ProductTable extends LightningElement {
                Units_Required__c: 1,
                Unit_Area__c: pref(this.areaUM, item.Product_Type__c),  
                Unit_Price__c: item.agency ? item.floorPrice : item.unitPrice,
-               Cost: item.unitCost, 
+               Product_Cost__c: item.unitCost, 
                Margin__c: item.agency ? "" : item.margin, 
                Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
                size: item.size,

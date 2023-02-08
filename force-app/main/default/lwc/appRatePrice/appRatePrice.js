@@ -8,7 +8,7 @@ export default class AppRatePrice extends LightningElement {
            appTotalN = 0
            appTotalP = 0
            appTotalK = 0
-           
+           measure = 'M'
            @api 
            get selection(){
             return this.data;
@@ -74,7 +74,7 @@ export default class AppRatePrice extends LightningElement {
                     //console.log(typeof this.data[index].Unit_Price__c +' unit Type');          
                         
                         if(this.data[index].Unit_Price__c > 0){
-                        this.data[index].Margin__c = Number((1 - (this.data[index].Cost /this.data[index].Unit_Price__c))*100).toFixed(2)
+                        this.data[index].Margin__c = Number((1 - (this.data[index].Product_Cost__c /this.data[index].Unit_Price__c))*100).toFixed(2)
                         this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
                         
                        this.appTotalPrice = appTotal(this.data)
@@ -96,7 +96,7 @@ export default class AppRatePrice extends LightningElement {
                     this.delay = setTimeout(()=>{
                             this.data[index].Margin__c = Number(m.detail.value);
                             if(1- this.data[index].Margin__c/100 > 0){
-                                this.data[index].Unit_Price__c = Number(this.data[index].Cost /(1- this.data[index].Margin__c/100)).toFixed(2);
+                                this.data[index].Unit_Price__c = Number(this.data[index].Product_Cost__c /(1- this.data[index].Margin__c/100)).toFixed(2);
                                 this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
                                 this.appTotalPrice = appTotal(this.data);
                             console.log('margin if ' +this.appTotalPrice);
@@ -143,12 +143,17 @@ export default class AppRatePrice extends LightningElement {
                return true;
            }
 
+//Update Pricing and Fertility info displayed to per M or per Acre
+           updateMeasure(){
+            this.measure = this.measure === 'M' ? 'Acre' : 'M';
+           }
+
            cancel(){
                this.dispatchEvent(new CustomEvent('cancel'))
            }
            prodInfo(){
-            console.log(this.selection.length);
-            console.log('areaSize '+ this.areaSize);
+            //console.log(this.selection.length);
+            //console.log('areaSize '+ this.areaSize);
             
             for(let i=0;i<this.selection.length;i++){
                 console.log(this.selection[i])

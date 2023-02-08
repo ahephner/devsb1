@@ -51,7 +51,10 @@
                 </div>
                 <div class='slds-col slds-size_2-of-12'>
                     <h1 class='slds-text-heading_medium'>App Total: ${appTotalPrice}</h1>
-                    <h5>Fertility Info: Per M </h5>
+                    <h3><span class='point' onclick={updateMeasure}>
+                        Per: {measure}
+                    </span></h3>
+                    <h5>Fertility Info: </h5>
                     <ul>
                         <li>N:{appTotalN}</li>
                         <li>P:{appTotalP}</li>

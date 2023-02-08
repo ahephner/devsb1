@@ -207,6 +207,8 @@ export default class AppDataTable extends LightningElement {
 
 //This function calls the apex class that attaches the customer copy to the program 
  createPDF(){
+    console.log('ai', this.areaId);
+    
      this.loaded = false; 
     savePDF_File({Id: this.areaId, appId: this.recordId})
         .then(()=>{

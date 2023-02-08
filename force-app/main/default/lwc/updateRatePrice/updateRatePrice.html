@@ -68,7 +68,10 @@
         </div>
         <div class='slds-col slds-size_3-of-12'>
             <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
-                    <h5>Fertility Info Per M:</h5>
+            <h3><span class='hover' onclick={updateMeasure}>
+                Per: {measure}
+            </span></h3>
+            <h5>Fertility Info: </h5>
                     <ul>
                         <li>N:{appTotalN}</li>
                         <li>P:{appTotalP}</li>

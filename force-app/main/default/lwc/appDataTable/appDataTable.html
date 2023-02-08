@@ -4,7 +4,7 @@
                       apps={appList}
                       record-id={recordId}></c-make-order>
     </template>
-    <lightning-card  variant="Narrow"  title="Applications" icon-name="utility:note"> 
+    <lightning-card> 
         <div class="slds-grid  slds-wrap">
             <template if:false={loaded}>
                 <div class="exampleHolder">
@@ -18,6 +18,11 @@
                 </div> -->
                 <!-- add slds-m-left_small if add back in search terms -->
                 <template if:true={loaded}>
+                    <div class="slds-col slds-size_1-of-2 head">
+                        <lightning-icon icon-name="utility:note" alternative-text="note" title="icon"></lightning-icon>
+                        <p class="slds-m-left_x-small">Applications</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">box 2</div>
                     <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
                             <lightning-combobox
                             name='box'

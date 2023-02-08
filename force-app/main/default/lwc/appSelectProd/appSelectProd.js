@@ -89,17 +89,18 @@ export default class AppSelectProd extends LightningElement {
       }
       pfChange(event){
           this.pf = event.detail.value;
-          console.log(this.pf);
+          this.search(); 
            
       }
   
       catChange(e){
           this.cat = e.detail.value; 
+          this.search(); 
       }
 
       search(){
         this.loaded = false; 
-       console.log('sk '+this.searchKey); 
+       //console.log('sk '+this.searchKey); 
         searchProduct({searchKey: this.searchKey, cat: this.cat, family: this.pf })
         .then((result) => {
             this.prod = result.map(item=>{
@@ -118,7 +119,7 @@ export default class AppSelectProd extends LightningElement {
                 return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price, nVal, pVal, kVal, isFert, galWeight} 
 
             });
-            console.log(JSON.stringify(this.prod))
+            //console.log(JSON.stringify(this.prod))
             this.error = undefined;
         })
         .catch((error) => {
@@ -159,7 +160,8 @@ export default class AppSelectProd extends LightningElement {
             const rowK = e.detail.row.kVal; 
             const fert = e.detail.row.isFert; 
             const galWeight = e.detail.row.galWeight;
-            console.log(e.detail.Product2Id)
+
+            
             if(rowAction ==='Add'){
                 let index = this.prod.findIndex(x => x.Id === rowId)
                 this.prod[index].rowLabel = 'X';
@@ -185,8 +187,6 @@ export default class AppSelectProd extends LightningElement {
                     }
                 ]  
                 this.prod = [...this.prod]
-                console.log({rowProduct})
-                console.log(JSON.stringify(this.selection))
             }else if(rowAction==='remove'){
                 console.log('remove');
                 

@@ -16,7 +16,7 @@ export default class UpdateRatePrice extends LightningElement {
     error; 
     loaded=false; 
     areaSize;
-    appTotalPrice;
+    @track appTotalPrice = 0.00;
     sqft
     area
     areaUM
@@ -24,6 +24,7 @@ export default class UpdateRatePrice extends LightningElement {
     appTotalN;
     appTotalP;
     appTotalK;
+    measure = 'M'; 
     connectedCallback(){
         this.loadProducts();
         //console.log('calling') 
@@ -48,9 +49,12 @@ export default class UpdateRatePrice extends LightningElement {
                 let nVal = item.Product__r.N__c;
                 let pVal = item.Product__r.P__c;
                 let kVal = item.Product__r.K__c;
+                let type = item.Product__r.Product_Type__c; 
                 let isFert = item.Product__r.hasFertilizer__c;
                 let galLb = item.Product__r.X1_Gallon_Weight__c
-                return {...item, allowEdit, nVal, pVal, kVal, isFert, galLb}
+                this.appTotalPrice += item.Total_Price__c
+                //console.log(this.appTotalPrice, 2, item.Total_Price__c)
+                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, galLb}
             });
              console.log(JSON.stringify(this.prodlist));
             
@@ -68,11 +72,11 @@ export default class UpdateRatePrice extends LightningElement {
             this.areaId = resp[0].Application__r.Area__c
             //console.log('areaId '+this.areaId);
             this.areaName = resp[0].Area__c
-            this.appTotalPrice = resp[0].Application__r.Total_Price__c; 
+             
             this.areaUM = resp[0].Application__r.Area__r.Pref_U_of_M__c; 
             //console.log('type of total price '+ typeof resp[0].Total_Price__c);
             
-            //console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
+            console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
             
 //need for doing math later
             this.areaSize= parseInt(resp[0].Application__r.Area__r.Area_Sq_Feet__c)
@@ -82,7 +86,7 @@ export default class UpdateRatePrice extends LightningElement {
             
         }).catch((error)=> {
             this.error = error;
-            console.log('error '+JSON.stringify(this.error));
+            //console.log('error '+JSON.stringify(this.error));
             
         })
     }
@@ -112,13 +116,13 @@ export default class UpdateRatePrice extends LightningElement {
              // eslint-disable-next-line @lwc/lwc/no-async-operation
             this.delay = setTimeout(()=>{
                 this.prodlist[index].Rate2__c = e.detail.value;
-                console.log('ua '+this.prodlist[index].Unit_Area__c);
+                //console.log('ua '+this.prodlist[index].Unit_Area__c);
                 
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
                     this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c )    
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2);
                     this.appTotalPrice = appTotal(this.prodlist)
-                   console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSize,4, this.prodlist[index].Product_Size__c)
+                   //console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSize,4, this.prodlist[index].Product_Size__c)
                     if(this.prodlist[index].isFert){
                         let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
                         this.appTotalN = fert.n;
@@ -132,7 +136,7 @@ export default class UpdateRatePrice extends LightningElement {
 
            handleUnitArea(e){
             let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
-            console.log('index ' +index + ' detail '+e.detail.value );
+            //console.log('index ' +index + ' detail '+e.detail.value );
             
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
@@ -158,14 +162,14 @@ export default class UpdateRatePrice extends LightningElement {
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                     
                     this.appTotalPrice = appTotal(this.prodlist)
-                    console.log('newPrice if ' + this.appTotalPrice);
+                    //console.log('newPrice if ' + this.appTotalPrice);
                 }else{
                     this.prodlist[index].Margin__c = 0;                
                     this.prodlist[index].Margin__c = this.prodlist[index].Margin__c.toFixed(2)
                     this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
                     //console.log(this.prodlist[index].Total_Price__c, 'here price');
                     this.appTotalPrice = appTotal(this.prodlist)
-                    console.log('price else '+ this.appTotalPrice);
+                    //console.log('price else '+ this.appTotalPrice);
                 }
                 }, 1000)
            }
@@ -275,7 +279,7 @@ handleNewProd(x){
                
                 updateProducts({products:this.prodlist})
             }).then((mess)=>{
-                console.log('mess '+mess)
+                //console.log('mess '+mess)
                 this.prodlist = [];
                 this.dispatchEvent(
                     new ShowToastEvent({
@@ -286,7 +290,7 @@ handleNewProd(x){
                 )
                 this.cancel();
             }).catch((error)=>{
-                console.log(JSON.stringify(error))
+                //console.log(JSON.stringify(error))
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Error adding app',
@@ -296,6 +300,10 @@ handleNewProd(x){
                 ) 
             })
         }
+        //Update Pricing and Fertility info displayed to per M or per Acre
+    updateMeasure(){
+        this.measure = this.measure === 'M' ? 'Acre' : 'M';
+   }
     cancel(){
         this.dispatchEvent(new CustomEvent('cancel'))
         
