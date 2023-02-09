@@ -6,3 +6,7 @@
 .hover{
     cursor: pointer;  
 }
+
+.fs{
+    font-size: large;
+}

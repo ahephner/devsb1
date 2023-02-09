@@ -85,6 +85,12 @@ const onLoadTotalPrice = (data)=>{
       return total; 
 }
 
+      //returns a round number for later math functions
+const roundNum = (value, dec)=>{
+  let x = Number(Math.round(parseFloat(value+'e'+dec))+'e-'+dec); 
+      return x;
+}
+
 export{hold, 
       appTotal, 
       alreadyAdded, 
@@ -93,6 +99,7 @@ export{hold,
       calcLiqFert, 
       unitsRequired, 
       roundRate, 
-      onLoadTotalPrice}
+      onLoadTotalPrice, 
+      roundNum}
 
  

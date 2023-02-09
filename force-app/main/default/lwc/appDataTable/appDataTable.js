@@ -85,7 +85,6 @@ export default class AppDataTable extends LightningElement {
                 
                 this.appList = result.data; 
                 this.copy = result.data; 
-                console.log(result.data)
                 this.programName = result.data[0].Program_Name__c;
                 this.customerName = result.data[0].Customer_Name__c;
                 this.error = undefined; 

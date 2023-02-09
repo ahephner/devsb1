@@ -4,7 +4,7 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired } from 'c/programBuilderHelper';
+import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum } from 'c/programBuilderHelper';
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -120,7 +120,7 @@ export default class UpdateRatePrice extends LightningElement {
                 
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
                     this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c )    
-                    this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2);
+                    this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
                     this.appTotalPrice = appTotal(this.prodlist)
                    //console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSize,4, this.prodlist[index].Product_Size__c)
                     if(this.prodlist[index].isFert){
@@ -142,7 +142,7 @@ export default class UpdateRatePrice extends LightningElement {
             
             if(this.prodlist[index].Rate2__c > 0){
              this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSize, this.prodlist[index].Product_Size__c );
-             this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+             this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
             }
         }
 
@@ -158,15 +158,15 @@ export default class UpdateRatePrice extends LightningElement {
                 //console.log(typeof this.prodlist[index].Unit_Price__c +' unit Type');          
                     
                     if(this.prodlist[index].Unit_Price__c > 0){
-                    this.prodlist[index].Margin__c = Number((1 - (this.prodlist[index].Product_Cost__c /this.prodlist[index].Unit_Price__c))*100).toFixed(2)
-                    this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+                    this.prodlist[index].Margin__c = roundNum((1 - (this.prodlist[index].Product_Cost__c /this.prodlist[index].Unit_Price__c))*100,2)
+                    this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c,2);
                     
                     this.appTotalPrice = appTotal(this.prodlist)
                     //console.log('newPrice if ' + this.appTotalPrice);
                 }else{
                     this.prodlist[index].Margin__c = 0;                
-                    this.prodlist[index].Margin__c = this.prodlist[index].Margin__c.toFixed(2)
-                    this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+                    this.prodlist[index].Margin__c = roundNum(this.prodlist[index].Margin__c, 2);
+                    this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c,2)
                     //console.log(this.prodlist[index].Total_Price__c, 'here price');
                     this.appTotalPrice = appTotal(this.prodlist)
                     //console.log('price else '+ this.appTotalPrice);
@@ -180,14 +180,14 @@ export default class UpdateRatePrice extends LightningElement {
                     this.delay = setTimeout(()=>{
                             this.prodlist[index].Margin__c = Number(m.detail.value);
                             if(1- this.prodlist[index].Margin__c/100 > 0){
-                                this.prodlist[index].Unit_Price__c = Number(this.prodlist[index].Product_Cost__c /(1- this.prodlist[index].Margin__c/100)).toFixed(2);
-                                this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)
+                                this.prodlist[index].Unit_Price__c = roundNum(this.prodlist[index].Product_Cost__c /(1- this.prodlist[index].Margin__c/100),2);
+                                this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
                                 this.appTotalPrice = appTotal(this.prodlist)
                             
                             }else{
                                 this.prodlist[index].Unit_Price__c = 0;
-                                this.prodlist[index].Unit_Price__c = this.prodlist[index].Unit_Price__c.toFixed(2);
-                                this.prodlist[index].Total_Price__c = Number(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c).toFixed(2)   
+                                this.prodlist[index].Unit_Price__c = roundNum(this.prodlist[index].Unit_Price__c, 2); 
+                                this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c,2)   
                                 this.appTotalPrice = this.appTotalPrice = appTotal(this.prodlist)
                                 
                             }

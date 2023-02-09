@@ -1,5 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
-import {appTotal, calcDryFert, calcLiqFert, unitsRequired} from 'c/programBuilderHelper';
+import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum} from 'c/programBuilderHelper';
 export default class AppRatePrice extends LightningElement {
            @track data; 
            @api areaSize;
@@ -30,11 +30,11 @@ export default class AppRatePrice extends LightningElement {
                 this.data[index].Rate2__c = e.detail.value;
                 
                 if(this.data[index].Unit_Area__c != '' && this.data[index].Unit_Area__c != null){
-                    console.log('uofm',this.data[index].Unit_Area__c,'rate', this.data[index].Rate2__c,'area size', this.areaSize,'product size', this.data[index].size)
+                    //console.log('uofm',this.data[index].Unit_Area__c,'rate', this.data[index].Rate2__c,'area size', this.areaSize,'product size', this.data[index].size)
                     this.data[index].Units_Required__c = unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size )    
-                    this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2);
+                    this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c,2);
                     this.appTotalPrice = appTotal(this.data)
-                    console.log('info = '+this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size);
+                    //console.log('info = '+this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size);
                     if(this.data[index].isFert){
                         let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);
                         
@@ -49,20 +49,20 @@ export default class AppRatePrice extends LightningElement {
 
            handleUnitArea(e){
                let index = this.data.findIndex(prod => prod.Id === e.target.name);
-               console.log('index ' +index + ' detail '+e.detail.value );
+               //console.log('index ' +index + ' detail '+e.detail.value );
                
                this.data[index].Unit_Area__c = e.detail.value;
                
                if(this.data[index].Rate2__c > 0){
                 this.data[index].Units_Required__c = unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].size );
-                this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                }
            }
 
 //Pricing 
            //this is a reuable functions for pricing and line totals
-           appTotal = (t, nxt)=> (t+nxt).toFixed(2);
-           lineTotal = (units, charge)=> (units * charge).toFixed(2);
+           appTotal = (t, nxt)=> roundNum((t+nxt),2); 
+           
            newPrice(e){
                 window.clearTimeout(this.delay);
                 let index = this.data.findIndex(prod => prod.Id === e.target.name);
@@ -74,18 +74,17 @@ export default class AppRatePrice extends LightningElement {
                     //console.log(typeof this.data[index].Unit_Price__c +' unit Type');          
                         
                         if(this.data[index].Unit_Price__c > 0){
-                        this.data[index].Margin__c = Number((1 - (this.data[index].Product_Cost__c /this.data[index].Unit_Price__c))*100).toFixed(2)
-                        this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                        this.data[index].Margin__c = roundNum((1 - (this.data[index].Product_Cost__c /this.data[index].Unit_Price__c))*100, 2);
+                        this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                         
                        this.appTotalPrice = appTotal(this.data)
-                        console.log('newPrice if ' + this.appTotalPrice);
+    
                     }else{
                         this.data[index].Margin__c = 0;                
-                        this.data[index].Margin__c = this.data[index].Margin__c.toFixed(2)
-                        this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
-                        //console.log(this.data[index].Total_Price__c, 'here price');
-                        this.appTotalPrice = appTotal(this.data)
-                        console.log('price else '+ this.appTotalPrice);
+                        this.data[index].Margin__c = roundNum(this.data[index].Margin__c, 2);
+                        this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
+
+                        this.appTotalPrice = appTotal(this.data);
                     }
                     }, 1000)
            }
@@ -96,14 +95,14 @@ export default class AppRatePrice extends LightningElement {
                     this.delay = setTimeout(()=>{
                             this.data[index].Margin__c = Number(m.detail.value);
                             if(1- this.data[index].Margin__c/100 > 0){
-                                this.data[index].Unit_Price__c = Number(this.data[index].Product_Cost__c /(1- this.data[index].Margin__c/100)).toFixed(2);
-                                this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)
+                                this.data[index].Unit_Price__c = roundNum(this.data[index].Product_Cost__c /(1- this.data[index].Margin__c/100), 2)
+                                this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2)
                                 this.appTotalPrice = appTotal(this.data);
                             console.log('margin if ' +this.appTotalPrice);
                             }else{
                                 this.data[index].Unit_Price__c = 0;
                                 this.data[index].Unit_Price__c = this.data[index].Unit_Price__c.toFixed(2);
-                                this.data[index].Total_Price__c = Number(this.data[index].Units_Required__c * this.data[index].Unit_Price__c).toFixed(2)   
+                                this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                                 this.appTotalPrice = appTotal(this.data); 
                                 console.log('margin else ' +this.appTotalPrice);
                                 
