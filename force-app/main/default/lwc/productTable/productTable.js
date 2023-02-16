@@ -14,7 +14,8 @@ export default class ProductTable extends LightningElement {
     dateName = false;
     productList = false; 
     productRates = false;
-    subscritption = null; 
+    subscritption = null;
+    disableBtn = false; 
     //firstApp = true; 
     //searching product table 
     areaSelected;
@@ -224,5 +225,9 @@ export default class ProductTable extends LightningElement {
             })
 
          
+    }
+
+    badPrice(prod){
+        this.disableBtn = prod.detail;
     }
 }

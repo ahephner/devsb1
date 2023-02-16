@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum} from 'c/programBuilderHelper';
+import {checkPricing} from 'c/helper'
 export default class AppRatePrice extends LightningElement {
            @track data; 
            @api areaSize;
@@ -9,6 +10,7 @@ export default class AppRatePrice extends LightningElement {
            appTotalP = 0
            appTotalK = 0
            measure = 'M'
+           goodPricing = true; 
            @api 
            get selection(){
             return this.data;
@@ -16,7 +18,7 @@ export default class AppRatePrice extends LightningElement {
            //need to make this private so we can edit this
            set selection(value){
                this.data = JSON.parse(JSON.stringify(value)); 
-                //console.log('data ' +JSON.stringify(this.data));
+                console.log('data ' +JSON.stringify(this.data));
                 
            }
 
@@ -66,26 +68,29 @@ export default class AppRatePrice extends LightningElement {
            newPrice(e){
                 window.clearTimeout(this.delay);
                 let index = this.data.findIndex(prod => prod.Id === e.target.name);
-                console.log(JSON.stringify(this.data))
+                let targetId = e.target.name; 
                 
                 this.delay = setTimeout(()=>{
                     this.data[index].Unit_Price__c = e.detail.value;
-                    this.data[index].Unit_Price__c = Number(this.data[index].Unit_Price__c);
+                    //this.data[index].Unit_Price__c = Number(this.data[index].Unit_Price__c);
                     //console.log(typeof this.data[index].Unit_Price__c +' unit Type');          
                         
                         if(this.data[index].Unit_Price__c > 0){
+                        console.log('unit price')
                         this.data[index].Margin__c = roundNum((1 - (this.data[index].Product_Cost__c /this.data[index].Unit_Price__c))*100, 2);
                         this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
-                        
-                       this.appTotalPrice = appTotal(this.data)
-    
                     }else{
                         this.data[index].Margin__c = 0;                
                         this.data[index].Margin__c = roundNum(this.data[index].Margin__c, 2);
                         this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
 
-                        this.appTotalPrice = appTotal(this.data);
                     }
+                    this.appTotalPrice = appTotal(this.data);
+                    
+                    let lOne = Number(this.data[index].levelOne)
+                    let floor = Number(this.data[index].floorPrice)
+                    let unitPrice = this.data[index].Unit_Price__c
+                    this.handleWarning(targetId, lOne, floor, unitPrice, index)
                     }, 1000)
            }
            newMargin(m){
@@ -150,13 +155,37 @@ export default class AppRatePrice extends LightningElement {
            cancel(){
                this.dispatchEvent(new CustomEvent('cancel'))
            }
-           prodInfo(){
-            //console.log(this.selection.length);
-            //console.log('areaSize '+ this.areaSize);
-            
-            for(let i=0;i<this.selection.length;i++){
-                console.log(this.selection[i])
 
+        //handle price warnings
+        handleWarning = (targ, lev, flr, price, ind)=>{
+            //console.log(1,lev, 2, flr, 3, price, 4, targ);
+            
+            if(price > lev){        
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
+                this.data[ind].goodPrice = true; 
+               
+            }else if(price<lev && price>=flr){
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="orange";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="orange";
+                this.data[ind].goodPrice = true;
+                
+            }else if(price===lev && price>=flr){
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
+                this.data[ind].goodPrice = true;
+                
+            }else if(price<flr){
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="red";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="red";
+                this.data[ind].goodPrice = false;
             }
+            //seems backward but using a disable btn on the productTable. So if it's bad I need to return a true so the button is disabled. 
+            this.goodPricing = checkPricing(this.data) === true ? false : true;
+            
+                this.dispatchEvent(new CustomEvent('price',{
+                    detail: this.goodPricing
+                })); 
+            
         }
 }

@@ -84,13 +84,15 @@ export default class UpdateAddProduct extends LightningElement {
       }
     pfChange(event){
         this.pf = event.detail.value;
-        this.startEventListener();
+        this.search(); 
+        //this.startEventListener();
          
     }
 
     catChange(e){
         this.cat = e.detail.value;
-        this.startEventListener(); 
+        this.search();
+        //this.startEventListener(); 
     }
     watchKeyDown(event){
         if(event.key==='Enter'){
@@ -122,7 +124,7 @@ export default class UpdateAddProduct extends LightningElement {
                 return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price, nVal, pVal, kVal, isFert, galWeight} 
 
             });
-            
+            console.log(JSON.stringify(this.prod))
             this.error = undefined;
         })
         .catch((error) => {

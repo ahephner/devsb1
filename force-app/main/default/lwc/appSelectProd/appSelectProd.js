@@ -150,6 +150,7 @@ export default class AppSelectProd extends LightningElement {
             const rowProduct = e.detail.row.Product2Id; 
             const rowProdType = e.detail.row.Product_Type__c;
             const rowUnitPrice = e.detail.row.Level_2_UserView__c;
+            const rowLev1 = e.detail.row.Level_1_UserView__c; 
             const rowFlrPrice = e.detail.row.Floor_Price__c; 
             const rowMargin = e.detail.row.Level_2_Margin__c;
             const rowAgency = e.detail.row.Agency_Product__c;
@@ -175,6 +176,7 @@ export default class AppSelectProd extends LightningElement {
                         Product_Type__c: rowProdType,
                         unitPrice: rowUnitPrice,
                         floorPrice: rowFlrPrice,
+                        levelOne: rowLev1,
                         unitCost: rowCost,
                         margin: rowMargin,
                         agency: rowAgency,
@@ -183,7 +185,9 @@ export default class AppSelectProd extends LightningElement {
                         kVal: rowK,
                         size: rowSize,
                         isFert: fert,
-                        galWeight: galWeight
+                        galWeight: galWeight,
+                        goodPrice: true,
+                        title: `Unit Price - Flr $${rowFlrPrice}`
                     }
                 ]  
                 this.prod = [...this.prod]

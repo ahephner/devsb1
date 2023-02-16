@@ -27,15 +27,19 @@
                                 ></lightning-combobox> 
                             </div>
                             <div class="slds-col slds-size_2-of-12">
-                                <lightning-input class='liquid' type="number"  
-                                                label="Unit Price" name={sp.Id} 
-                                                value={sp.Unit_Price__c} onchange={newPrice} 
-                                                formatter="currency" step="0.01" read-only={sp.allowEdit}></lightning-input>
+                                <div data-id={sp.Id}>
+                                    <lightning-input class='liquid' type="number"  
+                                                    label={sp.title} name={sp.Id} 
+                                                    value={sp.Unit_Price__c} onchange={newPrice} 
+                                                    formatter="currency" step="0.01" read-only={sp.allowEdit}></lightning-input>
+                                </div>
                             </div>
                             <div class="slds-col slds-size_2-of-12">
-                                <lightning-input class='liquid' type="number"  
-                                                label="Margin%" name={sp.Id} 
-                                                value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit}></lightning-input>
+                                <div data-margin={sp.Id}>
+                                    <lightning-input class='liquid' type="number"  
+                                                    label="Margin%" name={sp.Id} 
+                                                    value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit}></lightning-input>
+                                </div>
                             </div> 
                             <div class='slds-col slds-size_2-of-12'>
                                 <lightning-input type="number" name="input4" class="reqUnits"
@@ -62,6 +66,7 @@
                     </ul>
                 </div>
             </div>
+
                 <!--footer-->
         <!-- <div class="slds-docked-form-footer">
             <lightning-button variant="destructive" label="Cancel" 

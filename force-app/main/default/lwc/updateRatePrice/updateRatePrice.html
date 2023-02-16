@@ -70,16 +70,30 @@
             </template>
         </div>
         <div class='slds-col slds-size_3-of-12'>
-            <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
+<!--             
             <h3><span class='hover' onclick={updateMeasure}>
                 Per: {measure}
-            </span></h3>
-            <h5>Fertility Info: </h5>
+            </span></h3> -->
+            <lightning-tabset>
+                <lightning-tab label="Cost Info:"> 
+                    <ul>
+                        <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
+                        <li>prod per M: {costPerM}</li>
+                        <li>prod per Acre: {costPerAcre}</li>
+                        <li>cost to treat area: {prodAreaCost}</li>
+                    </ul>
+                </lightning-tab>
+                <lightning-tab label="Fertility Info:"> 
                     <ul>
                         <li>N:{appTotalN}</li>
                         <li>P:{appTotalP}</li>
                         <li>K:{appTotalK}</li>
-                    </ul>        
+                    </ul>
+                </lightning-tab>
+                <lightning-tab label="Note"> 
+                    <lightning-textarea name="input1" label="Application Notes" ></lightning-textarea>
+                </lightning-tab>
+            </lightning-tabset>       
         </div>
     </div>
     </template>    

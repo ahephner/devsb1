@@ -91,6 +91,33 @@ const roundNum = (value, dec)=>{
       return x;
 }
 
+
+//cost per single product. Returns per M and per Acre
+const areaCostCal = (perUnit, rate, unitOfMeasure)=>{
+  let d = roundNum(perUnit * rate, 2);
+  let perThousand = unitOfMeasure.includes('Acre') ? roundNum(d/43.56, 2): d;
+  let perAcre = unitOfMeasure.includes('Acre') ? d : roundNum(d*43.56, 2);
+
+  return {perThousand, perAcre}
+}
+//price per unit
+const pricePerUnit = (prodPrice, uSize, prodRate,unitMeasure )=>{
+  let areaSize = unitMeasure.includes('Acre') ? uSize/43.56 : uSize; 
+  let price = roundNum(prodPrice/areaSize, 2);
+  let final = areaCostCal(price, prodRate, unitMeasure);
+  return final;
+}
+
+
+const perProduct = (prodPrice, prodSize, rate, unitOfMeasure)=>{
+  let perOz = roundNum(prodPrice/prodSize, 2)
+  let cost = roundNum(rate * perOz, 2)
+  
+  let perAcre = unitOfMeasure.includes('/M') ? cost : roundNum(cost*43.56, 2);
+  let perThousand = unitOfMeasure.includes('Acre') ? cost: roundNum(cost/43.56, 2);
+  return {perAcre, perThousand}; 
+}
+
 export{hold, 
       appTotal, 
       alreadyAdded, 
@@ -100,6 +127,8 @@ export{hold,
       unitsRequired, 
       roundRate, 
       onLoadTotalPrice, 
-      roundNum}
+      roundNum, 
+      pricePerUnit,
+      perProduct}
 
  
