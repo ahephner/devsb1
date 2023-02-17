@@ -21,6 +21,7 @@ export default class UpdateTable extends LightningElement {
     areaId;
     sqFt; 
     buttonText = 'Save';
+    disableBtn = false; 
     @wire(MessageContext)
     messageContext; 
 //subscribe to message channel
@@ -140,5 +141,9 @@ wiredareaInfo({error,data}){
         this.updateExposed = false;  
         this.showButton = true;
         this.buttonText = 'Save'; 
+    }
+
+    badPrice(prod){
+        this.disableBtn = prod.detail;
     }
 }

@@ -118,6 +118,24 @@ const perProduct = (prodPrice, prodSize, rate, unitOfMeasure)=>{
   return {perAcre, perThousand}; 
 }
 
+//on update merge pricing together with app products
+const merge = (info, levels)=>{
+  console.log(levels);
+  
+  let merged;
+  if(info){
+    console.log('info ' +info);
+    merged = info.map(res =>({
+      ...levels.find((i)=> (i.Product2Id === res.Product__c)),
+      ...res
+    })
+  )
+    return merged; 
+  }else{
+    return info; 
+  }
+}
+
 export{hold, 
       appTotal, 
       alreadyAdded, 
@@ -129,6 +147,7 @@ export{hold,
       onLoadTotalPrice, 
       roundNum, 
       pricePerUnit,
-      perProduct}
+      perProduct,
+      merge}
 
  

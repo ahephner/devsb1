@@ -47,15 +47,15 @@
                         required
                         ></lightning-combobox> 
                     </div>
-                    <div class="slds-col slds-size_2-of-12">
+                    <div class="slds-col slds-size_2-of-12" data-id={sp.Product2Id}>
                         <lightning-input class='liquid' type="number"  
-                                        label="Unit Price" name={sp.Product_Code__c} 
+                                        label={sp.title} name={sp.Product2Id} 
                                         value={sp.Unit_Price__c} onchange={newPrice} 
                                         formatter="currency" step="0.01" read-only={sp.allowEdit}></lightning-input>
                     </div>
-                    <div class="slds-col slds-size_2-of-12">
+                    <div class="slds-col slds-size_2-of-12" data-margin={sp.Product2Id}>
                         <lightning-input class='liquid' type="number"  
-                                        label="Margin%" name={sp.Product_Code__c} 
+                                        label="Margin%" name={sp.Product2Id} 
                                         value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit} ></lightning-input>
                     </div> 
                     <div class='slds-col slds-size_2-of-12'>

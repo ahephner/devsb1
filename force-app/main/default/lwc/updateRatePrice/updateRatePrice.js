@@ -1,10 +1,12 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import appProducts from '@salesforce/apex/appProduct.appProducts'; 
+import getPricing from '@salesforce/apex/appProduct.pricing';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct } from 'c/programBuilderHelper';
+import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge } from 'c/programBuilderHelper';
+import {checkPricing} from 'c/helper'
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
     appName; 
@@ -28,7 +30,9 @@ export default class UpdateRatePrice extends LightningElement {
     measure = 'M'; 
     costPerM = 0;
     costPerAcre = 0;
-    prodAreaCost = 0;  
+    prodAreaCost = 0;
+    goodPricing = true;
+
     connectedCallback(){
         this.loadProducts();
         //console.log('calling') 
@@ -42,59 +46,52 @@ export default class UpdateRatePrice extends LightningElement {
         ];
     }
  
-  
-    loadProducts(){
-        appProducts({app: this.appId})
-        .then((resp)=>{
-            //console.log('running '+resp);
-            this.loaded = true; 
-            this.prodlist = resp.map(item =>{
-                let allowEdit = item.Product__r.Agency_Pricing__c ? item.Product__r.Agency_Pricing__c : item.Product__r.Agency_Pricing__c
-                let nVal = item.Product__r.N__c;
-                let pVal = item.Product__r.P__c;
-                let kVal = item.Product__r.K__c;
-                let type = item.Product__r.Product_Type__c; 
-                let isFert = item.Product__r.hasFertilizer__c;
-                let galLb = item.Product__r.X1_Gallon_Weight__c
-                this.appTotalPrice += item.Total_Price__c
-                //console.log(this.appTotalPrice, 2, item.Total_Price__c)
-                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, galLb}
-            });
-             console.log(JSON.stringify(this.prodlist));
-            
-            
-            // resp.forEach(element => {
-            //     console.log(element);
+       async loadProducts(){
+        try{
+            let prodIds = new Set();
+            this.loaded = false;
+            let firstLoad = await appProducts({app: this.appId});
+            let nonPrice = firstLoad.map(item =>{
+                                let allowEdit = item.Product__r.Agency_Pricing__c ? item.Product__r.Agency_Pricing__c : item.Product__r.Agency_Pricing__c
+                                let nVal = item.Product__r.N__c;
+                                let pVal = item.Product__r.P__c;
+                                let kVal = item.Product__r.K__c;
+                                let type = item.Product__r.Product_Type__c; 
+                                let isFert = item.Product__r.hasFertilizer__c;
+                                let title = `Unit Price - Flr $${item.Product__r.Floor_Price__c}`; 
+                                let galLb = item.Product__r.X1_Gallon_Weight__c
+                                this.appTotalPrice += item.Total_Price__c
+                                prodIds.add(item.Product__c);
+                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb}
+                            });
+            let idList = [...prodIds]
+            let pricing = await getPricing({ids: idList });
+            this.prodlist = await merge(nonPrice, pricing);
+            console.log(JSON.stringify(this.prodlist))
+            //get your app and area info for the pop up screen
+                this.appName = this.prodlist[0].Application__r.Name;            
+                this.appDate = this.prodlist[0].Application__r.Date__c;             
+                this.updateAppId = this.prodlist[0].Application__c;            
+                this.areaId = this.prodlist[0].Application__r.Area__c           
+                this.areaName = this.prodlist[0].Area__c            
+                this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
+    
                 
-            // });
-            this.appName = resp[0].Application__r.Name;
-            //console.log('appName '+this.appName);
-            this.appDate = resp[0].Application__r.Date__c;
-            //console.log('appDate '+this.appDate); 
-            this.updateAppId = resp[0].Application__c;
-            //console.log('updateAppId '+this.updateAppId); 
-            this.areaId = resp[0].Application__r.Area__c
-            //console.log('areaId '+this.areaId);
-            this.areaName = resp[0].Area__c
-             
-            this.areaUM = resp[0].Application__r.Area__r.Pref_U_of_M__c; 
-            //console.log('type of total price '+ typeof resp[0].Total_Price__c);
-            
-            console.log('sqft '+resp[0].Application__r.Area__r.Area_Sq_Feet__c);
-            
-//need for doing math later
-            this.areaSizeM= parseInt(resp[0].Application__r.Area__r.Area_Sq_Feet__c);
-            this.areaAcres = parseInt(resp[0].Application__r.Area__r.Area_Acres__c);
-            //Not setting total price in the save function so nothing here to pull down yet
-            //the other way uses a pb or workflow rule need to update that with SF dec tools. 
-            //this.appTotalPrice = this.resp.map(el=> el.Total_Price__c).reduce(this.appTotal)
-            
-        }).catch((error)=> {
-            this.error = error;
-            //console.log('error '+JSON.stringify(this.error));
-            
-        })
+    //need for doing math later
+                this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
+                this.areaAcres = parseInt(this.prodlist[0].Application__r.Area__r.Area_Acres__c);
+            this.loaded = true;
+        } catch (error) {
+            console.error(error);
+            const evt = new ShowToastEvent({
+                title: 'Error on load..',
+                message: error,
+                variant: 'error'
+            });
+            this.dispatchEvent(evt); 
+        }
     }
+
     @api
     addProducts(){
         this.addMore = true; 
@@ -145,8 +142,8 @@ export default class UpdateRatePrice extends LightningElement {
            }
 
            handleUnitArea(e){
-            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
-            //console.log('index ' +index + ' detail '+e.detail.value );
+            let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name);
+            console.log('index ' +index + ' detail '+e.detail.value );
             
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
@@ -166,7 +163,8 @@ export default class UpdateRatePrice extends LightningElement {
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
            newPrice(e){
             window.clearTimeout(this.delay);
-            let index = this.prodlist.findIndex(prod => prod.Product_Code__c === e.target.name);
+            let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name);
+            let targetId = e.target.name; 
 
             this.delay = setTimeout(()=>{
                 this.prodlist[index].Unit_Price__c = e.detail.value;
@@ -183,7 +181,7 @@ export default class UpdateRatePrice extends LightningElement {
                     this.costPerAcre = costs.perAcre; 
                     this.prodAreaCost = this.areaAcres * this.costPerAcre; 
                     this.appTotalPrice = appTotal(this.prodlist)
-                    
+                    //this.handleWarning()
                 }else{
                     this.prodlist[index].Margin__c = 0;                
                     this.prodlist[index].Margin__c = roundNum(this.prodlist[index].Margin__c, 2);
@@ -194,9 +192,13 @@ export default class UpdateRatePrice extends LightningElement {
                     this.costPerM = costs.perThousand;
                     this.costPerAcre = costs.perAcre; 
                     this.prodAreaCost = this.areaAcres * this.costPerAcre; 
-                    this.appTotalPrice = appTotal(this.prodlist)
-                    //console.log('price else '+ this.appTotalPrice);
+                    this.appTotalPrice = appTotal(this.prodlist);
                 }
+                let lOne = this.prodlist[index].Level_1_UserView__c;
+                let floor = this.prodlist[index].Floor_Price__c;
+                let unitPrice = this.prodlist[index].Unit_Price__c;
+                console.log('firing')
+                this.handleWarning(targetId,lOne, floor, unitPrice, index)
                 }, 1000)
            }
            newMargin(m){
@@ -344,6 +346,39 @@ handleNewProd(x){
    }
     cancel(){
         this.dispatchEvent(new CustomEvent('cancel'))
+        
+    }
+
+    //handle price warnings
+    handleWarning = (targ, lev, flr, price, ind)=>{
+        console.log(1,targ, 2,lev , 3,flr , 4,price, 5, ind );
+        
+        if(price > lev){        
+            this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
+            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
+            //this.prodlist[ind].goodPrice = true; 
+           
+        }else if(price<lev && price>=flr){
+            this.template.querySelector(`[data-id="${targ}"]`).style.color ="orange";
+            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="orange";
+            //this.prodlist[ind].goodPrice = true;
+            
+        }else if(price===lev && price>=flr){
+            this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
+            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
+            //this.prodlist[ind].goodPrice = true;
+            
+        }else if(price<flr){
+            this.template.querySelector(`[data-id="${targ}"]`).style.color ="red";
+            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="red";
+            //this.prodlist[ind].goodPrice = false;
+        }
+        //seems backward but using a disable btn on the productTable. So if it's bad I need to return a true so the button is disabled. 
+        //this.goodPricing = checkPricing(this.prodlist) === true ? false : true;
+        
+            // this.dispatchEvent(new CustomEvent('price',{
+            //     detail: this.goodPricing
+            // })); 
         
     }
 }
