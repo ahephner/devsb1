@@ -323,7 +323,9 @@ handleNewProd(x){
 
 //Display proudct info
 mouse(e){
-    console.log('mouse ', e.target.dataset.code);    
+    let index = this.prodlist.findIndex((i)=> i.Product_Code__c === e.target.dataset.code)    
+    let item = this.prodlist[index]
+    
 }
 
     newNote(){
