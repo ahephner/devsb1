@@ -60,14 +60,15 @@ export default class UpdateRatePrice extends LightningElement {
                                 let isFert = item.Product__r.hasFertilizer__c;
                                 let title = `Unit Price - Flr $${item.Product__r.Floor_Price__c}`; 
                                 let galLb = item.Product__r.X1_Gallon_Weight__c
+                                let goodPrice = true; 
                                 this.appTotalPrice += item.Total_Price__c
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb}
+                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, goodPrice}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
             this.prodlist = await merge(nonPrice, pricing);
-            console.log(JSON.stringify(this.prodlist))
+            //console.log(JSON.stringify(this.prodlist))
             //get your app and area info for the pop up screen
                 this.appName = this.prodlist[0].Application__r.Name;            
                 this.appDate = this.prodlist[0].Application__r.Date__c;             
@@ -197,13 +198,14 @@ export default class UpdateRatePrice extends LightningElement {
                 let lOne = this.prodlist[index].Level_1_UserView__c;
                 let floor = this.prodlist[index].Floor_Price__c;
                 let unitPrice = this.prodlist[index].Unit_Price__c;
-                console.log('firing')
+                
                 this.handleWarning(targetId,lOne, floor, unitPrice, index)
                 }, 1000)
            }
            newMargin(m){
                 window.clearTimeout(this.delay)
-                    let index = this.prodlist.findIndex(prod => prod.Product_Code__c === m.target.name)
+                    let index = this.prodlist.findIndex(prod => prod.Product2Id === m.target.name)
+                    let targetId = m.target.name;
                     // eslint-disable-next-line @lwc/lwc/no-async-operation
                     this.delay = setTimeout(()=>{
                             this.prodlist[index].Margin__c = Number(m.detail.value);
@@ -216,7 +218,7 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.costPerM = costs.perThousand;
                                 this.costPerAcre = costs.perAcre; 
                                 this.prodAreaCost = this.areaAcres * this.costPerAcre; 
-                                this.appTotalPrice = appTotal(this.prodlist)
+                                
                             
                             }else{
                                 this.prodlist[index].Unit_Price__c = 0;
@@ -228,10 +230,17 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.costPerM = costs.perThousand;
                                 this.costPerAcre = costs.perAcre; 
                                 this.prodAreaCost = this.areaAcres * this.costPerAcre; 
-                                this.appTotalPrice = this.appTotalPrice = appTotal(this.prodlist)
+                                
                                 
                             }
-                },1500)
+                            this.appTotalPrice = appTotal(this.prodlist)
+
+                            
+                            let lOne = this.prodlist[index].Level_1_UserView__c;
+                            let floor = this.prodlist[index].Floor_Price__c;
+                            let unitPrice = this.prodlist[index].Unit_Price__c;
+                            this.handleWarning(targetId, lOne, floor, unitPrice, index)
+                },1000)
             }
 //remove product from app
 removeProd(x){
@@ -297,9 +306,15 @@ handleNewProd(x){
         kVal: x.detail.rowK,
         isFert: x.detail.isFert,
         galLb: x.galWeight,
+        Product2Id: x.detail.rowProduct,
+        goodPrice: true, 
+        Floor_Price__c: x.detail.rowFlrPrice,
+        Level_1_UserView__c: x.detail.rowLevelOne, 
+        title:  x.detail.rowAgency ? 'Agency Product': `Unit Price - Flr $${x.detail.rowFlrPrice}`, 
         Product_Type__c: x.detail.rowType
 
     }]
+    //console.log(this.prodlist.at(-1))
 }
 
 
@@ -356,29 +371,30 @@ handleNewProd(x){
         if(price > lev){        
             this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
             this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
-            //this.prodlist[ind].goodPrice = true; 
+            this.prodlist[ind].goodPrice = true; 
            
         }else if(price<lev && price>=flr){
             this.template.querySelector(`[data-id="${targ}"]`).style.color ="orange";
             this.template.querySelector(`[data-margin="${targ}"]`).style.color ="orange";
-            //this.prodlist[ind].goodPrice = true;
+            this.prodlist[ind].goodPrice = true;
             
         }else if(price===lev && price>=flr){
             this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
             this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
-            //this.prodlist[ind].goodPrice = true;
+            this.prodlist[ind].goodPrice = true;
             
         }else if(price<flr){
             this.template.querySelector(`[data-id="${targ}"]`).style.color ="red";
             this.template.querySelector(`[data-margin="${targ}"]`).style.color ="red";
-            //this.prodlist[ind].goodPrice = false;
+            this.prodlist[ind].goodPrice = false;
         }
         //seems backward but using a disable btn on the productTable. So if it's bad I need to return a true so the button is disabled. 
-        //this.goodPricing = checkPricing(this.prodlist) === true ? false : true;
+        this.goodPricing = checkPricing(this.prodlist) === true ? false : true;
+
         
-            // this.dispatchEvent(new CustomEvent('price',{
-            //     detail: this.goodPricing
-            // })); 
+            this.dispatchEvent(new CustomEvent('price',{
+                detail: this.goodPricing
+            })); 
         
     }
 }

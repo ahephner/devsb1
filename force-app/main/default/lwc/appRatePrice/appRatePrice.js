@@ -109,7 +109,6 @@ export default class AppRatePrice extends LightningElement {
                                 this.data[index].Unit_Price__c = this.data[index].Unit_Price__c.toFixed(2);
                                 this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                                 this.appTotalPrice = appTotal(this.data); 
-                                console.log('margin else ' +this.appTotalPrice);
                                 
                             }
                 },1500)
