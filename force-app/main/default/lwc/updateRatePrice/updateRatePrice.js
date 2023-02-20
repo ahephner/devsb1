@@ -32,6 +32,10 @@ export default class UpdateRatePrice extends LightningElement {
     costPerAcre = 0;
     prodAreaCost = 0;
     goodPricing = true;
+    //Here is notes per app
+    //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
+    wasNewNote = false; 
+    oppNote
 
     connectedCallback(){
         this.loadProducts();
@@ -76,7 +80,7 @@ export default class UpdateRatePrice extends LightningElement {
                 this.areaId = this.prodlist[0].Application__r.Area__c           
                 this.areaName = this.prodlist[0].Area__c            
                 this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
-    
+                this.oppNote = this.prodlist[0].Application__r.Note__c;             
                 
     //need for doing math later
                 this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
@@ -317,19 +321,28 @@ handleNewProd(x){
     //console.log(this.prodlist.at(-1))
 }
 
+//Display proudct info
+mouse(e){
+    console.log('mouse ', e.target.dataset.code);    
+}
 
+    newNote(){
+        this.wasNewNote = true; 
+    }
 //Update name and products
     @api 
     update(){
         this.loaded = false;
-        
+        this.oppNote= this.template.querySelector('[data-note="appNote"]').value;
+
         let params = {
             appName: this.appName,
             appDate: this.appDate,
-            appArea: this.areaId
+            appArea: this.areaId, 
+            appNote: this.oppNote
         }
 
-        updateApplication({wrapper: params, id:this.appId})
+        updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
             .then(()=>{
                
                 updateProducts({products:this.prodlist})

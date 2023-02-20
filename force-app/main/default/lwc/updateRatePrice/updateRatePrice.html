@@ -26,7 +26,8 @@
     <div class='slds-grid slds-m-top_small'>
         <div class='slds-col slds-size_9-of-12'>  
             <template for:each={prodlist} for:item="sp" >
-               <div key={sp.Product_Code__c} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid  '>
+               <div key={sp.Product_Code__c} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid' 
+                    data-code={sp.Product_Code__c} onmouseenter={mouse}>
                     <div class="slds-col slds-size_2-of-12 pName">
                         <lightning-icon icon-name="utility:close" name={sp.Product_Code__c} size='xx-small' class='hover'
                                         alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon>
@@ -91,7 +92,8 @@
                     </ul>
                 </lightning-tab>
                 <lightning-tab label="Note"> 
-                    <lightning-textarea name="input1" label="Application Notes" ></lightning-textarea>
+                    <lightning-textarea data-note="appNote" label="Application Notes" value={oppNote} 
+                    maxlength="255" message-when-too-long="A maximum of 255 characters are allowed in a note." onchange={newNote}></lightning-textarea>
                 </lightning-tab>
             </lightning-tabset>       
         </div>
