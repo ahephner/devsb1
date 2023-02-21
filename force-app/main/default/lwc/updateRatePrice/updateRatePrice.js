@@ -5,6 +5,9 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
+import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
+import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
+import NOTE from '@salesforce/schema/App_Product__c.Note__c';
 import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge } from 'c/programBuilderHelper';
 import {checkPricing} from 'c/helper'
 export default class UpdateRatePrice extends LightningElement {
@@ -32,6 +35,7 @@ export default class UpdateRatePrice extends LightningElement {
     costPerAcre = 0;
     prodAreaCost = 0;
     goodPricing = true;
+    noteOps;
     //Here is notes per app
     //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
     wasNewNote = false; 
@@ -49,6 +53,16 @@ export default class UpdateRatePrice extends LightningElement {
             {label: 'LB/Acre', value:'LB/Acre'}
         ];
     }
+        //need this to get picklist
+        @wire(getObjectInfo, { objectApiName: PRODUCT_OBJ })
+        objectInfo;
+
+    //get sub category picklist
+    @wire(getPicklistValues, {
+        recordTypeId: "$objectInfo.data.defaultRecordTypeId",
+        fieldApiName: NOTE
+      })
+      noteOps;
  
        async loadProducts(){
         try{
@@ -65,9 +79,12 @@ export default class UpdateRatePrice extends LightningElement {
                                 let title = `Unit Price - Flr $${item.Product__r.Floor_Price__c}`; 
                                 let galLb = item.Product__r.X1_Gallon_Weight__c
                                 let goodPrice = true; 
+                                let showNote = false; 
+                                let btnLabel = 'Add Note';
+                                let btnValue = 'Note';
                                 this.appTotalPrice += item.Total_Price__c
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, goodPrice}
+                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, goodPrice, showNote, btnLabel, btnValue}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
@@ -246,9 +263,14 @@ export default class UpdateRatePrice extends LightningElement {
                             this.handleWarning(targetId, lOne, floor, unitPrice, index)
                 },1000)
             }
+
+            newNotes(e){
+                console.log(e.detail.value); 
+                //this.prodlist = this.prodlist.find((x)=> x.Product2Id === e.target.name).Note__c = e.detail.value; 
+            }
 //remove product from app
 removeProd(x){
-    const row = x.target.name
+    const row = x; 
     let cf = confirm('Do you want to delete this product');
     if(cf === true){
         deleteRecord(row)
@@ -314,7 +336,10 @@ handleNewProd(x){
         goodPrice: true, 
         Floor_Price__c: x.detail.rowFlrPrice,
         Level_1_UserView__c: x.detail.rowLevelOne, 
-        title:  x.detail.rowAgency ? 'Agency Product': `Unit Price - Flr $${x.detail.rowFlrPrice}`, 
+        title:  x.detail.rowAgency ? 'Agency Product': `Unit Price - Flr $${x.detail.rowFlrPrice}`,
+        showNote: false,
+        btnLabel: 'Add Note',
+        btnValue: 'Note', 
         Product_Type__c: x.detail.rowType
 
     }]
@@ -325,6 +350,7 @@ handleNewProd(x){
 mouse(e){
     let index = this.prodlist.findIndex((i)=> i.Product_Code__c === e.target.dataset.code)    
     let item = this.prodlist[index]
+   // console.log(item)
     
 }
 
@@ -335,7 +361,8 @@ mouse(e){
     @api 
     update(){
         this.loaded = false;
-        this.oppNote= this.template.querySelector('[data-note="appNote"]').value;
+        // this.oppNote= this.template.querySelector('[data-note="appNote"]').value;
+        // console.log('update ',this.oppNote)
 
         let params = {
             appName: this.appName,
@@ -343,10 +370,10 @@ mouse(e){
             appArea: this.areaId, 
             appNote: this.oppNote
         }
-
+        console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
         updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
             .then(()=>{
-               
+               console.log(JSON.stringify(this.prodlist))
                 updateProducts({products:this.prodlist})
             }).then((mess)=>{
                 //console.log('mess '+mess)
@@ -378,7 +405,29 @@ mouse(e){
         this.dispatchEvent(new CustomEvent('cancel'))
         
     }
-
+//handle select drop down on the products
+    handleOnselect(event){
+        let choice = event.detail.value;
+        switch(choice){
+            case 'Note':
+                 this.prodlist.find((x)=>x.Product_Code__c === event.target.name).showNote = true;
+                 this.prodlist.find((x)=>x.Product_Code__c === event.target.name).btnValue = 'Stash';
+                 this.prodlist.find((x)=>x.Product_Code__c === event.target.name).btnLabel = 'Hide Note';
+                break;
+            case 'Delete':
+                let prodName = event.target.name; 
+                this.removeProd(prodName);
+                break;
+            case 'Stash':
+                this.prodlist.find(e=>e.Product_Code__c === target.name).showNote = false;
+                this.prodlist.find((x)=>x.Product_Code__c === event.target.name).btnValue = 'Note';
+                this.prodlist.find((x)=>x.Product_Code__c === event.target.name).btnLabel = 'Add Note';
+                break;
+            default:
+                console.log('no choice');
+                
+        }
+    }
     //handle price warnings
     handleWarning = (targ, lev, flr, price, ind)=>{
         console.log(1,targ, 2,lev , 3,flr , 4,price, 5, ind );
