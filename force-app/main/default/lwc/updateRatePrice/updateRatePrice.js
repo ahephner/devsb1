@@ -26,11 +26,17 @@ export default class UpdateRatePrice extends LightningElement {
     sqft
     area
     areaUM
+    measure = 'M'; 
     addMore = false; 
+    //for showing area size
+    showAcreSize
+    //For showing product information
+    productName = '';
+    productCost = 0;
+    treatedAcreage;
     appTotalN;
     appTotalP;
     appTotalK;
-    measure = 'M'; 
     costPerM = 0;
     costPerAcre = 0;
     prodAreaCost = 0;
@@ -102,6 +108,8 @@ export default class UpdateRatePrice extends LightningElement {
     //need for doing math later
                 this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
                 this.areaAcres = parseInt(this.prodlist[0].Application__r.Area__r.Area_Acres__c);
+
+                this.showAcreSize = this.areaUM.includes('Acre') ? true : false; 
             this.loaded = true;
         } catch (error) {
             console.error(error);
@@ -130,7 +138,9 @@ export default class UpdateRatePrice extends LightningElement {
         newAppDate(e){
             this.appDate = e.detail.value; 
         }
-
+        showAreaSize(){
+            this.showAcreSize = this.showAcreSize === true ? false : true; 
+        }
 
 //get new rate for the product
         newRate(e){
@@ -264,9 +274,10 @@ export default class UpdateRatePrice extends LightningElement {
                 },1000)
             }
 
-            newNotes(e){
-                console.log(e.detail.value); 
-                //this.prodlist = this.prodlist.find((x)=> x.Product2Id === e.target.name).Note__c = e.detail.value; 
+            prodNote(e){
+                console.log(e.detail.value);
+                let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name) 
+                this.prodlist[index].Note__c = e.detail.value; 
             }
 //remove product from app
 removeProd(x){
@@ -347,22 +358,38 @@ handleNewProd(x){
 }
 
 //Display proudct info
-mouse(e){
-    let index = this.prodlist.findIndex((i)=> i.Product_Code__c === e.target.dataset.code)    
-    let item = this.prodlist[index]
-   // console.log(item)
-    
+// productName;
+// productCost;
+// treatedAcreage;
+levelOne;
+levelTwo;
+prodFloor;
+showProdInfo; 
+hiMouse(e){
+    this.showProdInfo = true; 
+    let index = this.prodlist[e.target.dataset.code]
+    console.log(index.Level_1_UserView__c)
+    this.productName = index.Product_Name__c;
+    this.productCost = index.Product_Cost__c;
+    this.levelOne = index.Level_1_UserView__c;
+    this.levelTwo = index.Level_2_UserView__c;
+    this.prodFloor = index.Floor_Price__c; 
+}
+byeMouse(e){
+console.log('run mouse')
 }
 
-    newNote(){
+    newAppNote(event){
         this.wasNewNote = true; 
+        this.oppNote = event.detail.value
     }
 //Update name and products
     @api 
     update(){
+        
         this.loaded = false;
-        // this.oppNote= this.template.querySelector('[data-note="appNote"]').value;
-        // console.log('update ',this.oppNote)
+        //only works if that tab is open when saving
+        //this.oppNote= this.template.querySelector('[data-note="appNote"]').value;
 
         let params = {
             appName: this.appName,
@@ -370,7 +397,7 @@ mouse(e){
             appArea: this.areaId, 
             appNote: this.oppNote
         }
-        console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
+        //console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
         updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
             .then(()=>{
                console.log(JSON.stringify(this.prodlist))
@@ -419,7 +446,7 @@ mouse(e){
                 this.removeProd(prodName);
                 break;
             case 'Stash':
-                this.prodlist.find(e=>e.Product_Code__c === target.name).showNote = false;
+                this.prodlist.find((e)=>e.Product_Code__c === event.target.name).showNote = false;
                 this.prodlist.find((x)=>x.Product_Code__c === event.target.name).btnValue = 'Note';
                 this.prodlist.find((x)=>x.Product_Code__c === event.target.name).btnLabel = 'Add Note';
                 break;

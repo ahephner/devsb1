@@ -15,3 +15,7 @@
     background-color: #cc0000;
     color: black;
 }
+
+.line{
+    border-bottom: solid 1px black;
+}
