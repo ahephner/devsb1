@@ -52,7 +52,7 @@
                         </div>   
                         <div class="slds-col slds-size_2-of-12">
                             <lightning-combobox
-                            name={sp.Product_Code__c}
+                            name={sp.Product2Id}
                             label="Unit Area"
                             value={sp.Unit_Area__c}
                             placeholder="Select Measure"
@@ -108,7 +108,7 @@
                             <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                            Total Cost Per M: $23.23
+                            Total Cost Per M: ${totalCostPerM}
                         </div>
                         <div lwc:if={showProdInfo} class='slds-col slds-size_1-of-1'>
                             <div class="slds-col slds-size_1-of-1">
@@ -118,10 +118,10 @@
                                 <p>Product Name: {productName}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                                <p>prod per M: {costPerM}</p>
+                                <p>prod per M: ${prodCostM}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                                <p>Acres Treated @ rate: 1.2 acres</p>
+                                <p>One unit will cover: {treatedAcreage} acres @ current rate</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_small">
                                 <div class="slds-text-heading_small slds-m-top_small slds-align_absolute-center line">

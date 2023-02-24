@@ -117,7 +117,11 @@ const perProduct = (prodPrice, prodSize, rate, unitOfMeasure)=>{
   let perThousand = unitOfMeasure.includes('Acre') ? cost: roundNum(cost/43.56, 2);
   return {perAcre, perThousand}; 
 }
-
+//acres treated
+const areaTreated = (unitSize, rate, unitMeasure) =>{
+  let treated = unitMeasure.includes('/M') ? roundNum((unitSize/rate)/43.56,2) : roundNum((unitSize/rate), 2);
+  return treated; 
+}
 //on update merge pricing together with app products
 const merge = (info, levels)=>{
   console.log(levels);
@@ -148,6 +152,7 @@ export{hold,
       roundNum, 
       pricePerUnit,
       perProduct,
-      merge}
+      merge,
+      areaTreated}
 
  
