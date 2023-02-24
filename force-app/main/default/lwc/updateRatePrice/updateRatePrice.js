@@ -368,7 +368,7 @@ showProdInfo;
 hiMouse(e){
     this.showProdInfo = true; 
     let index = this.prodlist[e.target.dataset.code]
-    console.log(index.Level_1_UserView__c)
+    console.log(index)
     this.productName = index.Product_Name__c;
     this.productCost = index.Product_Cost__c;
     this.levelOne = index.Level_1_UserView__c;
