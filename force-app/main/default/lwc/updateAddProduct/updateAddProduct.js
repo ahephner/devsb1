@@ -84,13 +84,15 @@ export default class UpdateAddProduct extends LightningElement {
       }
     pfChange(event){
         this.pf = event.detail.value;
-        this.startEventListener();
+        this.search(); 
+        //this.startEventListener();
          
     }
 
     catChange(e){
         this.cat = e.detail.value;
-        this.startEventListener(); 
+        this.search();
+        //this.startEventListener(); 
     }
     watchKeyDown(event){
         if(event.key==='Enter'){
@@ -122,7 +124,7 @@ export default class UpdateAddProduct extends LightningElement {
                 return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price, nVal, pVal, kVal, isFert, galWeight} 
 
             });
-            
+            //console.log(JSON.stringify(this.prod))
             this.error = undefined;
         })
         .catch((error) => {
@@ -148,6 +150,7 @@ export default class UpdateAddProduct extends LightningElement {
                         rowProdType : e.detail.row.Product_Type__c,
                         rowUnitPrice : e.detail.row.Level_2_UserView__c,
                         rowFlrPrice : e.detail.row.Floor_Price__c, 
+                        rowLevelOne: e.detail.row.Level_1_UserView__c,
                         rowMargin : e.detail.row.Level_2_Margin__c,
                         rowAgency : e.detail.row.Agency_Product__c,
                         rowCost : e.detail.row.Product_Cost__c,

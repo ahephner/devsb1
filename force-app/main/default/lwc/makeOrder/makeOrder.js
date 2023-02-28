@@ -58,7 +58,7 @@ export default class MakeOrder extends LightningElement {
         let saveProd = await insertProd({oppId: opp, appIds:orders})
         console.log('back',saveProd)
         this.sliderValue = 100; 
-        this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view` 
+        this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view`;
         this.softLoad = true    
         }
     // @api

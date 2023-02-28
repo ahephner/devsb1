@@ -6,8 +6,9 @@ import getAreas from '@salesforce/apex/appProduct.getAreas';
 import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
+import LightningConfirm from 'lightning/confirm';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
-
+import {onLoadTotalPrice} from 'c/programBuilderHelper';
 //table actions bottom of file shows how to handle
 const actions = [
     { label: 'Show details', name: 'show_details' },
@@ -48,6 +49,9 @@ export default class AppDataTable extends LightningElement {
     subscription= null;   
     loaded = false
     showOrder = false; 
+    programName;
+    customerName; 
+    totalPrice = 0.00; 
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
@@ -81,7 +85,10 @@ export default class AppDataTable extends LightningElement {
                 
                 this.appList = result.data; 
                 this.copy = result.data; 
+                this.programName = result.data[0].Program_Name__c;
+                this.customerName = result.data[0].Customer_Name__c;
                 this.error = undefined; 
+                this.totalPrice = onLoadTotalPrice(result.data); 
             }else if(result.error){
                 this.error = result.error 
                 this.appList = undefined; 
@@ -147,6 +154,14 @@ export default class AppDataTable extends LightningElement {
             this.getCopy = true; 
         }
     }
+    async  handleConfirm(){
+        const res = await LightningConfirm.open({
+            message: 'Do you want to delete this entry?',
+            variant: 'headless',
+            label:'Delete'
+        })
+        return res; 
+        }
     //handle table row actions. Delete or pop up to edit. 
     handleRowAction(event) {
         const actionName = event.detail.action.name;
@@ -156,29 +171,32 @@ export default class AppDataTable extends LightningElement {
             case 'delete':{
                     // eslint-disable-next-line no-case-declarations
                     // eslint-disable-next-line no-alert
-                    let cf = confirm('Do you want to delete this entry?')
-                    if(cf===true){
-                deleteRecord(row)
-                    .then(() => {
-                        this.dispatchEvent(
-                            new ShowToastEvent({
-                                title: 'Success', 
-                                message: 'App Deleted', 
-                                variant: 'success'
-                            }) 
-                        );//this refreshes the table  
-                        return refreshApex(this.wiredAppList)
+            this.handleConfirm()
+                    .then((res)=>{
+                        if(res===true){
+                            deleteRecord(row)
+                                .then(() => {
+                                    this.dispatchEvent(
+                                        new ShowToastEvent({
+                                            title: 'Success', 
+                                            message: 'App Deleted', 
+                                            variant: 'success'
+                                        }) 
+                                    );//this refreshes the table  
+                                    return refreshApex(this.wiredAppList)
+                                })
+                                .catch(error => {
+                                    this.dispatchEvent(
+                                        new ShowToastEvent({
+                                            title: 'Error deleting record',
+                                            message: JSON.stringify(error),
+                                            variant: 'error'
+                                        })
+                                    )
+                                })
+                            }
                     })
-                    .catch(error => {
-                        this.dispatchEvent(
-                            new ShowToastEvent({
-                                title: 'Error deleting record',
-                                message: JSON.stringify(error),
-                                variant: 'error'
-                            })
-                        )
-                    })
-                }
+
             }
                 break;
             case 'show_details':
@@ -207,6 +225,8 @@ export default class AppDataTable extends LightningElement {
 
 //This function calls the apex class that attaches the customer copy to the program 
  createPDF(){
+    console.log('ai', this.areaId);
+    
      this.loaded = false; 
     savePDF_File({Id: this.areaId, appId: this.recordId})
         .then(()=>{

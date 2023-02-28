@@ -146,6 +146,7 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
     infoIsValid(){
         if(this.interval === 'custom'){
             const spread = this.custSpreadBetweenApps * this.custDaysApart; 
+            console.log(spread)
             this.dispatchEvent(new CustomEvent('namedate', {
                 detail:{ 
                  name: this.appName,
@@ -168,33 +169,3 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
     }
 }
 
-// buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
-//     this.dateRange = [];
-//     const d = new Date(firstDate);
-//      console.log('timeBetween '+timeBetween);
-     
-//      this.nxt = (repeats * timeBetween)
-//      const left = Number(totalApp)-1;
-//       this.total = Number(totalApp)+1;  
-//      var mult = 0;
-//     for (let i = 0; i<= totalApp; i++){
-//          let nxt =  Number(i*timeBetween)
-//          console.log('nxt ' +nxt)
-//          console.log('date '+d);
-         
-//          d.setDate(d.getDate() + nxt)
-//          let day = new Date(d); 
-//          console.log('day '+d);
-         
-//          this.dateRange=[
-//             ...this.dateRange,{
-//                id:mult, name:day
-//             }
-//         ]
-//          mult ++; 
-         
-
-//     }  
-
-//     return this.dateRange
-// }

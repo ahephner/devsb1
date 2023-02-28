@@ -1,11 +1,11 @@
 const hold = () => console.log('hey');
 
 const appTotal = (prod) =>{
-  console.log(1,prod)
+ 
     let total = prod.reduce((a, b)=>{
         return Number(a + (b.Unit_Price__c * b.Units_Required__c))
     }, 0)
-    console.log(2,total);
+    
     
     total = roundRate(total, 2)
     return total; 
@@ -74,26 +74,106 @@ const handleLRate = (chem, galWeight, rate) => {
     amount = roundRate(amount, 4);
     return amount;
   }
+//sum all the fert
+const sumFert = (products)=>{
+  const totals = products.reduce((basket, items) => {
+    //console.log(basket) //is the const first loop blank
+    //console.log(items) //is the object of data you want to reduce
+      for (const [keyName, valueCount] of Object.entries(items)) {
+        //only get the fields we want to add ship weight add this below     
+          if(keyName  ==='N__c' || keyName==='P__c' || keyName ==='K__c'){
+//if the basket does not contain the key add the key and set the value to 0
+            if(!basket[keyName]) {
+                basket[keyName] = 0;
+            }
+          basket[keyName] += Number(valueCount);
+          }
+        }
+        return basket;
+  }, {});
+return totals; 
+}
+
 const roundRate = (numb, places) =>{
     return +(Math.round(numb + `e+${places}`) + `e-${places}`)
 }
 
+const onLoadTotalPrice = (data)=>{
+  let total= data.reduce((x, y)=>{
+                return x + y.Total_Price_ap__c;
+          }, 0);
+      return total; 
+}
 
-export{hold, appTotal, alreadyAdded, pref, calcDryFert, calcLiqFert, unitsRequired, roundRate}
+      //returns a round number for later math functions
+const roundNum = (value, dec)=>{
+  let x = Number(Math.round(parseFloat(value+'e'+dec))+'e-'+dec); 
+      return x;
+}
+
+
+//cost per single product. Returns per M and per Acre
+const areaCostCal = (perUnit, rate, unitOfMeasure)=>{
+  let d = roundNum(perUnit * rate, 2);
+  let perThousand = unitOfMeasure.includes('Acre') ? roundNum(d/43.56, 2): d;
+  let perAcre = unitOfMeasure.includes('Acre') ? d : roundNum(d*43.56, 2);
+
+  return {perThousand, perAcre}
+}
+//price per unit
+const pricePerUnit = (prodPrice, uSize, prodRate,unitMeasure )=>{
+  let areaSize = unitMeasure.includes('Acre') ? uSize/43.56 : uSize; 
+  let price = roundNum(prodPrice/areaSize, 2);
+  let final = areaCostCal(price, prodRate, unitMeasure);
+  return final;
+}
+
+
+const perProduct = (prodPrice, prodSize, rate, unitOfMeasure)=>{
+  let perOz = roundNum(prodPrice/prodSize, 2)
+  let cost = roundNum(rate * perOz, 2)
+  
+  let perAcre = unitOfMeasure.includes('/M') ? cost : roundNum(cost*43.56, 2);
+  let perThousand = unitOfMeasure.includes('Acre') ? cost: roundNum(cost/43.56, 2);
+  return {perAcre, perThousand}; 
+}
+//acres treated
+const areaTreated = (unitSize, rate, unitMeasure) =>{
+  let treated = unitMeasure.includes('/M') ? roundNum((unitSize/rate)/43.56,2) : roundNum((unitSize/rate), 2);
+  return treated; 
+}
+//on update merge pricing together with app products
+const merge = (info, levels)=>{
+  console.log(levels);
+  
+  let merged;
+  if(info){
+    console.log('info ' +info);
+    merged = info.map(res =>({
+      ...levels.find((i)=> (i.Product2Id === res.Product__c)),
+      ...res
+    })
+  )
+    return merged; 
+  }else{
+    return info; 
+  }
+}
+
+export{hold, 
+      appTotal, 
+      alreadyAdded, 
+      pref, 
+      calcDryFert, 
+      calcLiqFert, 
+      sumFert,
+      unitsRequired, 
+      roundRate, 
+      onLoadTotalPrice, 
+      roundNum, 
+      pricePerUnit,
+      perProduct,
+      merge,
+      areaTreated}
 
  
-// let n = calcDFert(prod.Rate2__c, prod.Unit_Area__c, areaSize, prod.nVal, prod.pVal, prod.kVal)
-
-// //console.log(Array.isArray(n))
-// //console.log(n[0])
-
-// //liquid
-// let liquid = {"Id":"01u2M00000ZBLpJQAX","Name":"FOLIAR-PAK BIO 12-6-6","Product__c":"01t2M0000062XyvQAE","unitPrice":117.28,"floorPrice":69.42,"unitCost":33.32,"margin":71.59,"agency":false,"nVal":11,"pVal":0,"kVal":11,"size":320,"isFert":true,"galWeight":10.58,"Product_Name__c":"FOLIAR-PAK BIO 12-6-6","Rate2__c":6,"Application__c":"","Note__c":"","Units_Required__c":1,"Unit_Area__c":"LB/Acre","Unit_Price__c":117.28,"Cost":33.32,"Margin__c":71.59,"Total_Price__c":117.28,"allowEdit":false,"Area__c":"","galLb":10.4}
-
-
-
-
-
-// const test = calcLFert(liquid.Rate2__c, liquid.Unit_Area__c, areaSize, liquid.nVal, liquid.pVal, liquid.kVal, liquid.galLb)
-
-// console.log(test[0])

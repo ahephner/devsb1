@@ -29,14 +29,21 @@
               <template if:true={productRates}>
                 <c-app-rate-price selection={selectedProducts}
                                   area-size={areaSQft}
+                                  onprice={badPrice}
                                   onsave={save}
                                   oncancel={closeModal}></c-app-rate-price>
               </template>
+              <template if:true={disableBtn}>
+                <div class='slds-align_absolute-center'>
+                    <p>One or more items is below floor. Look for the price in <span style='color:red'>red</span></p>     
+                </div>
+            </template>
             </div>
+            
               <footer class="slds-modal__footer ">
                 <div class="btnGroup">
                   <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
-                  <button class="slds-button slds-button_brand" onclick={move}>Next</button>
+                  <button class="slds-button slds-button_brand" disabled={disableBtn} onclick={move}>Next</button>
                 </div>
               </footer>
             </div>

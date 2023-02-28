@@ -14,7 +14,8 @@ export default class ProductTable extends LightningElement {
     dateName = false;
     productList = false; 
     productRates = false;
-    subscritption = null; 
+    subscritption = null;
+    disableBtn = false; 
     //firstApp = true; 
     //searching product table 
     areaSelected;
@@ -148,7 +149,7 @@ export default class ProductTable extends LightningElement {
                Units_Required__c: 1,
                Unit_Area__c: pref(this.areaUM, item.Product_Type__c),  
                Unit_Price__c: item.agency ? item.floorPrice : item.unitPrice,
-               Cost: item.unitCost, 
+               Product_Cost__c: item.unitCost, 
                Margin__c: item.agency ? "" : item.margin, 
                Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
                size: item.size,
@@ -224,5 +225,9 @@ export default class ProductTable extends LightningElement {
             })
 
          
+    }
+
+    badPrice(prod){
+        this.disableBtn = prod.detail;
     }
 }

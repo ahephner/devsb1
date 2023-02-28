@@ -6,3 +6,20 @@
 .hover{
     cursor: pointer;  
 }
+
+.fs{
+    font-size: large;
+}
+
+.btnOptions{
+    background-color: #cc0000;
+    color: black;
+}
+
+.line{
+    border-bottom: solid 1px black;
+}
+
+.lineUp{
+    display: inline-flex; 
+}
