@@ -7,6 +7,6 @@ public with sharing class appWrapper {
     public Date appDate {get;set;} 
     @AuraEnabled
     public String appArea {get;set;} 
-    
-
+    @AuraEnabled
+    public String appNote {get;set;}
 }
