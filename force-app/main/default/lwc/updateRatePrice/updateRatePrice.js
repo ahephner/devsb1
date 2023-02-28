@@ -8,7 +8,7 @@ import updateProducts from '@salesforce/apex/addApp.updateProducts';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
 import NOTE from '@salesforce/schema/App_Product__c.Note__c';
-import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated } from 'c/programBuilderHelper';
+import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated, sumFert } from 'c/programBuilderHelper';
 import {checkPricing} from 'c/helper'
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
@@ -34,9 +34,9 @@ export default class UpdateRatePrice extends LightningElement {
     productName = '';
     productCost = 0;
     treatedAcreage;
-    appTotalN;
-    appTotalP;
-    appTotalK;
+    appTotalN = 0.00;
+    appTotalP = 0.00;
+    appTotalK = 0.00;
     levelOne;
     levelTwo;
     prodFloor;
@@ -93,12 +93,17 @@ export default class UpdateRatePrice extends LightningElement {
                                 let costM;
                                 let costA; 
                                 let goodPrice = true; 
-                                let showNote = false; 
+                                let showNote = false;
+                                let agencyProd = item.Product__r.Agency_Pricing__c; 
                                 let btnLabel = 'Add Note';
                                 let btnValue = 'Note';
-                                this.appTotalPrice += item.Total_Price__c
+                                this.appTotalPrice += item.Total_Price__c;
+                                //console.log(typeof item.N__c);
+                                this.appTotalN += item.N__c;
+                                this.appTotalP += item.P__c;
+                                this.appTotalK += item.K__c;
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, btnLabel, btnValue}
+                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
@@ -176,9 +181,14 @@ export default class UpdateRatePrice extends LightningElement {
                    //console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSizeM,4, this.prodlist[index].Product_Size__c)
                     if(this.prodlist[index].isFert){
                         let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
-                        this.appTotalN = fert.n;
-                        this.appTotalP = fert.p;
-                        this.appTotalK = fert.k
+                        this.prodlist[index].N__c = fert.n;
+                        this.prodlist[index].P__c = fert.p;
+                        this.prodlist[index].K__c = fert.k;
+                        let totalFert = sumFert(this.prodlist)
+                        this.appTotalN += roundNum(totalFert.N__c, 4);
+                        this.appTotalP += roundNum(totalFert.P__c, 4);
+                        this.appTotalK += roundNum(totalFert.K__c, 4);
+
                     }
                 }
                 
@@ -205,6 +215,18 @@ export default class UpdateRatePrice extends LightningElement {
              this.treatedAcreage = areaTreated(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c );
              this.appTotalPrice = appTotal(this.prodlist);
              this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
+            //handle updating fertilizer amounts
+             if(this.prodlist[index].isFert){
+                let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
+                this.prodlist[index].N__c = fert.n;
+                this.prodlist[index].P__c = fert.p;
+                this.prodlist[index].K__c = fert.k;
+                //get totals
+                let totalFert = sumFert(this.prodlist)
+                this.appTotalN += roundNum(totalFert.N__c, 4);
+                this.appTotalP += roundNum(totalFert.P__c, 4);
+                this.appTotalK += roundNum(totalFert.K__c, 4);
+            }
             }
         }
 
@@ -308,13 +330,16 @@ export default class UpdateRatePrice extends LightningElement {
             }
 //remove product from app
 removeProd(x){
-    const row = x; 
+    let index = this.prodlist.findIndex(prod => prod.Product_Code__c === x);
+    let id = this.prodlist[index].Id; 
+    let fert = this.prodlist[index].isFert;
     let cf = confirm('Do you want to delete this product');
     if(cf === true){
-        deleteRecord(row)
+        this.prodlist.splice(index, 1);
+        if(id){
+        deleteRecord(id)
             .then(()=>{
-                let index = this.prodlist.findIndex(prod => prod.Product_Code__c === row);
-                this.prodlist.splice(index, 1)
+                //let index = this.prodlist.findIndex(prod => prod.Product_Code__c === row);
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success', 
@@ -332,6 +357,16 @@ removeProd(x){
                     })
                 )
             })
+        }
+        //need to do update all values.
+        this.appTotalPrice = appTotal(this.prodlist);
+        this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2);
+        if(fert){
+            let totalFert = sumFert(this.prodlist)
+            this.appTotalN += roundNum(totalFert.N__c, 4);
+            this.appTotalP += roundNum(totalFert.P__c, 4);
+            this.appTotalK += roundNum(totalFert.K__c, 4);
+        }  
     }
     
 }
@@ -359,7 +394,7 @@ handleNewProd(x){
         Units_Required__c: 1,
         Unit_Area__c: pref(this.areaUM, x.detail.rowProdType),  
         Unit_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
-        Product_Cost__c: x.detail.rowCost, 
+        Product_Cost__c: x.detail.rowAgency ? 'Agency' : x.detail.rowCost , 
         Margin__c: x.detail.rowAgency ? "" : x.detail.rowMargin, 
         Total_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
         Product_Size__c: x.detail.rowSize,
@@ -368,10 +403,14 @@ handleNewProd(x){
         nVal: x.detail.rowN,
         pVal: x.detail.rowP,
         kVal: x.detail.rowK,
+        N__c: 0.0,
+        P__c: 0.0,
+        K__c: 0.0, 
         isFert: x.detail.isFert,
-        galLb: x.galWeight,
+        galLb: x.detail.galWeight,
         Product2Id: x.detail.rowProduct,
         goodPrice: true, 
+        agencyProd: x.detail.rowAgency,
         Floor_Price__c: x.detail.rowFlrPrice,
         Level_1_UserView__c: x.detail.rowLevelOne, 
         title:  x.detail.rowAgency ? 'Agency Product': `Unit Price - Flr $${x.detail.rowFlrPrice}`,
@@ -388,7 +427,9 @@ handleNewProd(x){
 // productName;
 // productCost;
 // treatedAcreage;
-
+prodN
+prodP
+prodK
 hiMouse(e){
     this.showProdInfo = true; 
     let index = this.prodlist[e.target.dataset.code]
@@ -401,6 +442,9 @@ hiMouse(e){
     this.prodCostM = index.costM ? index.costM : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perThousand;
     this.prodCostA = index.costA ? index.costA : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perAcre;
     this.treatedAcreage = this.treatedAcreage ? this.treatedAcreage : areaTreated(index.Product_Size__c,index.Rate2__c, index.Unit_Area__c );
+    this.prodN = index.N__c;
+    this.prodP = index.P__c;
+    this.prodK = index.K__c; 
 }
 byeMouse(e){
 console.log('run mouse')

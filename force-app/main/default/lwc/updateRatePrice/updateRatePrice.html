@@ -19,7 +19,7 @@
                 <lightning-input type="date" variant="standard" value={appDate} 
                                  name="name" label="App Date" onchange={newAppDate}></lightning-input>
             </div>
-            <div class='slds-size_2-of-8 slds-m-left_small slds-m-top_large'>
+            <div class='slds-size_1-of-8 slds-m-left_small slds-m-top_large'>
                 <p class="fs">Area: {areaName}</p>
             </div>
                 <div class='slds-col slds-size_2-of-8 slds-m-top_large' onclick={showAreaSize}>
@@ -129,10 +129,10 @@
                                 </div>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
-                                <p>Product Cost: ${prodFloor}</p>
+                                <p>Product Cost: ${productCost}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
-                                <p>Product Floor: ${productCost}</p>
+                                <p>Product Floor: ${prodFloor}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
                                 <p>Product Level 1: ${levelOne}</p>
@@ -153,11 +153,35 @@
                     </ul> -->
                 </lightning-tab>
                 <lightning-tab label="Fertility Info:"> 
-                    <ul>
-                        <li>N:{appTotalN}</li>
-                        <li>P:{appTotalP}</li>
-                        <li>K:{appTotalK}</li>
-                    </ul>
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col slds-size_1-of-1 line lineUp">
+                            <div class="slds-text-heading_small slds-m-top_small">App Total NPK:</div>
+                            <p class="slds-m-top_small slds-m-left_small"><i>Note all based on per 1,000ft<sup>2</sup></i></p>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-m-top_small slds-size_1-of-1">
+                        <ul>
+                            <li>N:{appTotalN}</li>
+                            <li>P:{appTotalP}</li>
+                            <li>K:{appTotalK}</li>
+                        </ul>
+                    </div>
+                    <div lwc:if={showProdInfo}>
+                    <div class="slds-col slds-size_1-of-1">
+                        <div class="slds-text-heading_small slds-m-top_small">Product Info:</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
+                        <p>Product Name: {productName}</p>
+                    </div>
+                    <div class="slds-col">
+                        <ul class="slds-m-top_small slds-size_1-of-1">
+                            <li>N:{prodN}</li>
+                            <li>P:{prodP}</li>
+                            <li>K:{prodK}</li>
+                            <li>Total Treated area:  {treatedAcreage} acres</li>
+                        </ul>
+                    </div>
+                </div>
                 </lightning-tab>
                 <lightning-tab label="Note"> 
                     <lightning-textarea data-note="appNote" label="Application Notes" value={oppNote} 

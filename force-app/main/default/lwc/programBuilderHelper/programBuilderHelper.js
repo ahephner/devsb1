@@ -74,6 +74,26 @@ const handleLRate = (chem, galWeight, rate) => {
     amount = roundRate(amount, 4);
     return amount;
   }
+//sum all the fert
+const sumFert = (products)=>{
+  const totals = products.reduce((basket, items) => {
+    //console.log(basket) //is the const first loop blank
+    //console.log(items) //is the object of data you want to reduce
+      for (const [keyName, valueCount] of Object.entries(items)) {
+        //only get the fields we want to add ship weight add this below     
+          if(keyName  ==='N__c' || keyName==='P__c' || keyName ==='K__c'){
+//if the basket does not contain the key add the key and set the value to 0
+            if(!basket[keyName]) {
+                basket[keyName] = 0;
+            }
+          basket[keyName] += Number(valueCount);
+          }
+        }
+        return basket;
+  }, {});
+return totals; 
+}
+
 const roundRate = (numb, places) =>{
     return +(Math.round(numb + `e+${places}`) + `e-${places}`)
 }
@@ -146,6 +166,7 @@ export{hold,
       pref, 
       calcDryFert, 
       calcLiqFert, 
+      sumFert,
       unitsRequired, 
       roundRate, 
       onLoadTotalPrice, 

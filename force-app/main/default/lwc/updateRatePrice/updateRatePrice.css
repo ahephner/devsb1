@@ -19,3 +19,7 @@
 .line{
     border-bottom: solid 1px black;
 }
+
+.lineUp{
+    display: inline-flex; 
+}
