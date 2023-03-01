@@ -14,3 +14,8 @@
 .point{
     cursor: pointer;
 }
+
+.btnOptions{
+    background-color: #cc0000;
+    color: black;
+}

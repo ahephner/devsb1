@@ -148,15 +148,21 @@ export default class ProductTable extends LightningElement {
                Note__c: '' ,
                Units_Required__c: 1,
                Unit_Area__c: pref(this.areaUM, item.Product_Type__c),  
-               Unit_Price__c: item.agency ? item.floorPrice : item.unitPrice,
+               Unit_Price__c: item.agency ? item.floorPrice : item.levelTwo,
                Product_Cost__c: item.unitCost, 
                Margin__c: item.agency ? "" : item.margin, 
-               Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
+               Total_Price__c: item.agency ? item.floorPrice : item.levelTwo,
                size: item.size,
                allowEdit: item.agency ? true : false,
                Area__c: '',
                isFert: item.isFert,
-               galLb: item.galWeight
+               galLb: item.galWeight,
+               btnLabel:'Add Note',
+               btnValue: 'Note',
+               showNote: false,
+               Note__c: '',
+               costM:'',
+               costA:''
             }
         } );
        
