@@ -29,6 +29,7 @@ export default class ProductTable extends LightningElement {
     daysApart;
     customInsert = false; 
     currentStage = 'appInfo'
+    applicationNote; 
    @track selectedProducts = []; 
 
     @wire(MessageContext)
@@ -168,11 +169,14 @@ export default class ProductTable extends LightningElement {
        
     }
     save(prod){ 
-        this.selectedProducts = prod.detail; 
+        //catching values from appRatePrice. It's an array that you can get values using [1]
+        this.selectedProducts = prod.detail[0]; 
+        this.applicationNote = prod.detail[1]; 
         let params = {
             appName: this.appName,
             appArea: this.areaId,
-            appDate: this.appDate
+            appDate: this.appDate,
+            appNote: this.applicationNote
         }
         addApplication({wrapper:params})
             .then((resp)=>{

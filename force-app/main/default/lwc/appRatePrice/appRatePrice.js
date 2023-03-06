@@ -31,7 +31,7 @@ export default class AppRatePrice extends LightningElement {
            prodP;
            prodK;
            //note on the application 
-           oppNote
+           oppNote = ''; 
 
            @api 
            get selection(){
@@ -202,15 +202,14 @@ export default class AppRatePrice extends LightningElement {
                 {label: 'LB/Acre', value:'LB/Acre'}
             ];
         }
-
+//handle note 
         prodNote(e){
-            console.log(e.detail.value);
             let index = this.data.findIndex(prod => prod.Product2Id === e.target.name) 
             this.data[index].Note__c = e.detail.value; 
         }
 
         removeProd(e){
-            let index = this.data.findIndex(x => x.Id === e.target.name);
+            let index = this.data.findIndex(x => x.Product__c === e);
             
             if(index > -1){
                 this.data.splice(index, 1)
@@ -223,18 +222,18 @@ export default class AppRatePrice extends LightningElement {
         
         switch(choice){
             case 'Note':
-                 this.data.find((x)=>x.Product_Code__c === event.target.name).showNote = true;
-                 this.data.find((x)=>x.Product_Code__c === event.target.name).btnValue = 'Stash';
-                 this.data.find((x)=>x.Product_Code__c === event.target.name).btnLabel = 'Hide Note';
+                 this.data.find((x)=>x.Product__c === event.target.name).showNote = true;
+                 this.data.find((x)=>x.Product__c === event.target.name).btnValue = 'Stash';
+                 this.data.find((x)=>x.Product__c === event.target.name).btnLabel = 'Hide Note';
                 break;
             case 'Delete':
                 let prodName = event.target.name; 
                 this.removeProd(prodName);
                 break;
             case 'Stash':
-                this.data.find((e)=>e.Product_Code__c === event.target.name).showNote = false;
-                this.data.find((x)=>x.Product_Code__c === event.target.name).btnValue = 'Note';
-                this.data.find((x)=>x.Product_Code__c === event.target.name).btnLabel = 'Add Note';
+                this.data.find((e)=>e.Product__c === event.target.name).showNote = false;
+                this.data.find((x)=>x.Product__c === event.target.name).btnValue = 'Note';
+                this.data.find((x)=>x.Product__c === event.target.name).btnLabel = 'Add Note';
                 break;
             default:
                 console.log('no choice');
@@ -249,10 +248,9 @@ export default class AppRatePrice extends LightningElement {
            save(){
                
                this.loaded = false; 
-               console.log('loaded '+this.loaded);
-               
+               let note = this.oppNote.length > 0 ? this.oppNote : '';
                this.dispatchEvent(new CustomEvent('save',{
-                    detail: this.data
+                    detail: [this.data, note]
                }));    
                //this.loaded = true; 
                return true;
