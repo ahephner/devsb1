@@ -82,12 +82,12 @@ export default class ProductTable extends LightningElement {
                     break;
                 case 'selectProd':
                     let ok = this.template.querySelector('c-app-select-prod').next();
-                    console.log({ok})
+                    //console.log({ok})
                     ok ? this.currentStage = 'ratePrice' : ''
                     break;
                 case 'ratePrice':
                     let final = this.template.querySelector('c-app-rate-price').save();
-                    console.log({final})
+                    //console.log({final})
                     final ? this.currentStage = 'appInfo': '';
                     break;
             }

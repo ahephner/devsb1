@@ -1,5 +1,5 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum, perProduct, areaTreated} from 'c/programBuilderHelper';
+import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum, perProduct, areaTreated, sumFert} from 'c/programBuilderHelper';
 import {checkPricing} from 'c/helper';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
@@ -79,10 +79,14 @@ export default class AppRatePrice extends LightningElement {
                     this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2); 
                     if(this.data[index].isFert){
                         let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);
-
-                        this.appTotalN = fert.n;
-                        this.appTotalP = fert.p;
-                        this.appTotalK = fert.k; 
+                        this.data[index].N__c = fert.n;
+                        this.data[index].P__c = fert.p;
+                        this.data[index].K__c = fert.k;
+                        
+                        let totalFert = sumFert(this.data)
+                        this.appTotalN = roundNum(totalFert.N__c, 4);
+                        this.appTotalP = roundNum(totalFert.P__c, 4);
+                        this.appTotalK = roundNum(totalFert.K__c, 4); 
                     } 
                 }
                 
@@ -109,6 +113,18 @@ export default class AppRatePrice extends LightningElement {
                 this.treatedAcreage = areaTreated(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].Unit_Area__c );
                 this.appTotalPrice = appTotal(this.data); 
                 this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2);
+                //handle fertilizer
+                if(this.data[index].isFert){
+                    let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);
+                    this.data[index].N__c = fert.n;
+                    this.data[index].P__c = fert.p;
+                    this.data[index].K__c = fert.k;
+                    
+                    let totalFert = sumFert(this.data)
+                    this.appTotalN = roundNum(totalFert.N__c, 4);
+                    this.appTotalP = roundNum(totalFert.P__c, 4);
+                    this.appTotalK = roundNum(totalFert.K__c, 4); 
+                } 
                }
            }
 

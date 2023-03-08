@@ -45,7 +45,7 @@ export default class AppDataTable extends LightningElement {
     //used to pass areaId to pdf creator
     areaId; 
     //expose customer copy button
-    getCopy = false; 
+    //getCopy = false; 
     subscription= null;   
     loaded = false
     showOrder = false; 
@@ -55,8 +55,8 @@ export default class AppDataTable extends LightningElement {
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
-        this.loaded = true; 
     }
+
     disconnectedCallback(){
         this.unsubscribeFromMessageChannel(); 
     }
@@ -89,6 +89,7 @@ export default class AppDataTable extends LightningElement {
                 this.customerName = result.data[0].Customer_Name__c;
                 this.error = undefined; 
                 this.totalPrice = onLoadTotalPrice(result.data); 
+                this.loaded = true;     
             }else if(result.error){
                 this.error = result.error 
                 this.appList = undefined; 
@@ -120,6 +121,7 @@ export default class AppDataTable extends LightningElement {
     //then retrieve the new values
     handleUpdate(mess){
         this.loaded = false; 
+        console.log(1, this.loaded)
         window.clearTimeout(this.delay);
         if(mess.updateTable === true){
             this.delay = setTimeout(()=>{
@@ -127,6 +129,7 @@ export default class AppDataTable extends LightningElement {
             },2000) 
         }
         this.loaded = true; 
+        console.log(2, this.loaded)
     }
     //I found  the search by area to be more helpfull. You can add back search function here
 
@@ -146,12 +149,12 @@ export default class AppDataTable extends LightningElement {
 
         if(areaName==='All'){
             this.appList = this.copy
-            this.getCopy = false; 
+            //this.getCopy = false; 
         }else{
             //console.log('areaName2 '+areaName);
             this.appList = this.copy
             this.appList = this.appList.filter(x => x.Area_Name__c === areaName)
-            this.getCopy = true; 
+            //this.getCopy = true; 
         }
     }
     async  handleConfirm(){

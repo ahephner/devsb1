@@ -57,7 +57,7 @@ export default class AppSelectProd extends LightningElement {
         wiredPickListValues({data, error}){
             if(data){
                 this.pfOptions = data.values;
-                console.log('picklist '+this.pfOptions[1]);
+                //console.log('picklist '+this.pfOptions[1]);
                 
             }else if(error){
                 console.log(error)
