@@ -185,9 +185,9 @@ export default class UpdateRatePrice extends LightningElement {
                         this.prodlist[index].P__c = fert.p;
                         this.prodlist[index].K__c = fert.k;
                         let totalFert = sumFert(this.prodlist)
-                        this.appTotalN += roundNum(totalFert.N__c, 4);
-                        this.appTotalP += roundNum(totalFert.P__c, 4);
-                        this.appTotalK += roundNum(totalFert.K__c, 4);
+                        this.appTotalN = roundNum(totalFert.N__c, 4);
+                        this.appTotalP = roundNum(totalFert.P__c, 4);
+                        this.appTotalK = roundNum(totalFert.K__c, 4);
 
                     }
                 }
@@ -223,9 +223,9 @@ export default class UpdateRatePrice extends LightningElement {
                 this.prodlist[index].K__c = fert.k;
                 //get totals
                 let totalFert = sumFert(this.prodlist)
-                this.appTotalN += roundNum(totalFert.N__c, 4);
-                this.appTotalP += roundNum(totalFert.P__c, 4);
-                this.appTotalK += roundNum(totalFert.K__c, 4);
+                this.appTotalN = roundNum(totalFert.N__c, 4);
+                this.appTotalP = roundNum(totalFert.P__c, 4);
+                this.appTotalK = roundNum(totalFert.K__c, 4);
             }
             }
         }

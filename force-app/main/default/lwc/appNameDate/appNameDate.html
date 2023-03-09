@@ -2,11 +2,11 @@
     <lightning-card  variant="Narrow"  title="Application Name and Date" icon-name="utility:event">
         <div class='slds-grid'>
             <lightning-input type="text" variant="standard" class='slds-size_2-of-6'
-                name="appName" label="Application Name" onchange={setName}
+                name="appName" label="Application Name" onchange={setName} value={appName}
                 required placeholder="type here..."></lightning-input>
 
             <lightning-input type="date" name="appDate" class='slds-size_2-of-6 slds-m-left_small'
-                label="Application Date" required onchange={setDate}></lightning-input>
+                label="Application Date" required onchange={setDate} value={appDate}></lightning-input>
         </div>
 
         <lightning-card variant='Narrow' title="Occurences">

@@ -1,58 +1,84 @@
 @isTest
 private class test_appProduct {
-  static Product__c r1 = new Product__c();
-  static Product__c r2 = new Product__c();
-  static Product__c r3 = new Product__c();
-  static Product__c r4 = new Product__c();
+  static Product2 r1 = new Product2();
+  static Product2 r2 = new Product2();
+  static Product2 r3 = new Product2();
+  static Product2 r4 = new Product2();
   static Area__c area = new Area__c();
   static Program__c prog = new Program__c(); 
   static Application__c Application = new Application__c(); 	
   static {
-
+        //pricebook
+        Id pricebookId = Test.getStandardPricebookId();
     // insert some products
-     r1.Product_Name__c='Product 1';
-     r1.Primary_Category__c = 'Chemicals';
-     r1.Subcategory__c ='Chemicals-Herbicide';
-     r1.Include_in_Programs__c = True;
-     r1.size__c = 128;
-     r1.Product_Status__c = 'Stock';
-     r1.Average_Cost__c = 4.00; 
-     r1.Product_Type__c = 'Liquid';
-     r1.Product_Family__c = 'FMC';
+         r1.Name='Product 1';
+         r1.Primary_Category__c = 'Chemicals';
+         r1.Subcategory__c ='Chemicals-Herbicide';
+         r1.Include_in_Programs__c = True;
+         r1.IsActive= True; 
+         r1.ProductCode='123';
+         r1.Product_Status__c ='Stock';
+         r1.Size__c = 128;
+         r1.Floor_Type__c ='Floor'; 
+         r1.Floor_Price__c = 100;  
+     	 r1.Product_Type__c = 'Liquid';
+     	 r1.Product_Family__c = 'FMC';
       
-     r2.Product_Name__c='Product 2';
-     r2.Primary_Category__c = 'Chemicals';
-     r2.Subcategory__c = 'Chemicals-Fungicide';
-     r2.Include_in_Programs__c = True; 
-     r2.Size__c = 128;
-     r2.Product_Status__c = 'Stock';
-     r2.Average_Cost__c = 3.00;
-     r2.Product_Type__c = 'Liquid';
-     r2.Product_Family__c = 'FMC'; 
+         r2.Name='Product 2';
+         r2.Primary_Category__c = 'Chemicals';
+         r2.Subcategory__c = 'Chemicals-Fungicide';
+         r2.Include_in_Programs__c = True;
+         r2.IsActive= True; 
+         r2.ProductCode='123';
+         r2.Product_Status__c ='Stock';
+         r2.Size__c = 128;
+         r2.Floor_Type__c ='Floor'; 
+         r2.Floor_Price__c = 100;
+     	 r2.Product_Type__c = 'Liquid';
+     	 r2.Product_Family__c = 'FMC'; 
      
-     r3.Product_Name__c='Product 3';
-     r3.Primary_Category__c = 'Chemicals';
-     r3.Subcategory__c ='Chemicals-Herbicide';
-     r3.Include_in_Programs__c = True;
-     r3.Size__c = 128; 
-     r3.Product_Status__c = 'Stock';
-     r3.Average_Cost__c = 2.00;
-     r3.Product_Type__c = 'Liquid';
-     r3.Product_Family__c = 'FMC'; 
-     r4.Product_Name__c='Product 4';
-     r4.Primary_Category__c = 'Chemicals';
-     r4.Subcategory__c ='Chemicals-Fungicide';
-     r4.Include_in_Programs__c = False; 
-     r4.Size__c = 128; 
-     r4.Product_Status__c = 'Stock'; 
-     r4.Average_Cost__c = 1.00;
-     r4.Product_Type__c = 'Liquid'; 
-    
-    insert r1;
-    insert r2;
-    insert r3; 
-    insert r4; 
+     	r3.Name='Product 3';
+     	r3.Primary_Category__c = 'Chemicals';
+     	r3.Subcategory__c ='Chemicals-Herbicide';
+     	r3.Include_in_Programs__c = True;
+     	r3.Size__c = 128; 
+     	r3.Product_Status__c = 'Stock';
+        r3.Floor_Type__c ='Floor'; 
+        r3.Floor_Price__c = 100;
+     	r3.Product_Type__c = 'Liquid';
+     	r3.Product_Family__c = 'FMC';
       
+      	r4.Name='Product 4';
+     	r4.Primary_Category__c = 'Chemicals';
+     	r4.Subcategory__c ='Chemicals-Fungicide';
+        r4.Include_in_Programs__c = True;
+        r4.IsActive= True; 
+        r4.ProductCode='123';
+        r4.Product_Status__c ='Stock';
+        r4.Size__c = 128;
+        r4.Floor_Type__c ='Floor'; 
+        r4.Floor_Price__c = 100;
+     	r4.Product_Type__c = 'Liquid';
+     	r4.Product_Family__c = 'FMC';
+    
+    	insert r1;
+    	insert r2;
+    	insert r3; 
+    	insert r4; 
+      
+              //pricebook entries
+        PricebookEntry pbe = new PricebookEntry(Pricebook2Id = pricebookId, Product2Id=r1.id,
+                                                 unitprice=100, IsActive = True, UseStandardPrice=False);
+        PricebookEntry pbe2 = new PricebookEntry(Pricebook2Id = pricebookId, Product2Id=r2.id,
+                                                 unitprice=110, IsActive = True, UseStandardPrice=False);
+        PricebookEntry pbe3 = new PricebookEntry(Pricebook2Id = pricebookId, Product2Id=r3.id,
+                                                 unitprice=130, IsActive = True, UseStandardPrice=False);
+        PricebookEntry pbe4 = new PricebookEntry(Pricebook2Id = pricebookId, Product2Id=r4.id,
+                                                 unitprice=140, IsActive = True, UseStandardPrice=False);
+		insert pbe;
+        insert pbe2;
+      	insert pbe3;
+      	insert pbe4;
     // setup a new account
     Account cust = new Account();
     cust.Name = 'Test123456';
@@ -74,8 +100,20 @@ private class test_appProduct {
      
     Application.Name = 'test app';
     Application.Area__c = area.id;  
-    insert Application;   
-
+    insert Application;
+      //app products
+        App_Product__c ap1 = new App_Product__c(Application__c=application.Id,Product__c = r1.Id, Rate2__c =2,Units_Required__c = 2,
+                                                OZ_M__c = 3, Note__c ='', Unit_Area__c = 'OZ/M',Unit_Price__c = 12,Margin__c =13,
+                                               Unit_Cost__c = 2,N__c = 0, P__c=0, K__c=0);
+        App_Product__c ap2 = new App_Product__c(Application__c=application.Id,Product__c = r2.Id, Rate2__c =2,Units_Required__c = 2,
+                                                OZ_M__c = 3, Note__c ='', Unit_Area__c = 'OZ/M',Unit_Price__c = 12,Margin__c =13,
+                                               Unit_Cost__c = 2,N__c = 0, P__c=0, K__c=0);
+        App_Product__c ap3 = new App_Product__c(Application__c=application.Id,Product__c = r3.Id, Rate2__c =2,Units_Required__c = 2,
+                                                OZ_M__c = 3, Note__c ='', Unit_Area__c = 'OZ/M',Unit_Price__c = 12,Margin__c =13,
+                                               Unit_Cost__c = 2,N__c = 0, P__c=0, K__c=0);
+        App_Product__c ap4 = new App_Product__c(Application__c=application.Id,Product__c = r4.Id, Rate2__c =2,Units_Required__c = 2,
+                                                OZ_M__c = 3, Note__c ='', Unit_Area__c = 'OZ/M',Unit_Price__c = 12,Margin__c =13,
+                                               Unit_Cost__c = 2,N__c = 0, P__c=0, K__c=0);
   }
     //test wrapper 
     @isTest 
@@ -135,31 +173,40 @@ private class test_appProduct {
     
     @isTest 
     static void testAppProducts(){
-        list<application_product__c> apList = new list<application_product__c>(); 
-        Application_Product__c ap1 = new Application_Product__c(Application__c=application.Id,Product__c = r1.Id);
-        Application_Product__c ap2 = new Application_Product__c(Application__c=application.Id,Product__c = r2.Id);
+        list<App_Product__c> apList = new list<App_Product__c>(); 
+        App_Product__c ap1 = new App_Product__c(Application__c=application.Id,Product__c = r1.Id);
+        App_Product__c ap2 = new App_Product__c(Application__c=application.Id,Product__c = r2.Id);
         apList.add(ap1);
         apList.add(ap2); 
         insert apList; 
         Test.startTest(); 
-        	list<Application_Product__c> prodList = appProduct.appProducts(application.Id);         	
+        	list<App_Product__c> prodList = appProduct.appProducts(application.Id);         	
         Test.stopTest();
-        	list<application_product__c> nl = [select id from application_product__c where application__c =: application.id]; 
+        	list<App_Product__c> nl = [select id from App_Product__c where application__c =: application.id]; 
         	system.assertEquals(2, nl.size());
         
     }
     @istest
     static void testSearch(){
 	test.startTest();
-        list<product__c> prodSearch = appProduct.searchProduct('product', 'All', 'All');
-        list<product__c> searchCatSearch = appProduct.searchProduct('product', 'Chemicals-Herbicide', 'All');
-        list<product__c> searchFamSearch = appProduct.searchProduct('product', 'All', 'FMC');
-        list<product__c> catSearch = appProduct.searchProduct('null', 'Chemicals-Herbicide', 'All');
-        list<product__c> famSearch = appProduct.searchProduct('null', 'All', 'FMC');
-        list<product__c> prodFamSearch = appProduct.searchProduct('null', 'Chemicals-Herbicide', 'FMC');
+        list<PricebookEntry> prodSearch = appProduct.searchProduct2('product', 'All', 'All');
+        list<PricebookEntry> searchCatSearch = appProduct.searchProduct2('product', 'Chemicals-Herbicide', 'All');
+        list<PricebookEntry> searchFamSearch = appProduct.searchProduct2('product', 'All', 'FMC');
+        list<PricebookEntry> catSearch = appProduct.searchProduct2('null', 'Chemicals-Herbicide', 'All');
+        list<PricebookEntry> famSearch = appProduct.searchProduct2('null', 'All', 'FMC');
+        list<PricebookEntry> prodFamSearch = appProduct.searchProduct2('null', 'Chemicals-Herbicide', 'FMC');
      test.stopTest();
         system.assertNotEquals(0, prodSearch.size());
     }
+    //@istest
+    //static void testPricing(){
+        //list<string> ids = new list<string>();
+        	//ids.add(pbe2.Id); 
+        //test.startTest();
+        	//list<PricebookEntry> price = appProduct.pricing(ids);
+        //test.stopTest();
+    //}
+    
     //here is how would test if we reverse and decide to pass params back to apex
   //  @isTest
    // static void testSearch(){

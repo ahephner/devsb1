@@ -5,8 +5,9 @@ export default class AppNameDate extends LightningElement {
     interval ='once';
     numbApps = 1; 
     //name date vars
-    appName;
-    appDate;
+    //SET TO BLANK BEFORE DEPLOYING
+    appName = 'testing';
+    appDate = '2023-02-28';
     //custom insert values; 
     customInsert = false; 
     custNumberApps; 

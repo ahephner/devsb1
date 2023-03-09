@@ -29,6 +29,7 @@ export default class ProductTable extends LightningElement {
     daysApart;
     customInsert = false; 
     currentStage = 'appInfo'
+    applicationNote; 
    @track selectedProducts = []; 
 
     @wire(MessageContext)
@@ -81,12 +82,12 @@ export default class ProductTable extends LightningElement {
                     break;
                 case 'selectProd':
                     let ok = this.template.querySelector('c-app-select-prod').next();
-                    console.log({ok})
+                    //console.log({ok})
                     ok ? this.currentStage = 'ratePrice' : ''
                     break;
                 case 'ratePrice':
                     let final = this.template.querySelector('c-app-rate-price').save();
-                    console.log({final})
+                    //console.log({final})
                     final ? this.currentStage = 'appInfo': '';
                     break;
             }
@@ -148,25 +149,34 @@ export default class ProductTable extends LightningElement {
                Note__c: '' ,
                Units_Required__c: 1,
                Unit_Area__c: pref(this.areaUM, item.Product_Type__c),  
-               Unit_Price__c: item.agency ? item.floorPrice : item.unitPrice,
+               Unit_Price__c: item.agency ? item.floorPrice : item.levelTwo,
                Product_Cost__c: item.unitCost, 
                Margin__c: item.agency ? "" : item.margin, 
-               Total_Price__c: item.agency ? item.floorPrice : item.unitPrice,
+               Total_Price__c: item.agency ? item.floorPrice : item.levelTwo,
                size: item.size,
                allowEdit: item.agency ? true : false,
                Area__c: '',
                isFert: item.isFert,
-               galLb: item.galWeight
+               galLb: item.galWeight,
+               btnLabel:'Add Note',
+               btnValue: 'Note',
+               showNote: false,
+               Note__c: '',
+               costM:'',
+               costA:''
             }
         } );
        
     }
     save(prod){ 
-        this.selectedProducts = prod.detail; 
+        //catching values from appRatePrice. It's an array that you can get values using [1]
+        this.selectedProducts = prod.detail[0]; 
+        this.applicationNote = prod.detail[1]; 
         let params = {
             appName: this.appName,
             appArea: this.areaId,
-            appDate: this.appDate
+            appDate: this.appDate,
+            appNote: this.applicationNote
         }
         addApplication({wrapper:params})
             .then((resp)=>{

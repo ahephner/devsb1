@@ -22,11 +22,15 @@ const columnsList = [
     cellAttributes: {
         style: 'transform: scale(0.75)'}
     },
-    {label: 'Name', fieldName:'Name', cellAttributes:{alignment:'left'}, "initialWidth": 418},
+    {label: 'Name', fieldName:'Name', cellAttributes:{alignment:'left'}, "initialWidth": 375},
     {label: 'Code', fieldName:'Code', cellAttributes:{alignment:'center'}, "initialWidth": 134},
     {label: 'Status', fieldName:'Product_Status__c', cellAttributes:{alignment:'center'}, "initialWidth": 78},
-    {label: 'Suggested Price', fieldName:'Price', 
-    type:'currency', cellAttributes:{alignment:'center'}, "initialWidth": 194},
+    {label: 'Floor', fieldName:'Floor', 
+    type:'currency', cellAttributes:{alignment:'center'}, "initialWidth": 120},
+    {label: 'Lvl 1', fieldName:'LevelOne', 
+    type:'currency', cellAttributes:{alignment:'center'}, "initialWidth": 120},
+    {label: 'Lvl 2', fieldName:'LevelTwo', 
+    type:'currency', cellAttributes:{alignment:'center'}, "initialWidth": 120}
 ]
 export default class AppSelectProd extends LightningElement {
     @track loaded = false; 
@@ -53,7 +57,7 @@ export default class AppSelectProd extends LightningElement {
         wiredPickListValues({data, error}){
             if(data){
                 this.pfOptions = data.values;
-                console.log('picklist '+this.pfOptions[1]);
+                //console.log('picklist '+this.pfOptions[1]);
                 
             }else if(error){
                 console.log(error)
@@ -115,8 +119,10 @@ export default class AppSelectProd extends LightningElement {
                 let isFert = item.Product2.hasFertilizer__c;
                 let galWeight = item.Product2.X1_Gallon_Weight__c;
                 let Product_Status__c = item.Product2.Product_Status__c;
-                let Price = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
-                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Price, nVal, pVal, kVal, isFert, galWeight} 
+                let Floor = item.Agency_Product__c ? item.Floor_Price__c : item.Floor_Price__c;
+                let LevelOne = item.Agency_Product__c ? item.Floor_Price__c : item.Level_1_UserView__c;
+                let LevelTwo = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
+                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Floor, LevelOne, LevelTwo, nVal, pVal, kVal, isFert, galWeight} 
 
             });
             //console.log(JSON.stringify(this.prod))
@@ -149,7 +155,7 @@ export default class AppSelectProd extends LightningElement {
             const rowId = e.detail.row.Id;
             const rowProduct = e.detail.row.Product2Id; 
             const rowProdType = e.detail.row.Product_Type__c;
-            const rowUnitPrice = e.detail.row.Level_2_UserView__c;
+            const rowLev2 = e.detail.row.Level_2_UserView__c;
             const rowLev1 = e.detail.row.Level_1_UserView__c; 
             const rowFlrPrice = e.detail.row.Floor_Price__c; 
             const rowMargin = e.detail.row.Level_2_Margin__c;
@@ -174,7 +180,7 @@ export default class AppSelectProd extends LightningElement {
                         Name: rowName,
                         Product__c: rowProduct, 
                         Product_Type__c: rowProdType,
-                        unitPrice: rowUnitPrice,
+                        levelTwo: rowLev2,
                         floorPrice: rowFlrPrice,
                         levelOne: rowLev1,
                         unitCost: rowCost,
@@ -183,7 +189,7 @@ export default class AppSelectProd extends LightningElement {
                         nVal: rowN,
                         pVal: rowP,
                         kVal: rowK,
-                        size: rowSize,
+                        Product_Size__c: rowSize,
                         isFert: fert,
                         galWeight: galWeight,
                         goodPrice: true,
