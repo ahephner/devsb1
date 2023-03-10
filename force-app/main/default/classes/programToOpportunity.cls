@@ -6,7 +6,10 @@ public with sharing class programToOpportunity {
            system.debug(progId);
         Program__c program = [select account__c, name from Program__c where id =: progId];
        //record type id is not the same as PROD
-        Opportunity opp = new Opportunity(Name=program.Name, AccountId = Program.Account__c, CloseDate= cd, StageName='Working', pricebook2id='01s410000077vSKAAY', recordtypeid='01275000000CgcYAAS');
+       //prod record type: 0122M000001ElAYQA0
+       //sandbox record type: 01275000000CgcYAAS
+        Opportunity opp = new Opportunity(Name=program.Name, AccountId = Program.Account__c, CloseDate= cd, StageName='Working', 
+                                          pricebook2id='01s410000077vSKAAY', recordtypeid='0122M000001ElAYQA0');
         
         insert opp; 
 
@@ -59,3 +62,7 @@ public with sharing class programToOpportunity {
         }catch(Exception e){
             mess = string.valueOf(e);
         }
+
+        return mess; 
+    }
+}

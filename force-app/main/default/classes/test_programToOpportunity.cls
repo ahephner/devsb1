@@ -12,6 +12,7 @@ public class test_programToOpportunity {
      	   	
         Program__c program = new Program__c(Name = 'My Program', Account__c = cust.id);
            insert program;
+           system.debug('prog '+program);
         test.startTest();
            string idBack = programToOpportunity.createOpp(program.Id);
         test.stopTest();
