@@ -21,36 +21,7 @@ public class appProduct {
        //system.debug(appPDF);
        //return appPDF; 
    //}
-//need to make it that if the searchKey is blank nothing happens
-//probally better in js    
-  @AuraEnabled 
-    public static Product__c[] searchProduct(string searchKey, string cat, string family){
-        string searchterm = '%' + searchKey + '%'; 
-        string category = cat; 
-        string pf = family; 
-        system.debug(searchTerm);
-        String query = 'Select '
-            			+ ' Id, Name, Product_Name__c, Product_Status__c,Average_Cost__c, Product_Family__c, Subcategory__c, '
-            			+ ' Size__c, Product_Type__c'
-            			+ ' From Product__c Where Include_in_Programs__c =True AND Active__c = True and '; 
-            			 
-        if(!searchterm.contains('null') && category == 'All' && pf == 'All'){
-            query += ' (name like :searchTerm or product_name__c like :searchTerm)';
-        }else if (!searchterm.contains('null') && category != 'All' && pf == 'All'){
-            query += ' (name like :searchTerm or product_name__c like :searchTerm) and subcategory__c =:category';
-        }else if(!searchterm.contains('null') && category == 'All' && pf != 'All'){
-            query += ' (name like :searchTerm or product_name__c like :searchTerm) and Product_Family__c =:pf';
-        }else if (searchterm.contains('null') && category != 'All' && pf == 'All'){
-            query += ' subcategory__c =:category';
-        }else if(searchterm.contains('null') && category == 'All' && pf != 'All'){
-            query += ' Product_Family__c =:pf';
-        }else if(searchterm.contains('null') && category != 'All' && pf != 'All'){
-            query += ' Product_Family__c =:pf and subcategory__c =:category'; 
-        }else{
-           
-        }		 	 
-        return Database.query(query); 
-    } 
+
     
     @AuraEnabled(Cacheable=true)
     public static list<Application__c> getApps(ID recordId){
@@ -105,7 +76,7 @@ public class appProduct {
                 + '  Product2.Floor_Type__c, Product2.Floor_Price__c, Product2.Last_Purchase_Price__c, Agency_Product__c, product2.Total_Product_Items__c, Product2.Temp_Unavailable__c,'
           		+ ' Floor_Price__c, Level_1_UserView__c, Level_One_Margin__c, Level_2_UserView__c, Level_2_Margin__c, Product_Cost__c, Product2.Temp_Mess__c, Product_Type__c, Product_Size__c,'
                 + ' Product2.N__c, Product2.K__c, Product2.P__c, Product2.hasFertilizer__c, product2.X1_Gallon_Weight__c'
-                + ' From PricebookEntry Where IsActive = True and Pricebook2Id =: pbId  AND' ; 
+                + ' From PricebookEntry Where IsActive = True AND Include_in_Programs__c = True AND Pricebook2Id =: pbId  AND' ; 
      //AND Product2.ProductClass =:pClass
       if(!searchterm.contains('null') && category == 'All' && pf == 'All'){
           //system.debug('1');

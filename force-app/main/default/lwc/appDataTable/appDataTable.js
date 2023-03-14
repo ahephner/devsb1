@@ -40,7 +40,7 @@ export default class AppDataTable extends LightningElement {
     sortBy;
     sortDirection; 
     query;
-    appList;
+    @track appList = [];
     copy;
     //used to pass areaId to pdf creator
     areaId; 
@@ -55,6 +55,7 @@ export default class AppDataTable extends LightningElement {
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
+        this.loadApps(); 
     }
 
     disconnectedCallback(){
@@ -77,25 +78,38 @@ export default class AppDataTable extends LightningElement {
             }
         } 
 
-    @wire(getApps, {recordId: '$recordId'})
-        wiredList(result){
-            //console.log('app table recordID', this.recordId)
-            this.wiredAppList = result; 
-            if(result.data){
-                
-                this.appList = result.data; 
-                this.copy = result.data; 
-                this.programName = result.data[0].Program_Name__c;
-                this.customerName = result.data[0].Customer_Name__c;
-                this.error = undefined; 
-                this.totalPrice = onLoadTotalPrice(result.data); 
-                this.loaded = true;     
-            }else if(result.error){
-                this.error = result.error 
-                this.appList = undefined; 
-            }
+    // @wire(getApps, {recordId: '$recordId'})
+    //     wiredList(result){
+    //         this.wiredAppList = result; 
+    //         if(this.wiredAppList.data != undefined){
+    //             this.appList = result.data; 
+    //             this.copy = result.data; 
+    //             this.programName = result.data[0].Program_Name__c;
+    //             this.customerName = result.data[0].Customer_Name__c;
+    //             this.error = undefined; 
+    //             this.totalPrice = onLoadTotalPrice(result.data); 
+    //             this.loaded = true;     
+    //         }else if(result.error){
+    //             this.error = result.error 
+    //             this.appList = undefined; 
+    //         }else if(this.wiredAppList.data === undefined){
+    //             this.loaded = true; 
+    //         }
 
+    //     }
+    async loadApps(){
+        this.appList = await getApps({recordId: this.recordId });
+        if(this.appList.length > 0){
+            this.copy = this.appList;
+            this.programName = this.appList[0].Program_Name__c;
+            this.customerName = this.appList[0].Customer_Name__c;
+            this.error = undefined; 
+            this.totalPrice = onLoadTotalPrice(this.appList); 
+            this.loaded = true; 
+        }else if(this.appList.length === 0){
+            this.loaded = true; 
         }
+    }
 //get areas for searching the table by area
 //this was a pain to get to work. Since returned data is immutable have to make a copy then you can add to it    
     @wire(getAreas, {recordId: '$recordId'})
@@ -119,17 +133,12 @@ export default class AppDataTable extends LightningElement {
     //getUpdate
     //call a timeout to let the database insert multiple apps
     //then retrieve the new values
-    handleUpdate(mess){
-        this.loaded = false; 
-        console.log(1, this.loaded)
-        window.clearTimeout(this.delay);
+    async handleUpdate(mess){
         if(mess.updateTable === true){
-            this.delay = setTimeout(()=>{
-                return refreshApex(this.wiredAppList);
-            },2000) 
+            this.loaded = false;
+            this.appList = await getApps({recordId: this.recordId});
+            this.loaded = true; 
         }
-        this.loaded = true; 
-        console.log(2, this.loaded)
     }
     //I found  the search by area to be more helpfull. You can add back search function here
 
