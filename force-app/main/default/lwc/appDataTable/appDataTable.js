@@ -3,7 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
-//import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
+import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
 import LightningConfirm from 'lightning/confirm';
@@ -40,7 +40,7 @@ export default class AppDataTable extends LightningElement {
     sortBy;
     sortDirection; 
     query;
-    @track appList = [];
+    appList;
     copy;
     //used to pass areaId to pdf creator
     areaId; 
@@ -55,7 +55,6 @@ export default class AppDataTable extends LightningElement {
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
-        this.loadApps(); 
     }
 
     disconnectedCallback(){
@@ -78,38 +77,25 @@ export default class AppDataTable extends LightningElement {
             }
         } 
 
-    // @wire(getApps, {recordId: '$recordId'})
-    //     wiredList(result){
-    //         this.wiredAppList = result; 
-    //         if(this.wiredAppList.data != undefined){
-    //             this.appList = result.data; 
-    //             this.copy = result.data; 
-    //             this.programName = result.data[0].Program_Name__c;
-    //             this.customerName = result.data[0].Customer_Name__c;
-    //             this.error = undefined; 
-    //             this.totalPrice = onLoadTotalPrice(result.data); 
-    //             this.loaded = true;     
-    //         }else if(result.error){
-    //             this.error = result.error 
-    //             this.appList = undefined; 
-    //         }else if(this.wiredAppList.data === undefined){
-    //             this.loaded = true; 
-    //         }
+    @wire(getApps, {recordId: '$recordId'})
+        wiredList(result){
+            //console.log('app table recordID', this.recordId)
+            this.wiredAppList = result; 
+            if(result.data){
+                
+                this.appList = result.data; 
+                this.copy = result.data; 
+                this.programName = result.data[0] ? result.data[0].Program_Name__c :'' ;
+                this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
+                this.error = undefined; 
+                this.totalPrice = onLoadTotalPrice(result.data); 
+                this.loaded = true;     
+            }else if(result.error){
+                this.error = result.error 
+                this.appList = undefined; 
+            }
 
-    //     }
-    async loadApps(){
-        this.appList = await getApps({recordId: this.recordId });
-        if(this.appList.length > 0){
-            this.copy = this.appList;
-            this.programName = this.appList[0].Program_Name__c;
-            this.customerName = this.appList[0].Customer_Name__c;
-            this.error = undefined; 
-            this.totalPrice = onLoadTotalPrice(this.appList); 
-            this.loaded = true; 
-        }else if(this.appList.length === 0){
-            this.loaded = true; 
         }
-    }
 //get areas for searching the table by area
 //this was a pain to get to work. Since returned data is immutable have to make a copy then you can add to it    
     @wire(getAreas, {recordId: '$recordId'})
@@ -133,12 +119,17 @@ export default class AppDataTable extends LightningElement {
     //getUpdate
     //call a timeout to let the database insert multiple apps
     //then retrieve the new values
-    async handleUpdate(mess){
+    handleUpdate(mess){
+        this.loaded = false; 
+       // console.log(1, this.loaded)
+        window.clearTimeout(this.delay);
         if(mess.updateTable === true){
-            this.loaded = false;
-            this.appList = await getApps({recordId: this.recordId});
-            this.loaded = true; 
+            this.delay = setTimeout(()=>{
+                this.loaded = true; 
+                return refreshApex(this.wiredAppList);
+            },2000) 
         }
+        console.log(2, this.loaded)
     }
     //I found  the search by area to be more helpfull. You can add back search function here
 
@@ -236,37 +227,37 @@ export default class AppDataTable extends LightningElement {
 }
 
 //This function calls the apex class that attaches the customer copy to the program 
-//  createPDF(){
-//     console.log('ai', this.areaId);
+ createPDF(){
+    console.log('ai', this.areaId);
     
-//      this.loaded = false; 
-//     savePDF_File({Id: this.areaId, appId: this.recordId})
-//         .then(()=>{
-//             this.dispatchEvent(
-//                 new ShowToastEvent({
-//                     title:'PDF Created',
-//                     message:'Check File Tab',
-//                     variant: 'success',
-//                 }),
-//             );
-//             this.loaded = true; 
-//         }).catch((error)=>{
-//             let message = 'Unknown error';
-//             if (Array.isArray(error.body)) {
-//                 message = error.body.map(e => e.message).join(', ');
-//             } else if (typeof error.body.message === 'string') {
-//                 message = error.body.message;
-//             }
-//             this.dispatchEvent(
-//                 new ShowToastEvent({
-//                     title: 'Error loading contact',
-//                     message,
-//                     variant: 'error',
-//                 }),
-//             );
+     this.loaded = false; 
+    savePDF_File({Id: this.areaId, appId: this.recordId})
+        .then(()=>{
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title:'PDF Created',
+                    message:'Check File Tab',
+                    variant: 'success',
+                }),
+            );
+            this.loaded = true; 
+        }).catch((error)=>{
+            let message = 'Unknown error';
+            if (Array.isArray(error.body)) {
+                message = error.body.map(e => e.message).join(', ');
+            } else if (typeof error.body.message === 'string') {
+                message = error.body.message;
+            }
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error loading contact',
+                    message,
+                    variant: 'error',
+                }),
+            );
             
-//         })
-//     }
+        })
+    }
  makeOrder(){
     this.showOrder = true; 
  }
