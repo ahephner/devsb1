@@ -14,9 +14,9 @@ export default class AppModal extends LightningElement {
     openAppModal = false; 
     note;
     areaName;
-    areaDate
-    areaAcres = 0
-    feet = 0
+    areaDate;
+    areaAcres = 0; 
+    feet = 0;
     areaType;
     areaId;
     proId;
@@ -81,14 +81,14 @@ export default class AppModal extends LightningElement {
         console.log(this.recId);
          
     }
-    saveArea(){
-        if(this.areaName === '' || this.areaName ===undefined){
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Missing Information',
-                    message: 'Please enter an area name', 
-                    variant: 'error',
-                })); 
+    isValid;
+    errMsgs; 
+    saveArea(event){
+        event.preventDefault();
+
+          this.isValid = this.valid().isValid; 
+        if(!this.isValid){
+             this.errMsgs = this.valid().errorMessages; 
         }else{
         const fields ={}; 
         fields[NAME_FIELD.fieldApiName] = this.areaName;
@@ -98,7 +98,7 @@ export default class AppModal extends LightningElement {
         fields[TYPE_FIELD.fieldApiName] = this.note;
         fields[PROGRAM_FIELD.fieldApiName] = this.recId;
         fields[PREFUOFM.fieldApiName]= this.prefUM;
-        console.log(fields);
+        
         
         const recordInput = {apiName: AREA_OBJECT.objectApiName, fields};
         //create record
@@ -129,5 +129,27 @@ export default class AppModal extends LightningElement {
             );
         });
     }
+}
+
+valid(){
+    let isValid = true;
+    let inputFields = this.template.querySelectorAll('.validate');
+    let errorMessages = [];
+    inputFields.forEach(inputField => {
+        console.log(inputField.label, inputField.value)
+        if(inputField.type === 'number' && inputField.value<=0){
+            errorMessages.push(`make sure you have ${inputField.label} set`);
+            isValid = false; 
+        }else if((inputField.type==='text' || inputField.label==='Pref Unit of Measure') &&!inputField.checkValidity()){
+            errorMessages.push(`make sure you enter a ${inputField.label}`);
+            isValid = false;
+        }
+    })
+    return {isValid, errorMessages}; 
+}
+
+clearField(){
+    let inputFields = this.template.querySelectorAll('.validate');
+
 }
 }

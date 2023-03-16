@@ -49,17 +49,19 @@
                         </template> -->
                     </lightning-button-group>
                     <!-- This is the actual table -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-top_none">
-                    <lightning-datatable
-                            key-field="Id"
-                            data={appList}
-                            columns={columns}
-                            sorted-by={sortBy}
-                            sorted-direction={sortDirection}
-                            onsort={handleSortdata}
-                            onrowaction={handleRowAction}
-                            hide-checkbox-column="true">
-                    </lightning-datatable>
+                    <div class="slds-scrollable_y tableDiv">
+                        <div class="slds-col slds-size_1-of-1 slds-m-top_none">
+                        <lightning-datatable
+                                key-field="Id"
+                                data={appList}
+                                columns={columns}
+                                sorted-by={sortBy}
+                                sorted-direction={sortDirection}
+                                onsort={handleSortdata}
+                                onrowaction={handleRowAction}
+                                hide-checkbox-column="true">
+                        </lightning-datatable>
+                        </div>
                     </div>
                 </template>
         </div>

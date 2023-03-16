@@ -3,7 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
-import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
+//import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
 import LightningConfirm from 'lightning/confirm';
@@ -227,37 +227,37 @@ export default class AppDataTable extends LightningElement {
 }
 
 //This function calls the apex class that attaches the customer copy to the program 
- createPDF(){
-    console.log('ai', this.areaId);
+//  createPDF(){
+//     console.log('ai', this.areaId);
     
-     this.loaded = false; 
-    savePDF_File({Id: this.areaId, appId: this.recordId})
-        .then(()=>{
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title:'PDF Created',
-                    message:'Check File Tab',
-                    variant: 'success',
-                }),
-            );
-            this.loaded = true; 
-        }).catch((error)=>{
-            let message = 'Unknown error';
-            if (Array.isArray(error.body)) {
-                message = error.body.map(e => e.message).join(', ');
-            } else if (typeof error.body.message === 'string') {
-                message = error.body.message;
-            }
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error loading contact',
-                    message,
-                    variant: 'error',
-                }),
-            );
+//      this.loaded = false; 
+//     savePDF_File({Id: this.areaId, appId: this.recordId})
+//         .then(()=>{
+//             this.dispatchEvent(
+//                 new ShowToastEvent({
+//                     title:'PDF Created',
+//                     message:'Check File Tab',
+//                     variant: 'success',
+//                 }),
+//             );
+//             this.loaded = true; 
+//         }).catch((error)=>{
+//             let message = 'Unknown error';
+//             if (Array.isArray(error.body)) {
+//                 message = error.body.map(e => e.message).join(', ');
+//             } else if (typeof error.body.message === 'string') {
+//                 message = error.body.message;
+//             }
+//             this.dispatchEvent(
+//                 new ShowToastEvent({
+//                     title: 'Error loading contact',
+//                     message,
+//                     variant: 'error',
+//                 }),
+//             );
             
-        })
-    }
+//         })
+//     }
  makeOrder(){
     this.showOrder = true; 
  }
