@@ -479,10 +479,13 @@ console.log('run mouse')
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title:'Success',
-                        message:'Updated Products',
+                        message:'Updated Products!',
                         variant:'success'
                     })
                 )
+                //tell parent to request appDataTable refresh
+                this.dispatchEvent(new CustomEvent('update'))
+            }).then(()=>{
                 this.cancel();
             }).catch((error)=>{
                 //console.log(JSON.stringify(error))

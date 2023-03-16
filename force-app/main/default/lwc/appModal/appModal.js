@@ -26,10 +26,14 @@ export default class AppModal extends LightningElement {
 //open close modal
     @api 
     openMe(){
+        this.feet = 0;
+        this.areaAcres = 0;
+        this.areaName = '';
+        this.prefUM = ''; 
         this.openAppModal = true; 
     }
     closeModal(){
-        this.openAppModal = false; 
+        this.openAppModal = false;
     }
 
     //get api values from object settings
@@ -63,7 +67,7 @@ export default class AppModal extends LightningElement {
         this.feet = e.detail.value;
         this.areaAcres = this.feet/43560
         this.areaAcres = roundRate(this.areaAcres, 3); 
-        console.log(this.areaAcres)
+        //console.log(this.areaAcres)
         
     }
     newAcre(e){
@@ -78,7 +82,7 @@ export default class AppModal extends LightningElement {
     }
     newUM(e){
         this.prefUM = e.detail.value; 
-        console.log(this.recId);
+       //console.log(this.recId);
          
     }
     isValid;
@@ -111,13 +115,16 @@ export default class AppModal extends LightningElement {
                     message: 'Area created',
                     variant: 'success',
                 }),
-            );
+            ); 
+            this.clearField(); 
         })
         .then(this.openAppModal = false)
         .then(()=>{
             //console.log('alex is talking');
             //send a new event to the parent -> addProductButton
-            this.dispatchEvent(new CustomEvent('newarea')); 
+            this.dispatchEvent(new CustomEvent('newarea',{
+                detail: this.areaId
+            })); 
         }).catch(error => {
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -136,7 +143,7 @@ valid(){
     let inputFields = this.template.querySelectorAll('.validate');
     let errorMessages = [];
     inputFields.forEach(inputField => {
-        console.log(inputField.label, inputField.value)
+        //console.log(inputField.label, inputField.value)
         if(inputField.type === 'number' && inputField.value<=0){
             errorMessages.push(`make sure you have ${inputField.label} set`);
             isValid = false; 
@@ -148,8 +155,11 @@ valid(){
     return {isValid, errorMessages}; 
 }
 
-clearField(){
-    let inputFields = this.template.querySelectorAll('.validate');
-
-}
+//does not work
+// clearField(){
+//     let inputFields = this.template.querySelectorAll('.validate');
+//     inputFields.forEach(inputField => {
+//         inputField.value = ''; 
+        
+//     })
 }
