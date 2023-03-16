@@ -15,20 +15,29 @@
                                 </header>
                             <div class="slds-modal__content slds-p-around_medium slds-grid prodBody" id="modal-content-id-1">
                                 <div class="slds-col slds-size_1-of-2 slds slds-p-horizontal_medium">  
-                                    <lightning-input required type="text" label="Area Name" onchange={newName}></lightning-input>
-                                    <lightning-input type='number' label="Area Sq Feet (M)" value={feet} onchange={newFeet}></lightning-input>
+                                    <!-- Area Name -->
+                                    <lightning-input class='validate' type="text" 
+                                                     label="Area Name" onchange={newName} required></lightning-input>
+                                    <!-- SQ FT -->
+                                    <lightning-input class='validate' type='number' label="Area Sq Feet (M)"  
+                                                     value={feet} onchange={newFeet} required></lightning-input>
+                                    <!-- Date -->
                                     <lightning-input type="date" label="Date" onchange={newDate}></lightning-input>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2">
                                         <lightning-combobox
+                                        class="validate"
                                         name='UofM'
                                         label='Pref Unit of Measure'
-                                        placeholder='--None--'
                                         value={prefUM}
                                         options={setSize}
                                         onchange={newUM}
+                                        type="text"
+                                        required
                                         ></lightning-combobox>
-                                    <lightning-input type='number' label="Area Acres" value={areaAcres} onchange={newAcre}></lightning-input>
+                                        <!-- Acre -->
+                                    <lightning-input class='validate' type='number' 
+                                                     label="Area Acres" value={areaAcres} onchange={newAcre} required></lightning-input>
                                     <lightning-combobox
                                     name='category'
                                     label='Type'
@@ -37,6 +46,18 @@
                                     options={setNotes}
                                     onchange={newType}
                                    ></lightning-combobox>
+                                   <!-- error  messages -->
+                                   <template if:false={isValid}>
+                                       <div class="slds-grid">
+                                           <div class="slds-col slds-size_1-of-1 messages">
+                                               <template for:each={errMsgs} for:item="err" for:index="index">
+                                                   <ul key={err}>
+                                                       <li class="errMsg">{err}</li>
+                                                   </ul>
+                                               </template>
+                                           </div>
+                                       </div>
+                                   </template>
                                 </div>
                     </div>
                 <footer class="slds-modal__footer">

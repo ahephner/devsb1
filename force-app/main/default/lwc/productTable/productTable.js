@@ -201,20 +201,21 @@ export default class ProductTable extends LightningElement {
                             multiInsert({appId:this.appId, occurance:this.numbApps, daysBetween: this.interval})
                         }
                     }).then(()=>{
-                        const payload = {
-                            updateTable: true
-                        }
-                        publish(this.messageContext, Program_Builder, payload);
-                        //console.log('sending '+ payload.updateTable);
-                        
-                    }).then(()=>{
-                        //this.firstApp = true; 
-                        this.closeModal(); 
                         this.appName = '';
                         //this may be an issue was = ''; 
                         this.areaId = undefined;
                         this.appDate = '';
                         this.selectedProducts = [];
+                        //console.log('sending '+ payload.updateTable);
+                        
+                    }).then(()=>{
+                        //this.firstApp = true;
+                        const payload = {
+                            updateTable: true
+                        }
+                        publish(this.messageContext, Program_Builder, payload); 
+                        this.closeModal(); 
+
                     }).catch((error)=>{
                         console.log(JSON.stringify(error))
                         let message = 'Unknown error';

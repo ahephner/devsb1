@@ -1,7 +1,6 @@
 <template>
     <lightning-card  variant="Narrow"  title="Rates and Pricing" icon-name="utility:adjust_value">
         <template if:true={loaded}>
-            <div class="slds-text-heading_small">NOTE On new app is what I am working on currently. Errors are very likely. <a href='https://advancedturf--full.sandbox.lightning.force.com/lightning/r/Program__c/a0J750000007jWxEAI/view' target="_blank">To demo</a> try updating an app</div>
             <div class='slds-grid'>
                 <div class='slds-col slds-size_9-of-12'>  
                     <template for:each={data} for:item="sp" for:index="index">

@@ -1,3 +1,11 @@
 .prodBody{
     height: 60%; 
 }
+
+.errMsg{
+    color:#cc0000;
+}
+
+.messages{
+    margin-top: 30%;
+}
