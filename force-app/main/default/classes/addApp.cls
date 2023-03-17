@@ -5,6 +5,7 @@ public with sharing class addApp {
           app.Name = wrapper.appName; 
           app.Area__c = wrapper.appArea;
           app.Date__c = date.valueof(wrapper.appDate); 
+          app.Note__c = wrapper.appNote; 
           insert app; 
           return app; 
       }
@@ -29,7 +30,11 @@ public with sharing class addApp {
                              ap.Unit_Area__c = temp.Unit_Area__c;
                              ap.Unit_Price__c = temp.Unit_Price__c; 
                              ap.Margin__c = temp.Margin__c;
-                             ap.Units_Required__c = temp.Units_Required__c; 
+                             ap.Units_Required__c = temp.Units_Required__c;
+                             ap.N__c = temp.N__c;
+                             ap.P__c = temp.P__c;
+                             ap.K__c = temp.K__c;  
+                             ap.Note__c = temp.Note__c; 
                              prodList.add(ap);
                           }
                          

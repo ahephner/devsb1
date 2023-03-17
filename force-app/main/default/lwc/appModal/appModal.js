@@ -116,15 +116,13 @@ export default class AppModal extends LightningElement {
                     variant: 'success',
                 }),
             ); 
-            this.clearField(); 
+            
         })
         .then(this.openAppModal = false)
         .then(()=>{
             //console.log('alex is talking');
             //send a new event to the parent -> addProductButton
-            this.dispatchEvent(new CustomEvent('newarea',{
-                detail: this.areaId
-            })); 
+            this.dispatchEvent(new CustomEvent('newarea')); 
         }).catch(error => {
             this.dispatchEvent(
                 new ShowToastEvent({

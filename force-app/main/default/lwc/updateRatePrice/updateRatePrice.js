@@ -123,6 +123,7 @@ export default class UpdateRatePrice extends LightningElement {
                 this.areaAcres = parseInt(this.prodlist[0].Application__r.Area__r.Area_Acres__c);
 
                 this.showAcreSize = this.areaUM.includes('Acre') ? true : false; 
+                this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
             this.loaded = true;
         } catch (error) {
             console.error(error);
@@ -441,7 +442,7 @@ hiMouse(e){
     this.prodFloor = index.Floor_Price__c; 
     this.prodCostM = index.costM ? index.costM : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perThousand;
     this.prodCostA = index.costA ? index.costA : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perAcre;
-    this.treatedAcreage = this.treatedAcreage ? this.treatedAcreage : areaTreated(index.Product_Size__c,index.Rate2__c, index.Unit_Area__c );
+    this.treatedAcreage = areaTreated(index.Product_Size__c,index.Rate2__c, index.Unit_Area__c );
     this.prodN = index.N__c;
     this.prodP = index.P__c;
     this.prodK = index.K__c; 

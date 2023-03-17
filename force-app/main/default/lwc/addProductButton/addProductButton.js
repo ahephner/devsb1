@@ -58,11 +58,9 @@ export default class AddProductButton extends LightningElement {
     }
 
 
-    addedOption(mess){
+    addedOption(){
         //console.log('dad listening');
-        //listen for the child -> appModal to send parent new area has been added
-        console.log('message back '+mess.detail);
-        
+        //listen for the child -> appModal to send parent new area has been added  
         return refreshApex(this.areaList)
     }
 }
