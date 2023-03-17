@@ -136,6 +136,12 @@ wiredareaInfo({error,data}){
                 this.closeModal(); 
             })
     }
+    tellTable(){
+        const payload = {
+            updateTable: true
+        }
+        publish(this.messageContext, Program_Builder, payload); 
+    }
 
     closeModal(){
         this.updateExposed = false;  

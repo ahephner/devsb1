@@ -17,7 +17,7 @@ export default class AddProductButton extends LightningElement {
         areaList
     //get area options
     get areaOptions(){
-        //console.log('recordId '+this.recordId);
+        //console.log('areaList '+JSON.stringify(this.areaList.data));
         return this.areaList.data; 
     }
     //used to select area plus alert the user in the comp. Will use this to verify an area was set before products added
@@ -60,7 +60,7 @@ export default class AddProductButton extends LightningElement {
 
     addedOption(){
         //console.log('dad listening');
-        //listen for the child -> appModal to send parent new area has been added
+        //listen for the child -> appModal to send parent new area has been added  
         return refreshApex(this.areaList)
     }
 }

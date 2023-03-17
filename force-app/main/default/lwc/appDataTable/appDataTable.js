@@ -128,8 +128,9 @@ export default class AppDataTable extends LightningElement {
                 this.loaded = true; 
                 return refreshApex(this.wiredAppList);
             },2000) 
+        }else{
+            this.loaded= true;
         }
-        console.log(2, this.loaded)
     }
     //I found  the search by area to be more helpfull. You can add back search function here
 

@@ -23,6 +23,7 @@
                     <c-update-rate-price app-id={appId}
                                         oncancel={closeModal}
                                         onprice={badPrice}
+                                        onupdate={tellTable}
                     ></c-update-rate-price>
                   </template>
                   <template if:true={disableBtn}>
