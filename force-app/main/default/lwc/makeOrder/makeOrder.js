@@ -25,7 +25,7 @@ export default class MakeOrder extends LightningElement {
     sliderValue;
     connectedCallback(){
         this.data = [...this.apps]
-        console.log(this.recordId)
+        console.log(this.data)
     }
     
     getSelectedApp(e){
@@ -42,7 +42,7 @@ export default class MakeOrder extends LightningElement {
         for(let i = 0; i<this.selection.length; i++){
             toOrder.push(this.selection[i].Id);
         }
-        console.log(toOrder)
+        
         return toOrder; 
     }
     async convert(){

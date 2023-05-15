@@ -1,0 +1,14 @@
+<template>
+    <lightning-quick-action-panel header="Clone or Order">
+        <template if:false={loaded}>
+            <p>button go here</p>
+            <div class="spinner">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+        <template if:true={loaded}>
+            <p>button go here</p>
+            <lightning-button variant="brand" label="Get Data" title="titleName" onclick={handleClone}></lightning-button>
+        </template>
+    </lightning-quick-action-panel>
+</template>
