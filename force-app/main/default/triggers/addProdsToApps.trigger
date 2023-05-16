@@ -14,20 +14,18 @@ trigger addProdsToApps on Application__c ( after insert) {
         }
     
     
-    List<Application_Product__c> prods = [Select  Product__c, Application__c, Area_Square_Feet_M__c,  Product_Name__c,
-                                            Categories__c, K__c, K_Calc__c, K_Val__c,LBS_ACRE__c,
-                                            N__c,N_Val__c, Note__c, OZ_M__c,P__c, P_Calc__c,
-                                            P_Val__c,Product_Category__c, Product_Size__c, name, 
-                                            Product_Sub_Category__c, Rate__c, Total_Used_f__c, Units_Required__c
-                                          from application_Product__c 
-                                          where application__c = :prevID]; 
+    List<App_Product__c> prods = [SELECT Name, Application__c, Cost_per_Acre__c, Cost_per_M__c, 
+                                      							       K__c, LBS_ACRE__c, Margin__c, N__c, Note__c, Note_Other__c, 
+                                      							       OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
+                                      							       Unit_Price__c, Units_Required__c FROM App_Product__c
+                                          							   where application__c = :prevID]; 
     system.debug('***** Trigger Prods ----> ' + prods);
    // Map<String, Application_Product__c> addProds = new Map<String, Application_Product__c>();
     
-    List<Application_Product__c> products = new List<Application_Product__c>(); 
+    List<App_Product__c> products = new List<App_Product__c>(); 
    // for(application__c b: Trigger.new){
-    for(Application_Product__c ap: prods){  
-        Application_Product__c x = ap.clone(false);
+    for(App_Product__c ap: prods){  
+        App_Product__c x = ap.clone(false);
          x.Application__c = value;
         system.debug('***** Triggerlower loop run ###-> ');
          products.add(x); 
