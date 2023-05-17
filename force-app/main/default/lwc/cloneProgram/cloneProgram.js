@@ -9,6 +9,8 @@ export default class CloneProgram extends LightningElement {
     loaded = false; 
     formSize; 
     data = [];
+    msg; 
+    sliderValue;
 
     connectedCallback(){
         this.formSize = this.screenSize(FORM_FACTOR); 
@@ -20,7 +22,9 @@ export default class CloneProgram extends LightningElement {
         return screen === 'Large'? true : false
     }
 
-   
+   closeScreen(){
+    this.dispatchEvent(new CloseActionScreenEvent()); 
+   }
     handleClone(){
         this.loaded = false; 
         cloneHeaders({recId: this.recordId})
@@ -38,22 +42,25 @@ export default class CloneProgram extends LightningElement {
             })
     }
     @track mapIds = [];
+    newURL; 
     async handleClone2(){
         this.loaded = false; 
+        this.msg = 'Gathering'
+        this.sliderValue = 10;
         try{
+           this.sliderValue = 35;
+            this.msg = 'Inserting Program, Area and Apps'
             this.data = await cloneHeaders({recId: this.recordId});
-            
-            // this.data.forEach((x)=>{
-            //     this.mapIds = [...this.mapIds,{
-            //                     Prev_App_Id__c: x.Prev_App_Id__c,
-            //                     Id: x.Id 
-            //         }]                
-                
-            // })
-            console.log(JSON.stringify(this.mapIds))
+            //this.newURL = this.data[0].Program_ID__c
+
+            this.sliderValue = 75; 
+            this.msg = 'Cloning App Products'
+          
             let finalStep = await cloneProducts({JSONSTRING: JSON.stringify(this.data)})
+            this.sliderValue = 95; 
+            this.msg = 'Finishing up. Redirecting Soon'; 
             if(finalStep){
-                console.log(finalStep)
+                //console.log(this.newURL)
                 this.loaded = true; 
             }
         }catch(err){

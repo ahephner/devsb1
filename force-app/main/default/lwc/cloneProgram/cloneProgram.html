@@ -1,14 +1,32 @@
 <template>
     <lightning-quick-action-panel header="Clone or Order">
         <template if:false={loaded}>
-            <p>button go here</p>
-            <div class="spinner">
-                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            <div class="slds-grid">
+                <div class="slds-col slds-size_2-of-4">
+                    <p>{msg}</p>
+                </div>
+                <div class="slds-col slds-size_2-of-4">
+                    <lightning-progress-ring
+                    value={sliderValue}
+                    direction='fill'
+                    variant="base-autocomplete"
+                    ></lightning-progress-ring>
+                </div>
             </div>
-        </template>
+            </template>
         <template if:true={loaded}>
-            <p>button go here</p>
-            <lightning-button variant="brand" label="Get Data" title="titleName" onclick={handleClone2}></lightning-button>
-        </template>
+            <div class="slds-grid">
+                <div class="slds-col slds-size_2-of-4">
+                    <p>Wait did you know you can turn this into an order? Close the screen then hit make order and change the account on the order</p>
+
+                </div>
+                <div class="slds-col slds-size_2-of-4">
+                    <div class='slds-var-m-top_medium'>
+                        <lightning-button variant="brand" label="Nope Clone" title="titleName" onclick={handleClone2}></lightning-button>
+                        <lightning-button variant="destructive" label="Close Screen" title="titleName" onclick={closeScreen}></lightning-button>
+                    </div>
+                </div>
+            </div>
+        </template> 
     </lightning-quick-action-panel>
 </template>

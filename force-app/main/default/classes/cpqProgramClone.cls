@@ -35,7 +35,7 @@ public class cpqProgramClone {
         
         for(area__c j: areaCopy){
             for(application__c ap : [select a.Id, a.Name, a.Area__c, a.repeat__c, a.Note__c , a.Clone__c, 
-                                    a.Date__c,  a.Weeks_Apart__c, a.Number_of_Apps__c, a.Prev_App_Id__c
+                                    a.Date__c,  a.Weeks_Apart__c, a.Number_of_Apps__c, a.Prev_App_Id__c, Program_ID__c
                                      from Application__c a where a.area__c = :j.previd__c]){
                                         Application__c newApp = ap.clone(false); 
                                         newApp.area__c = j.Id;
@@ -52,40 +52,49 @@ public class cpqProgramClone {
             }
             return apps; 
         }
-        public class keyValuePair{
-            @AuraEnabled public string prevId;
-            @AuraEnabled public string newId; 
-        }
+    
         @AuraEnabled
         public static string cloneProducts(string JSONSTRING){
-            system.debug('data in ' +JSONSTRING); 
-        string retMess = 'success'; 
-        Map<String, String> appId = new Map<String, String>(); 
-                JSONParser parser = JSON.createParser(JSONSTRING); 
-                while(parser.nextToken() != null){
-                    if(parser.getCurrentToken() == JSONToken.START_ARRAY){
-                        while(parser.nextToken() != null){
-                            //system.debug('current name' + parser.getCurrentName() + ' current token' + parser.getCurrentToken());
-                            if(parser.getCurrentToken() == JSONToken.START_OBJECT){
-                                application__c temp = (application__c)parser.readValueAs(application__c.class);
-                                    appId.put(temp.Prev_App_Id__c, temp.Id);
-                               
-                                parser.skipChildren();
-                            }
-                        }
-                    }   
-                } 
-            try{
-                system.debug('parser '+appId.keySet());
-                 //Map<Id,App_Product__c> prod = new Map<Id, App_Product__c>([SELECT Name, Application__c, Cost_per_Acre__c, Cost_per_M__c, 
-                   //                       							       K__c, LBS_ACRE__c, Margin__c, N__c, Note__c, Note_Other__c, 
-                     //                     							       OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
-                       //                   							       Unit_Price__c, Units_Required__c FROM App_Product__c where Application__c in: preId.keySet()]);
-                system.debug('apps ---');
-                //system.debug(prod);
-            }catch(Exception e){
-                retMess = String.valueOf(e);
-            }
-            return retMess;
-        }
+             //system.debug('data in ' +JSONSTRING); 
+             string retMess = 'success'; 
+             Map<String, String> appId = new Map<String, String>(); 
+             List<App_Product__c> ListCloneProds = new List<App_Product__c>(); 
+             JSONParser parser = JSON.createParser(JSONSTRING); 
+                        
+            while(parser.nextToken() != null){
+                if(parser.getCurrentToken() == JSONToken.START_ARRAY){
+                    while(parser.nextToken() != null){
+                        //system.debug('current name' + parser.getCurrentName() + ' current token' + parser.getCurrentToken());
+                        if(parser.getCurrentToken() == JSONToken.START_OBJECT){
+                            application__c temp = (application__c)parser.readValueAs(application__c.class);
+                            appId.put(temp.Prev_App_Id__c, temp.Id);
+                 
+                            parser.skipChildren();
+                         }
+                    }
+               }   
+            } 
+         try{
+             //system.debug('parser '+appId.keySet());
+            List<App_Product__c> prod = new List<App_Product__c>([SELECT Name, Application__c, Cost_per_Acre__c, Cost_per_M__c, 
+                                                                        K__c, LBS_ACRE__c, Margin__c, N__c, Note__c, Note_Other__c, 
+                                                                        OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
+                                                                          Unit_Price__c, Units_Required__c FROM App_Product__c 
+                                                                       where Application__c in: appId.keySet()]);
+                        //system.debug('apps ---');
+                        //system.debug(prod);
+             for(App_Product__c x: prod){
+                 App_Product__c clonedProd = x.clone(false);	
+                     clonedProd.Application__c = appId.get(x.Application__c); 
+                     ListCloneProds.add(clonedProd); 
+             }
+             
+             if(ListCloneProds.size()> 1){
+                 insert ListCloneProds; 
+             }
+         }catch(Exception e){
+            retMess = String.valueOf(e);
+         }
+           return retMess;
+      }
     }
