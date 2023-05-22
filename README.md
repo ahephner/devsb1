@@ -1,6 +1,6 @@
-# Salesforce DX Project: Next Steps
+# Program Builder
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+Let reps create custom application programs for customers. App uses our catalog. User can create programs for the full season or simple best management practices.  
 
 ## How Do You Plan to Deploy Your Changes?
 
