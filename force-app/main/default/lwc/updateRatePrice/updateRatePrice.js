@@ -121,7 +121,11 @@ export default class UpdateRatePrice extends LightningElement {
     //need for doing math later
                 this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
                 this.areaAcres = parseInt(this.prodlist[0].Application__r.Area__r.Area_Acres__c);
-
+    //Round totals
+                this.appTotalN = roundNum(this.appTotalN, 4);
+                this.appTotalP = roundNum(this.appTotalP, 4);
+                this.appTotalK = roundNum(this.appTotalK, 4);
+                
                 this.showAcreSize = this.areaUM.includes('Acre') ? true : false; 
                 this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
             this.loaded = true;

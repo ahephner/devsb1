@@ -22,7 +22,22 @@ export default class AppModal extends LightningElement {
     proId;
     preUm;
     recordId; 
+    ornamentalArea = false; 
+    btnLabel = 'Turf Area'
     @api recId; 
+
+    changeAreaType(event){
+    
+        if(!this.ornamentalArea){ 
+            this.ornamentalArea = true; 
+            this.btnLabel = 'Ornamentals';
+        }else if(this.ornamentalArea){ 
+            this.ornamentalArea = false;
+            
+            this.btnLabel = 'Turf Area';
+        }
+        
+    }
 //open close modal
     @api 
     openMe(){
@@ -51,15 +66,16 @@ export default class AppModal extends LightningElement {
     get setSize(){
         return [
             {label:'Acre', value: 'Acre'},
-            {label: 'M', value:'M'}
+            {label: 'M', value:'M'}, 
+            {label:'Ornamental App', value:'100 Gal'}
         ]
     }
     //input field actions
     newName(e){
         this.areaName = e.detail.value;
-        this.areaId = undefined; 
-        
+        this.areaId = undefined;     
     }
+
     newDate(e){
         this.areaDate = e.detail.value;
     }
@@ -82,7 +98,7 @@ export default class AppModal extends LightningElement {
     }
     newUM(e){
         this.prefUM = e.detail.value; 
-       //console.log(this.recId);
+       console.log(this.prefUM);
          
     }
     isValid;

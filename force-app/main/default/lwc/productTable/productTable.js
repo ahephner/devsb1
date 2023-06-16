@@ -20,6 +20,7 @@ export default class ProductTable extends LightningElement {
     //searching product table 
     areaSelected;
     areaId;  
+    ornamental; 
     count = 0; 
     //App Info
     appName;
@@ -56,8 +57,7 @@ export default class ProductTable extends LightningElement {
             //control flow for when trying to call refresh apex
             //if an issue look at the reset below I changed to undefined used to be ''
             if(this.areaId){
-               this.handleArea(this.areaId)
-               //console.log('areaId '+this.areaId);
+               this.handleArea(this.areaId);
                
             }
         }
@@ -82,13 +82,19 @@ export default class ProductTable extends LightningElement {
                     break;
                 case 'selectProd':
                     let ok = this.template.querySelector('c-app-select-prod').next();
-                    //console.log({ok})
-                    ok ? this.currentStage = 'ratePrice' : ''
+                    console.log({ok})
+                    ok && this.ornamental ? this.currentStage = 'ornRatePrice' :'ratePrice';
+                    console.log(this.currentStage)
                     break;
                 case 'ratePrice':
                     let final = this.template.querySelector('c-app-rate-price').save();
                     //console.log({final})
                     final ? this.currentStage = 'appInfo': '';
+                    break;
+                case 'ornRatePrice':
+                    let ornFinal = this.template.querySelector('c-orn-app-rate-price').save();
+                    //console.log({final})
+                    ornFinal ? this.currentStage = 'appInfo': '';
                     break;
             }
         }
@@ -98,7 +104,7 @@ export default class ProductTable extends LightningElement {
                 .then((resp)=>{
                     this.areaSQft = resp[0].Area_Sq_Feet__c
                     this.areaUM = resp[0].Pref_U_of_M__c
-                    //console.log('areaCall '+this.areaSQft);
+                    this.ornamental = resp[0].Pref_U_of_M__c === '100 Gal' ? true : false; 
                 })
             }
 //how to call a function from a child comp. if tracking values in parent 

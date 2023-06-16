@@ -215,7 +215,8 @@ export default class AppRatePrice extends LightningElement {
                 {label:'OZ/M', value:'OZ/M'}, 
                 {label: 'OZ/Acre', value:'OZ/Acre'},
                 {label: 'LB/M', value:'LB/M'},
-                {label: 'LB/Acre', value:'LB/Acre'}
+                {label: 'LB/Acre', value:'LB/Acre'},
+                {label:'100 Gal', value:'100 Gal'}
             ];
         }
 //handle note 
