@@ -5,11 +5,11 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getRecord } from 'lightning/uiRecordApi';
 import AREA from '@salesforce/schema/Application__c.Area__c';
 import SQFT from '@salesforce/schema/Application__c.Area__r.Area_Sq_Feet__c';
-
+import PREFMEASURE from '@salesforce/schema/Application__c.Area__r.Pref_U_of_M__c';
 
 import addProducts from '@salesforce/apex/addApp.addProducts';
 
-const fields = [AREA, SQFT]
+const fields = [AREA, SQFT, PREFMEASURE]
 export default class UpdateTable extends LightningElement {
     updateExposed = false;
     loaded = false; 
@@ -20,6 +20,7 @@ export default class UpdateTable extends LightningElement {
     selectedProducts = [];
     areaId;
     sqFt; 
+    ornamental 
     buttonText = 'Save';
     disableBtn = false; 
     @wire(MessageContext)
@@ -80,7 +81,9 @@ wiredareaInfo({error,data}){
     }else if(data){
         //console.log(data.fields.Area__r.value.fields.Area_Sq_Feet__c.value);
         this.sqFt = data.fields.Area__r.value.fields.Area_Sq_Feet__c.value;
-        this.areaId = data.fields.Area__c.value;   
+        this.areaId = data.fields.Area__c.value;
+        let prefMeasure = data.fields.Area__r.value.fields.Pref_U_of_M__c.value
+        this.ornamental = prefMeasure  === '100 Gal' ? true : false;        
     }
 }
     addProducts(){
