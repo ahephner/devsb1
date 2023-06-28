@@ -173,7 +173,8 @@ const ornAppTotal = (prod) =>{
   }, 0)
   
   total = roundRate(total, 2)
-  return total; 
+  let total100 = roundRate((total/100), 2)
+  return {total, total100}; 
 }
 
 const ornPerProduct = (prodPrice, prodSize, rate)=>{

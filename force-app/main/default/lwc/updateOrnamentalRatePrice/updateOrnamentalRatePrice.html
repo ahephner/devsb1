@@ -22,14 +22,7 @@
             <div class='slds-size_1-of-8 slds-m-left_small slds-m-top_large'>
                 <p class="fs">Area: {areaName}</p>
             </div>
-                <div class='slds-col slds-size_2-of-8 slds-m-top_large' onclick={showAreaSize}>
-                    <template lwc:if={showAcreSize}>
-                        <p class="fs">Area Size: {areaAcres} Acres</p>
-                    </template>
-                    <template lwc:else>
-                        <p class="fs hoover">Area Size: {areaSizeM} sqFt</p>
-                    </template>
-                </div>
+
         </div>
     <div class='slds-grid slds-m-top_small'>
         <div class='slds-col slds-size_9-of-12'>  
@@ -113,8 +106,8 @@
                         <div class="slds-col slds-size_1-of-1">
                             <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                            Total Cost Per M: ${totalCostPerM}
+                        <div class="slds-col slds-size_1-of-1">
+                            <h1>Total per gallon: <lightning-formatted-number value={appPer100} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                         </div>
                         <div lwc:if={showProdInfo} class='slds-col slds-size_1-of-1'>
                             <div class="slds-col slds-size_1-of-1">
@@ -124,10 +117,10 @@
                                 <p>Product Name: {productName}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                                <p>prod per M: ${prodCostM}</p>
+                                <p>price per gallon spray : ${prodCostG}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                                <p>One unit will cover: {treatedAcreage} acres @ current rate</p>
+                                <p>One unit will create: {gallonAmounts} gallons @ current rate</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_small">
                                 <div class="slds-text-heading_small slds-m-top_small slds-align_absolute-center line">

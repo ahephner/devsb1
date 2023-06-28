@@ -89,24 +89,45 @@ wiredareaInfo({error,data}){
     addProducts(){
         this.buttonText = 'Done';
         this.showButton = false; 
-        this.template.querySelector('c-update-rate-price').addProducts();
+        if(!this.ornamental){
+            this.template.querySelector('c-update-rate-price').addProducts();
+        }else{
+            this.template.querySelector('c-update-ornamental-rate-price').addProducts();
+        }
     }
 
     handleNext(){
         let txt = this.buttonText; 
-        switch (txt) {
-            case 'Save':
-                this.showButton = true; 
-                this.template.querySelector('c-update-rate-price').update();
-                break;
-            case 'Done':
-                this.showButton = true;
-                this.buttonText = 'Save';
-                this.template.querySelector('c-update-rate-price').closeAdd();
-                break
-            default:
-                break;
+        if(!this.ornamental){
+            switch (txt) {
+                case 'Save':
+                    this.showButton = true; 
+                    this.template.querySelector('c-update-rate-price').update();
+                    break;
+                case 'Done':
+                    this.showButton = true;
+                    this.buttonText = 'Save';
+                    this.template.querySelector('c-update-rate-price').closeAdd();
+                    break
+                default:
+                    break;
+            }
+        }else{
+            switch (txt) {
+                case 'Save':
+                    this.showButton = true; 
+                    this.template.querySelector('c-update-ornamental-rate-price').update();
+                    break;
+                case 'Done':
+                    this.showButton = true;
+                    this.buttonText = 'Save';
+                    this.template.querySelector('c-update-ornamental-rate-price').closeAdd();
+                    break
+                default:
+                    break;
+            }
         }
+
     }
 
     save(products){

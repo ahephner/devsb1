@@ -85,6 +85,9 @@
                                             <div class="slds-col slds-size_1-of-1">
                                                 <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                                             </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <h1>Total per gallon: <lightning-formatted-number value={appPer100} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
+                                            </div>
                                             <div lwc:if={showProdInfo} class='slds-col slds-size_1-of-1'>
                                                 <div class="slds-col slds-size_1-of-1">
                                                     <div class="slds-text-heading_small slds-m-top_small">Product Info:</div>

@@ -32,7 +32,8 @@ export default class OrnAppRatePrice extends LightningElement {
     prodP;
     prodK;
     //note on the application 
-    oppNote = ''; 
+    oppNote = '';
+    appPer100 = 0; 
 
     @api 
     get selection(){
@@ -41,7 +42,8 @@ export default class OrnAppRatePrice extends LightningElement {
     //need to make this private so we can edit this
     set selection(value){
         this.data = JSON.parse(JSON.stringify(value));     
-        this.appTotalPrice = ornAppTotal(this.data); 
+        this.appTotalPrice = ornAppTotal(this.data).total; 
+        this.appPer100 = ornAppTotal(this.data).total100;
     }
 
 //need this to get picklist
@@ -103,7 +105,9 @@ noteOps;
             this.prodCost100 = costs.per100;
            
             this.gallonAmounts = finishedGals(this.data[index].Product_Size__c,this.data[index].Rate2__c);
-            this.appTotalPrice = ornAppTotal(this.data); 
+            this.appTotalPrice = ornAppTotal(this.data).total; 
+            this.appPer100 = ornAppTotal(this.data).total100;
+
          //handle fertilizer
          if(this.data[index].isFert){
              let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);
@@ -153,7 +157,8 @@ noteOps;
                  this.prodAreaCost = this.areaAcres * this.costPerAcre;
 
              }
-             this.appTotalPrice = ornAppTotal(this.data); 
+                this.appTotalPrice = ornAppTotal(this.data).total; 
+                this.appPer100 = ornAppTotal(this.data).total100;
              ///this.totalCostPerG = roundNum(this.appTotalPrice/(this.areaSize/1000),2);
              let lOne = Number(this.data[index].levelOne)
              let floor = Number(this.data[index].floorPrice)
@@ -187,7 +192,8 @@ noteOps;
                          this.prodCost100 = costs.per100;
 
                      }
-                     this.appTotalPrice = ornAppTotal(this.data); 
+                     this.appTotalPrice = ornAppTotal(this.data).total; 
+                     this.appPer100 = ornAppTotal(this.data).total100; 
 
          },1500)
      }   
@@ -210,8 +216,8 @@ noteOps;
                         //  this.prodAreaCost = this.areaAcres * this.costPerAcre;
                                                     
                      }
-                     this.appTotalPrice = ornAppTotal(this.data); 
-                    //  this.totalCostPerG = roundNum(this.appTotalPrice/(this.areaSize/1000),2);
+                     this.appTotalPrice = ornAppTotal(this.data).total; 
+                     this.appPer100 = ornAppTotal(this.data).total100;
          }, 500)
      }
     //for the combo box 
