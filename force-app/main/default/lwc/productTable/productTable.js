@@ -75,29 +75,47 @@ export default class ProductTable extends LightningElement {
         }
         move(stage){
             stage = this.currentStage;
-            switch(stage){
-                case 'appInfo':
-                    let go = this.template.querySelector('c-app-name-date').next();
-                    go ? this.currentStage = 'selectProd' : '';
-                    break;
-                case 'selectProd':
-                    let ok = this.template.querySelector('c-app-select-prod').next();
-                    console.log({ok})
-                    ok && this.ornamental ? this.currentStage = 'ornRatePrice' :'ratePrice';
-                    console.log(this.currentStage)
-                    break;
-                case 'ratePrice':
-                    let final = this.template.querySelector('c-app-rate-price').save();
-                    //console.log({final})
-                    final ? this.currentStage = 'appInfo': '';
-                    break;
-                case 'ornRatePrice':
-                    let ornFinal = this.template.querySelector('c-orn-app-rate-price').save();
-                    //console.log({final})
-                    ornFinal ? this.currentStage = 'appInfo': '';
-                    break;
-            }
+            if(!this.ornamental){
+                switch(stage){
+                    case 'appInfo':
+                        let go = this.template.querySelector('c-app-name-date').next();
+                        go ? this.currentStage = 'selectProd' : '';
+                        break;
+                    case 'selectProd':
+                        let ok = this.template.querySelector('c-app-select-prod').next();
+                        
+                        ok ? this.currentStage = 'ratePrice' :'';
+                        console.log(this.currentStage)
+                        break;
+                    case 'ratePrice':
+                        let final = this.template.querySelector('c-app-rate-price').save();
+                        final ? this.currentStage = 'appInfo': '';
+                        break;
+                    default:
+                        break;
+                }
+            }else{
+                switch(stage){
+                    case 'appInfo':
+                        let go = this.template.querySelector('c-app-name-date').next();
+                        go ? this.currentStage = 'ornSelectProd' : '';
+                        break;
+                    case 'ornSelectProd':
+                        let ok = this.template.querySelector('c-app-select-prod').next();
+                        
+                        ok ? this.currentStage = 'ornRatePrice' :'';
+                        console.log(this.currentStage)
+                        break;
+                    case 'ornRatePrice':
+                        let final = this.template.querySelector('c-orn-app-rate-price').save();
+                        final ? this.currentStage = 'appInfo': '';
+                        break;
+                    default:
+                        break;
+                }
+            }       
         }
+    
         //get area info for the product calculations
         handleArea(x){  
             areaInfo({ai:x})
