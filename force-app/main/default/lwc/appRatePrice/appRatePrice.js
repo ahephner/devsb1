@@ -219,6 +219,16 @@ export default class AppRatePrice extends LightningElement {
                 {label:'100 Gal', value:'100 Gal'}
             ];
         }
+//Manual Charge specific info. If the rep is using a product that ATS does not carry this will allow them to set those values for name and size here
+
+        manName(e){
+            let index = this.data.findIndex(prod => prod.Id === e.target.name) 
+            this.data[index].Note_Other__c = e.detail.value;             
+        }
+        manSize(e){
+            let index = this.data.findIndex(prod => prod.Id === e.target.name) 
+            this.data[index].size = e.detail.value;    
+        }
 //handle note 
         prodNote(e){
             let index = this.data.findIndex(prod => prod.Product2Id === e.target.name) 

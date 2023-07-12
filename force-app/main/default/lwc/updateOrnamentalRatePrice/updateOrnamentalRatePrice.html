@@ -41,7 +41,7 @@
                  <template if:false={sp.showNote}>
                     <!--Rate-->  
                         <div class="slds-col slds-size_1-of-12">
-                            <lightning-input  type="number"  step="0.01" label="Rate"
+                            <lightning-input  type="number"  step="0.001" label="Rate"
                             name={sp.Product_Code__c} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
                         </div> 
                     <!--Unit of Measure-->      

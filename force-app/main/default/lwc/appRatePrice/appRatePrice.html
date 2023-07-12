@@ -15,8 +15,61 @@
                                 <p>{sp.Product_Name__c}</p>
                             </div>
                             <template if:false={sp.showNote}>
+        <!-- If a manual entry show here -->
+                            <template if:true={sp.manCharge}>
+                                <div class="slds-col slds-size_2-of-12">
+                <!--manual charge name-->
+                                    <div data-margin={sp.Id}>
+                                        <lightning-input class='liquid' type="text"  
+                                                        label="Product Name" name={sp.Id} 
+                                                        value={sp.Note_Other__c} onchange={manName}></lightning-input>
+                                    </div>
+                                </div>
+                <!-- manual charge Size -->
                                 <div class="slds-col slds-size_1-of-12">
-                                    <lightning-input  type="number"  step="0.01" label="Rate"
+                                    <lightning-input  type="number"  step="0.01" label="Pkg Size"
+                                    name={sp.Id} value={sp.size}  onchange={manSize}></lightning-input>
+                                </div> 
+                <!-- rate -->
+                                <div class="slds-col slds-size_1-of-12">
+                                    <lightning-input  type="number"  step="0.001" label="Rate"
+                                    name={sp.Id} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
+                                </div>
+                <!--unit area  -->
+                                <div class="slds-col slds-size_2-of-12">
+                                    <lightning-combobox
+                                    name={sp.Id}
+                                    label="Unit Area"
+                                    value={sp.Unit_Area__c}
+                                    placeholder="Select Measure"
+                                    options={unitArea}
+                                    onchange={handleUnitArea}
+                                    required
+                                    ></lightning-combobox> 
+                                </div>
+                <!--price per unit-->
+                                <div class="slds-col slds-size_2-of-12">
+                                    <div data-id={sp.Id}>
+                                        <lightning-input class='liquid' type="number"  
+                                                        label={sp.title} name={sp.Id} 
+                                                        value={sp.Unit_Price__c} onchange={newPrice} 
+                                                        formatter="currency" step="0.01" read-only={sp.allowEdit}></lightning-input>
+                                    </div>
+                                </div>
+
+                                <div class='slds-col slds-size_2-of-12'>
+                                    <lightning-input type="number" name="input4" class="reqUnits"
+                                                     readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
+                                </div>
+                                <div class='slds-col slds-size_1-of-12'>
+                                    <lightning-input type="number" name="input4" formatter="currency"
+                                                     readonly value={sp.Total_Price__c} label="Total Price" ></lightning-input>
+                                </div>
+                            </template>
+        <!-- Non Manual Entry field -->
+                            <template if:false={sp.manCharge}>
+                                <div class="slds-col slds-size_1-of-12">
+                                    <lightning-input  type="number"  step="0.001" label="Rate"
                                     name={sp.Id} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
                                 </div>   
                                 <div class="slds-col slds-size_2-of-12">
@@ -53,6 +106,7 @@
                                     <lightning-input type="number" name="input4" formatter="currency"
                                                      readonly value={sp.Total_Price__c} label="Total Price" ></lightning-input>
                                 </div>
+                            </template>
                             </template>
                             <template if:true={sp.showNote}>
                                 <div class="slds-col slds-size_8-of-12">

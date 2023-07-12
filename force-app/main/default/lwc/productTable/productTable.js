@@ -187,10 +187,12 @@ export default class ProductTable extends LightningElement {
                showNote: false,
                Note__c: '',
                costM:'',
-               costA:''
+               costA:'',
+               Note_Other__c:'', 
+               manCharge: item.Name.toLowerCase().includes('manual charge')
             }
         } );
-       
+       console.log(this.selectedProducts)
     }
     save(prod){ 
         //catching values from appRatePrice. It's an array that you can get values using [1]

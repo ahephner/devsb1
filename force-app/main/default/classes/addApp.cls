@@ -35,6 +35,7 @@ public with sharing class addApp {
                              ap.P__c = temp.P__c;
                              ap.K__c = temp.K__c;  
                              ap.Note__c = temp.Note__c; 
+                             ap.Note_Other__c = temp.Note_Other__c;
                              prodList.add(ap);
                           }
                          
