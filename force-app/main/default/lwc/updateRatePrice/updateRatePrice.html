@@ -36,16 +36,30 @@
             <template for:each={prodlist} for:item="sp" for:index="index">
                <div key={sp.Product_Code__c} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid' 
                     data-code={index} onmouseenter={hiMouse} onmouseleave={byeMouse}>
-                    <div class="slds-col slds-size_2-of-12 pName">
+                    <div class="slds-col slds-m-top_large">
                         <!-- <lightning-icon icon-name="utility:close" name={sp.Product_Code__c} size='xx-small' class='hover'
-                                        alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon> -->
-                                        <lightning-button-menu alternative-text="Show menu" icon-size="x-small" name ={sp.Product_Code__c} onselect={handleOnselect}>
-                                            <lightning-menu-item value={sp.btnValue} label={sp.btnLabel} ></lightning-menu-item>
-                                            <lightning-menu-item value="Delete" label="Delete" class="btnOptions"></lightning-menu-item>
-                                        </lightning-button-menu>
-                        <p>{sp.Product_Name__c}</p>
+                            alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon> -->
+                            <lightning-button-menu alternative-text="Show menu" icon-size="x-small" name ={sp.Product_Code__c} onselect={handleOnselect}>
+                                <lightning-menu-item value={sp.btnValue} label={sp.btnLabel} ></lightning-menu-item>
+                                <lightning-menu-item value="Delete" label="Delete" class="btnOptions"></lightning-menu-item>
+                            </lightning-button-menu>
                     </div>
-                 <template if:false={sp.showNote}>  
+                            <template lwc:if={sp.manCharge}>
+                                <!--manual charge name-->
+                                <div class="slds-col slds-size_2-of-12 manLineName" data-margin={sp.Id}>
+                                    <lightning-input type="text"  
+                                                     label="Non-Stock Name" name={sp.Id} 
+                                                     value={sp.Note_Other__c} onchange={manName}></lightning-input>
+                                </div>
+                            </template>
+                            <template lwc:else>
+                                <div class="slds-col slds-size_2-of-12 pName">
+                                    <p>{sp.Product_Name__c}</p>
+                                </div>
+                            </template>
+                        <!-- Non Manual Item -->
+                <template if:false={sp.showNote}>  
+                    <template if:false={sp.manCharge}>
                         <div class="slds-col slds-size_1-of-12">
                             <lightning-input  type="number"  step="0.001" label="Rate"
                             name={sp.Product_Code__c} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
@@ -72,7 +86,7 @@
                                             label="Margin%" name={sp.Product2Id} 
                                             value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit} ></lightning-input>
                         </div> 
-                        <div class='slds-col slds-size_2-of-12'>
+                        <div class='slds-col slds-size_1-of-12'>
                             <lightning-input type="number" name="input4" 
                                             readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
                         </div>
@@ -81,6 +95,48 @@
                                             readonly value={sp.Total_Price__c} label="Line Total" ></lightning-input>
                         </div>
                 </template>
+<!-- Manual Entry Line Item -->
+                <template if:true={sp.manCharge}>
+                    <div class="slds-col slds-size_1-of-12">
+                        <lightning-input  type="number"  step="0.01" label="Pkg Size"
+                        name={sp.Id} value={sp.Product_Size__c}  onchange={manSize}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-12">
+                        <lightning-input  type="number"  step="0.001" label="Rate"
+                        name={sp.Product_Code__c} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
+                    </div>   
+                    <div class="slds-col slds-size_2-of-12">
+                        <lightning-combobox
+                        name={sp.Product2Id}
+                        label="Unit Area"
+                        value={sp.Unit_Area__c}
+                        placeholder="Select Measure"
+                        options={unitArea}
+                        onchange={handleUnitArea}
+                        required
+                        ></lightning-combobox> 
+                    </div>
+                    <div class="slds-col slds-size_2-of-12" data-id={sp.Product2Id}>
+                        <lightning-input class='liquid' type="number"  
+                                        label={sp.title} name={sp.Product2Id} 
+                                        value={sp.Unit_Price__c} onchange={newPrice} 
+                                        formatter="currency" step="0.01"></lightning-input>
+                    </div>
+                    <!-- <div class="slds-col slds-size_2-of-12" data-margin={sp.Product2Id}>
+                        <lightning-input class='liquid' type="number"  
+                                        label="Margin%" name={sp.Product2Id} 
+                                        value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit} ></lightning-input>
+                    </div>  -->
+                    <div class='slds-col slds-size_2-of-12'>
+                        <lightning-input type="number" name="input4" 
+                                        readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
+                    </div>
+                    <div class='slds-col slds-size_1-of-12'>
+                        <lightning-input type="number" name="input4" formatter="currency"
+                                        readonly value={sp.Total_Price__c} label="Line Total" ></lightning-input>
+                    </div>
+                </template>
+            </template>
                 <!-- Note on the product -->
                 <template if:true={sp.showNote}>
                     <div class="slds-col slds-size_8-of-12">

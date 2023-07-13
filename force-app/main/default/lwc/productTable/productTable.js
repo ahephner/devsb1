@@ -185,10 +185,10 @@ export default class ProductTable extends LightningElement {
                btnLabel:'Add Note',
                btnValue: 'Note',
                showNote: false,
-               Note__c: '',
                costM:'',
                costA:'',
                Note_Other__c:'', 
+               Manual_Charge_Size__c: 0,
                manCharge: item.Name.toLowerCase().includes('manual charge')
             }
         } );

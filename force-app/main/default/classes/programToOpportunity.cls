@@ -22,7 +22,7 @@ public with sharing class programToOpportunity {
         string mess; 
         try{
             Map<Id,App_Product__c> prod = new Map<Id,App_Product__c>([select id,Area_Id__c, Product__c, Unit_Price__c, Units_Required__c, Margin__c,Product_Cost__c,
-            	                   									 Product_Code__c from App_Product__c where Application__c in: appIds]);
+            	                   									 Product_Code__c, Note_Other__c from App_Product__c where Application__c in: appIds]);
 			//system.debug('prod '+prod.values());
             Map<String, OpportunityLineItem> lines = new Map<String, OpportunityLineItem>();
             system.debug('retrieved');
@@ -51,6 +51,7 @@ public with sharing class programToOpportunity {
                     nli.CPQ_Margin__c = x.Margin__c;
                     nli.UnitPrice = x.Unit_Price__c;
                     nli.Quantity = x.Units_Required__c;
+                    nli.Description = x.Note_Other__c; 
                     //system.debug('2 '+nli);
                     lines.put(x.Product__c, nli);
 

@@ -1,6 +1,7 @@
 .pName{
-    margin-top: 2rem; 
-    display:flex;  
+    margin-top: 1.5rem;
+    display:flex;
+    margin-right: 6%;  
 }
 
 .hover{
@@ -22,4 +23,8 @@
 
 .lineUp{
     display: inline-flex; 
+}
+
+.manLineName{
+    margin-right: 6%;
 }

@@ -47,7 +47,7 @@ public class appProduct {
                                       Total_Price__c, Units_Required__c, Product_Size__c, Application__r.Area__c,Application__r.Total_Price__c,
                                       Application__r.Area__r.Area_Sq_Feet__c,Application__r.Area__r.Area_Acres__c,Margin__c,Product_Cost__c, 
                                       Product_Code__c, Product__r.Product_Type__c,Product__r.N__c, Product__r.K__c, Product__r.P__c, 
-                                      Product__r.hasFertilizer__c, product__r.X1_Gallon_Weight__c, Product__r.Floor_Price__c,
+                                      Product__r.hasFertilizer__c, product__r.X1_Gallon_Weight__c, Product__r.Floor_Price__c, Manual_Charge_Size__c,
                                       N__c, P__c, K__c
                                       from App_Product__c where Application__c =: app];
         

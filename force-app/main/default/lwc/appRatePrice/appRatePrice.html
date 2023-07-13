@@ -6,24 +6,30 @@
                     <template for:each={data} for:item="sp" for:index="index">
                        <div key={sp.Id} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid'
                             data-code={index} onmouseenter={hiMouse} onmouseleave={byeMouse}>
-                            <div class="slds-col slds-size_2-of-12 pName">
+                            <div class="slds-col slds-m-top_large">
                                 <lightning-button-menu alternative-text="Show menu" icon-size="x-small" name ={sp.Product__c} onselect={handleOnselect}>
                                     <lightning-menu-item value={sp.btnValue} label={sp.btnLabel} ></lightning-menu-item>
                                     <lightning-menu-item value="Delete" label="Delete" class="btnOptions"></lightning-menu-item>
                                 </lightning-button-menu>
-
-                                <p>{sp.Product_Name__c}</p>
-                            </div>
+                            </div>    
+                                <template lwc:if={sp.manCharge}>
+                            <!--manual charge name-->
+                                    <div class="slds-col slds-size_2-of-12 manLineName" data-margin={sp.Id}>
+                                        <lightning-input type="text"  
+                                                         label="Non-Stock Name" name={sp.Id} 
+                                                         value={sp.Note_Other__c} onchange={manName}></lightning-input>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    <div class="slds-col slds-size_2-of-12 pName">
+                                        <p>{sp.Product_Name__c}</p>
+                                    </div>
+                                </template>
                             <template if:false={sp.showNote}>
         <!-- If a manual entry show here -->
                             <template if:true={sp.manCharge}>
-                                <div class="slds-col slds-size_2-of-12">
-                <!--manual charge name-->
-                                    <div data-margin={sp.Id}>
-                                        <lightning-input class='liquid' type="text"  
-                                                        label="Product Name" name={sp.Id} 
-                                                        value={sp.Note_Other__c} onchange={manName}></lightning-input>
-                                    </div>
+                                <div class="slds-col slds-size_1-of-12">
+              
                                 </div>
                 <!-- manual charge Size -->
                                 <div class="slds-col slds-size_1-of-12">
@@ -57,7 +63,7 @@
                                     </div>
                                 </div>
 
-                                <div class='slds-col slds-size_2-of-12'>
+                                <div class='slds-col slds-size_1-of-12'>
                                     <lightning-input type="number" name="input4" class="reqUnits"
                                                      readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
                                 </div>
@@ -98,7 +104,7 @@
                                                         value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit}></lightning-input>
                                     </div>
                                 </div> 
-                                <div class='slds-col slds-size_2-of-12'>
+                                <div class='slds-col slds-size_1-of-12'>
                                     <lightning-input type="number" name="input4" class="reqUnits"
                                                      readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
                                 </div>

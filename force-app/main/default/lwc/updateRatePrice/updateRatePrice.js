@@ -97,13 +97,15 @@ export default class UpdateRatePrice extends LightningElement {
                                 let agencyProd = item.Product__r.Agency_Pricing__c; 
                                 let btnLabel = 'Add Note';
                                 let btnValue = 'Note';
+                                let  manCharge =  item.Product_Code__c.toLowerCase().includes('manual charge')
+                                let Note_Other__c = item.Note_Other__c; 
                                 this.appTotalPrice += item.Total_Price__c;
                                 //console.log(typeof item.N__c);
                                 this.appTotalN += item.N__c;
                                 this.appTotalP += item.P__c;
                                 this.appTotalK += item.K__c;
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue}
+                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, manCharge, Note_Other__c}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
@@ -202,7 +204,6 @@ export default class UpdateRatePrice extends LightningElement {
 
            handleUnitArea(e){
             let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name);
-            console.log('index ' +index + ' detail '+e.detail.value );
             
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
@@ -333,6 +334,21 @@ export default class UpdateRatePrice extends LightningElement {
                 let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name) 
                 this.prodlist[index].Note__c = e.detail.value; 
             }
+
+//Manual Line Items update. These are for products ATS does not stock 
+            manName(e){
+                let index = this.prodlist.findIndex(prod => prod.Id === e.target.name) 
+                this.prodlist[index].Note_Other__c = e.detail.value;             
+            }
+
+            manSize(e){
+                let index = this.prodlist.findIndex(prod => prod.Id === e.target.name)
+                this.prodlist[index].Manual_Charge_Size__c = Number(e.detail.value); 
+                this.prodlist[index].Product_Size__c = Number(e.detail.value);
+                if(this.prodlist[index].Rate2__c > 0){
+                    this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c );
+                }
+            }
 //remove product from app
 removeProd(x){
     let index = this.prodlist.findIndex(prod => prod.Product_Code__c === x);
@@ -422,7 +438,10 @@ handleNewProd(x){
         showNote: false,
         btnLabel: 'Add Note',
         btnValue: 'Note', 
-        Product_Type__c: x.detail.rowType
+        Product_Type__c: x.detail.rowType,
+        Note_Other__c: '',
+        Manual_Charge_Size__c: 0,
+        manCharge: x.detail.rowName.toLowerCase().includes('manual charge')
 
     }]
     //console.log(this.prodlist.at(-1))
