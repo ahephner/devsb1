@@ -59,9 +59,9 @@ export default class MakeOrder extends LightningElement {
         console.log('back',saveProd)
         this.sliderValue = 100; 
         //sandbox
-        this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view`;
+        //this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view`;
         //full
-        //this.link = `https://advancedturf.lightning.force.com/lightning/r/Opportunity/${opp}/view`
+        this.link = `https://advancedturf.lightning.force.com/lightning/r/Opportunity/${opp}/view`
         this.softLoad = true    
         }
     // @api
