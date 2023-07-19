@@ -31,6 +31,8 @@ export default class ProductTable extends LightningElement {
     customInsert = false; 
     currentStage = 'appInfo'
     applicationNote; 
+    //if an application is the first of a multi-insert
+    parApp; 
    @track selectedProducts = []; 
 
     @wire(MessageContext)
@@ -153,8 +155,7 @@ export default class ProductTable extends LightningElement {
         this.interval = mess.detail.spread;
         this.dateName = false;
         this.productList = true; 
-        //console.log('spread '+ this.interval);
-        
+        this.parApp = mess.detail.spread != 'once'? true : false;  
     }
 
     //gathers products from appSelectProd then maps over to set values for the appRatePrice that are need for the math functions
@@ -202,7 +203,8 @@ export default class ProductTable extends LightningElement {
             appName: this.appName,
             appArea: this.areaId,
             appDate: this.appDate,
-            appNote: this.applicationNote
+            appNote: this.applicationNote,
+            parentApp: this.parApp
         }
         addApplication({wrapper:params})
             .then((resp)=>{

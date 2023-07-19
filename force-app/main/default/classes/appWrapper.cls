@@ -9,4 +9,6 @@ public with sharing class appWrapper {
     public String appArea {get;set;} 
     @AuraEnabled
     public String appNote {get;set;}
+    @AuraEnabled
+    public boolean parentApp {get; set;}
 }
