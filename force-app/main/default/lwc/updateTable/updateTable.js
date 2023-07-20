@@ -102,7 +102,7 @@ wiredareaInfo({error,data}){
             switch (txt) {
                 case 'Save':
                     this.showButton = true; 
-                    this.template.querySelector('c-update-rate-price').update();
+                    this.template.querySelector('c-update-rate-price').evalUpdate();
                     break;
                 case 'Done':
                     this.showButton = true;
@@ -116,7 +116,7 @@ wiredareaInfo({error,data}){
             switch (txt) {
                 case 'Save':
                     this.showButton = true; 
-                    this.template.querySelector('c-update-ornamental-rate-price').update();
+                    this.template.querySelector('c-update-ornamental-rate-price').evalUpdate();
                     break;
                 case 'Done':
                     this.showButton = true;
@@ -171,6 +171,7 @@ wiredareaInfo({error,data}){
         this.updateExposed = false;  
         this.showButton = true;
         this.buttonText = 'Save'; 
+        this.disableBtn = false;
     }
 
     badPrice(prod){

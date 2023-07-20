@@ -52,6 +52,9 @@ export default class UpdateRatePrice extends LightningElement {
     //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
     wasNewNote = false; 
     oppNote
+    multiApp; 
+    updateMulti = false;
+    @track productIds = [];
 
     connectedCallback(){
         this.loadProducts();
@@ -118,7 +121,9 @@ export default class UpdateRatePrice extends LightningElement {
                 this.areaId = this.prodlist[0].Application__r.Area__c           
                 this.areaName = this.prodlist[0].Area__c            
                 this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
-                this.oppNote = this.prodlist[0].Application__r.Note__c;             
+                this.oppNote = this.prodlist[0].Application__r.Note__c;
+                this.multiApp = this.prodlist[0].Application__r.Multi_Application__c; 
+                            
                 
     //need for doing math later
                 this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
@@ -141,6 +146,7 @@ export default class UpdateRatePrice extends LightningElement {
             this.dispatchEvent(evt); 
         }
     }
+    
 
     @api
     addProducts(){
@@ -185,7 +191,8 @@ export default class UpdateRatePrice extends LightningElement {
                     this.prodCostA = costs.perAcre;
                     this.prodAreaCost = this.areaAcres * this.costPerAcre; 
                     this.treatedAcreage = areaTreated(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c ); 
-                   //console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSizeM,4, this.prodlist[index].Product_Size__c)
+                    this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
+                    //console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSizeM,4, this.prodlist[index].Product_Size__c)
                     if(this.prodlist[index].isFert){
                         let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
                         this.prodlist[index].N__c = fert.n;
@@ -221,6 +228,7 @@ export default class UpdateRatePrice extends LightningElement {
              this.treatedAcreage = areaTreated(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c );
              this.appTotalPrice = appTotal(this.prodlist);
              this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
+             this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
             //handle updating fertilizer amounts
              if(this.prodlist[index].isFert){
                 let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
@@ -280,7 +288,7 @@ export default class UpdateRatePrice extends LightningElement {
                 let lOne = this.prodlist[index].Level_1_UserView__c;
                 let floor = this.prodlist[index].Floor_Price__c;
                 let unitPrice = this.prodlist[index].Unit_Price__c;
-                
+                this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
                 this.handleWarning(targetId,lOne, floor, unitPrice, index)
                 }, 1000)
            }
@@ -325,6 +333,7 @@ export default class UpdateRatePrice extends LightningElement {
                             let lOne = this.prodlist[index].Level_1_UserView__c;
                             let floor = this.prodlist[index].Floor_Price__c;
                             let unitPrice = this.prodlist[index].Unit_Price__c;
+                            this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
                             this.handleWarning(targetId, lOne, floor, unitPrice, index)
                 },1000)
             }
@@ -333,6 +342,7 @@ export default class UpdateRatePrice extends LightningElement {
                 console.log(e.detail.value);
                 let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name) 
                 this.prodlist[index].Note__c = e.detail.value; 
+                this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
             }
 
 //Manual Line Items update. These are for products ATS does not stock 
@@ -345,6 +355,7 @@ export default class UpdateRatePrice extends LightningElement {
                 let index = this.prodlist.findIndex(prod => prod.Id === e.target.name)
                 this.prodlist[index].Manual_Charge_Size__c = Number(e.detail.value); 
                 this.prodlist[index].Product_Size__c = Number(e.detail.value);
+                this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
                 if(this.prodlist[index].Rate2__c > 0){
                     this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c );
                 }
@@ -444,7 +455,7 @@ handleNewProd(x){
         manCharge: x.detail.rowName.toLowerCase().includes('manual charge')
 
     }]
-    //console.log(this.prodlist.at(-1))
+    this.productIds.includes(x.detail.rowProduct) ? '': this.productIds.push(x.detail.rowProduct);
 }
 
 //Display proudct info
@@ -478,7 +489,44 @@ console.log('run mouse')
         this.wasNewNote = true; 
         this.oppNote = event.detail.value
     }
-//Update name and products
+///UPDATE ALL OPTIONS HERE
+radioSelection
+setBTN(x){
+    this.radioSelection = x.target.value; 
+}
+get radioOpts(){
+    return [
+            { label: 'Edit just this event', value: 'one' },
+            { label: 'This and following events', value: 'twoOrMore' },
+        ]
+}
+
+    evalUpdates(){
+        if(this.radioSelection === undefined){
+            return
+        }else if(this.radioSelection === "twoOrMore"){
+            console.log('mass update');
+            this.updateMulti = false;
+        }else{
+            this.update();
+            this.updateMulti = false;  
+        }
+    }
+
+    cancelEval(){
+        this.updateMulti = false; 
+    }
+///THIS EVALUATES THE MULTI UPDATE APPLICATIONS STARTS THE UPDATE PROCESS!!!!!!!!
+    @api
+    evalUpdate(){
+        if(this.multiApp){
+            this.updateMulti = true; 
+        }else{
+            this.update(); 
+        }
+    }
+
+    //Update name and products
     @api 
     update(){
         
@@ -522,6 +570,12 @@ console.log('run mouse')
                 ) 
             })
         }
+
+// IF USER SELECTS TO UPDATE ALL ADDITIONAL APPS AFTER MAKING A CHANGE
+    updateAll(){
+        this.updateMulti = false;
+        this.loaded = false; 
+    }
         //Update Pricing and Fertility info displayed to per M or per Acre
     updateMeasure(){
         this.measure = this.measure === 'M' ? 'Acre' : 'M';

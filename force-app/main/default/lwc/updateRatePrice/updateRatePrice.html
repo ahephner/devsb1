@@ -1,6 +1,7 @@
 <template>
  
     <template if:true={loaded}>
+        <template if:false={updateMulti}>
         <template if:true={addMore}>
             <div class="slds-col slds-size_1-of-1">
                 <c-update-add-product ondone={closeAdd}
@@ -257,6 +258,32 @@
                       class="slds-m-left_x-small"></lightning-button>
     
 </div> -->
+</template>
+</template>
+<template if:true={updateMulti}>
+    <div class="updateAll">
+        <lightning-radio-group 
+        name="radioGroup"
+        label="This is a recurring application"
+        options={radioOpts}
+        value={radioSelection}
+        required
+        type="radio">
+        </lightning-radio-group>
+        <br/>
+        <div class="slds-m-top_medium">
+            <lightning-button 
+            variant="brand"
+            label="OK" 
+            onclick={evalUpdates} 
+            ></lightning-button>
+            <lightning-button 
+            variant="destructive-text"
+            label="Cancel" 
+            onclick={cancelEval} 
+            ></lightning-button>
+        </div>
+    </div>
 </template>
 <template if:false={loaded}>
     <lightning-spinner 
