@@ -5,6 +5,7 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
+import multiUpdateProd from '@salesforce/apex/addApp.multiUpdateProd';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
 import NOTE from '@salesforce/schema/App_Product__c.Note__c';
@@ -101,14 +102,15 @@ export default class UpdateRatePrice extends LightningElement {
                                 let btnLabel = 'Add Note';
                                 let btnValue = 'Note';
                                 let  manCharge =  item.Product_Code__c.toLowerCase().includes('manual charge')
-                                let Note_Other__c = item.Note_Other__c; 
+                                let Note_Other__c = item.Note_Other__c;
+                                let prevAppId = item.Application__r.Prev_App_Id__c != undefined ? item.Application__r.Prev_App_Id__c : item.Application__c; 
                                 this.appTotalPrice += item.Total_Price__c;
                                 //console.log(typeof item.N__c);
                                 this.appTotalN += item.N__c;
                                 this.appTotalP += item.P__c;
                                 this.appTotalK += item.K__c;
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, manCharge, Note_Other__c}
+                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, manCharge, Note_Other__c, prevAppId}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
@@ -505,8 +507,8 @@ get radioOpts(){
         if(this.radioSelection === undefined){
             return
         }else if(this.radioSelection === "twoOrMore"){
-            console.log('mass update');
             this.updateMulti = false;
+            this.updateAll()
         }else{
             this.update();
             this.updateMulti = false;  
@@ -572,9 +574,12 @@ get radioOpts(){
         }
 
 // IF USER SELECTS TO UPDATE ALL ADDITIONAL APPS AFTER MAKING A CHANGE
-    updateAll(){
+    async updateAll(){
         this.updateMulti = false;
         this.loaded = false; 
+        console.log("prodIds: ", this.productIds, " appDate: ", this.appDate, " parentId: ", this.prodlist[0].prevAppId, " currentRecId: ", this.prodlist[0].Application__c)
+        let res = await multiUpdateProd({prodIds: this.productIds, appDate: this.appDate, parentId: this.prodlist[0].prevAppId, currentRecId: this.prodlist[0].Application__c})
+        console.log(res)
     }
         //Update Pricing and Fertility info displayed to per M or per Acre
     updateMeasure(){
