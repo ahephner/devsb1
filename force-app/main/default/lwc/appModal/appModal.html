@@ -18,9 +18,16 @@
                         <!-- Area Name -->
                         <lightning-input class='validate' type="text" 
                         label="Area Name" onchange={newName} required></lightning-input>
-                        <!-- SQ FT -->
-                        <lightning-input class='validate' type='number' label="Area Sq Feet (M)"  
-                        value={feet} onchange={newFeet} required></lightning-input>
+                        <!-- Finish Spray -->
+                       <template lwc:if={ornamentalArea}>
+                           <lightning-input class='validate' type='number' label="Spray Gallons"  
+                           value={finishSpray} onchange={setFinishSpray} required></lightning-input>
+                       </template>
+                       <!--SQ FT-->
+                       <template lwc:else>
+                            <lightning-input class='validate' type='number' label="Area Sq Feet (M)"  
+                             value={feet} onchange={newFeet} required></lightning-input>
+                       </template>
                         <!-- Date -->
                         <lightning-input type="date" label="Date" onchange={newDate}></lightning-input>
                     </div>
@@ -35,8 +42,15 @@
                                         required
                                         ></lightning-combobox>
                                         <!-- Acre -->
-                                    <lightning-input class='validate' type='number' 
-                                                     label="Area Acres" value={areaAcres} onchange={newAcre} required></lightning-input>
+                        <template lwc:if={ornamentalArea}>
+                            <!-- <lightning-input class='validate' type='number' 
+                                    label="Tank Size" value={tankSize} onchange={setTankSize} required></lightning-input> -->
+                                <p class="slds-m-top_large slds-m-bottom_small">Amount of Gallons Required to treat area</p>
+                        </template>
+                        <template lwc:else>
+                            <lightning-input class='validate' type='number' 
+                            label="Area Acres" value={areaAcres} onchange={newAcre} required></lightning-input>
+                        </template>
                                     <lightning-combobox
                                     name='category'
                                     label='Type'

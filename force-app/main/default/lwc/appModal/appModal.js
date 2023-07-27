@@ -9,6 +9,8 @@ import ACRE_FIELD from '@salesforce/schema/Area__c.Area_Acres__c';
 import TYPE_FIELD from '@salesforce/schema/Area__c.Type__c';  
 import PROGRAM_FIELD from '@salesforce/schema/Area__c.Program__c';  
 import PREFUOFM from '@salesforce/schema/Area__c.Pref_U_of_M__c'; 
+import ORN_AREA from '@salesforce/schema/Area__c.Ornamental_Area__c';
+import GALS_REQ from '@salesforce/schema/Area__c.Required_Gallons__c';
 import {roundRate} from 'c/programBuilderHelper';
 export default class AppModal extends LightningElement {
     openAppModal = false; 
@@ -23,18 +25,19 @@ export default class AppModal extends LightningElement {
     preUm;
     recordId; 
     ornamentalArea = false; 
-    btnLabel = 'Turf Area'
+    btnLabel = 'Turf Area';
+    tankSize;
+    finishSpray = 0; 
     @api recId; 
 
-    changeAreaType(event){
+    changeAreaType(){
     
-        if(!this.ornamentalArea){ 
+        if(this.prefUM === '100 Gal'){ 
             this.ornamentalArea = true; 
-            this.btnLabel = 'Ornamentals';
-        }else if(this.ornamentalArea){ 
+            
+        }else{ 
             this.ornamentalArea = false;
             
-            this.btnLabel = 'Turf Area';
         }
         
     }
@@ -98,8 +101,15 @@ export default class AppModal extends LightningElement {
     }
     newUM(e){
         this.prefUM = e.detail.value; 
-       console.log(this.prefUM);
+        this.ornamentalArea = this.prefUM === '100 Gal' ? true : false;  
          
+    }
+    setTankSize(e){
+        this.tankSize = e.detail.value; 
+    }
+
+    setFinishSpray(e){
+        this.finishSpray = e.detail.value; 
     }
     isValid;
     errMsgs; 
@@ -118,8 +128,8 @@ export default class AppModal extends LightningElement {
         fields[TYPE_FIELD.fieldApiName] = this.note;
         fields[PROGRAM_FIELD.fieldApiName] = this.recId;
         fields[PREFUOFM.fieldApiName]= this.prefUM;
-        
-        
+        fields[ORN_AREA.fieldApiName] = this.ornamentalArea;
+        fields[GALS_REQ.fieldApiName] = this.finishSpray; 
         const recordInput = {apiName: AREA_OBJECT.objectApiName, fields};
         //create record
         createRecord(recordInput)
@@ -134,7 +144,10 @@ export default class AppModal extends LightningElement {
             ); 
             
         })
-        .then(this.openAppModal = false)
+        .then(()=>{
+            this.openAppModal = false
+            this.ornamentalArea = false;    
+        }) 
         .then(()=>{
             //console.log('alex is talking');
             //send a new event to the parent -> addProductButton

@@ -428,7 +428,7 @@ handleNewProd(x){
         Units_Required__c: 1,
         Unit_Area__c: pref(this.areaUM, x.detail.rowProdType),  
         Unit_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
-        Product_Cost__c: x.detail.rowAgency ? 'Agency' : x.detail.rowCost , 
+        Product_Cost__c: x.detail.rowAgency ? 0.0 : x.detail.rowCost , 
         Margin__c: x.detail.rowAgency ? "" : x.detail.rowMargin, 
         Total_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
         Product_Size__c: x.detail.rowSize,
@@ -646,3 +646,4 @@ get radioOpts(){
         
     }
 }
+
