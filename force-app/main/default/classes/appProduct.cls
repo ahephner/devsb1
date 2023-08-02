@@ -42,13 +42,14 @@ public class appProduct {
     //update application can't use cacheable or cant edita
     @AuraEnabled
     public static List<App_Product__c> appProducts(string app){
-        List<App_Product__c> prods = [Select id, product__c, Product_Name__c,Application__c,Application__r.Name, Application__r.Area__r.Pref_U_of_M__c, 
+        List<App_Product__c> prods = [Select id, Product__c, Product_Name__c,Application__c,Application__r.Name, Application__r.Area__r.Pref_U_of_M__c, 
                                       Application__r.Date__c,Application__r.Note__c, Unit_Area__c, Rate2__c, Area__c, Note__c,Unit_Price__c,Product__r.Agency_Pricing__c,
                                       Total_Price__c, Units_Required__c, Product_Size__c, Application__r.Area__c,Application__r.Total_Price__c,
                                       Application__r.Area__r.Area_Sq_Feet__c,Application__r.Area__r.Area_Acres__c,Margin__c,Product_Cost__c, 
-                                      Product_Code__c, Product__r.Product_Type__c,Product__r.N__c, Product__r.K__c, Product__r.P__c, 
-                                      Product__r.hasFertilizer__c, product__r.X1_Gallon_Weight__c, Product__r.Floor_Price__c, Manual_Charge_Size__c,
-                                      N__c, P__c, K__c
+                                      Product_Code__c, Product__r.Product_Type__c,Product__r.N__c, Product__r.K__c, Product__r.P__c,Note_Other__c,
+                                      Product__r.hasFertilizer__c, product__r.X1_Gallon_Weight__c, Product__r.Floor_Price__c,Manual_Charge_Size__c,
+                                      N__c, P__c, K__c, Application__r.Multi_Application__c, Application__r.prev_app_id__c, Application__r.Parent_Application__c,
+                                      Application__r.Program_ID__c
                                       from App_Product__c where Application__c =: app];
         
         return prods; 

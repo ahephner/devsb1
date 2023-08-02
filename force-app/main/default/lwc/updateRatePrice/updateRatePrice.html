@@ -262,9 +262,15 @@
 </template>
 <template if:true={updateMulti}>
     <div class="updateAll">
+        <p class="slds-m-bottom_x-small"><b>You have the ability to mass update your program explained below.</b></p>
+        <ul>
+            <li><b>Update Series:</b> If you used the multi-insert tool for applications. This will update the future apps in that series to match this application</li>
+            <li><b>Products in Area:</b> Edits made will match in this area. Will NOT insert any products you just added</li>
+            <li><b>Products in Program:</b>Products in Program: Edits made will match for products entire program. Will NOT insert any products you just added</li>
+        </ul>
         <lightning-radio-group 
         name="radioGroup"
-        label="This is a recurring application"
+        label="Update Type"
         options={radioOpts}
         value={radioSelection}
         required

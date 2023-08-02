@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import insertOpp from '@salesforce/apex/programToOpportunity.createOpp';
 import insertProd from '@salesforce/apex/programToOpportunity.createOppProduct';
+//import readProds from '@salesforce/apex/programToOpportunity.jsMerge';
 const columns = [
     { label: 'Name', fieldName: 'Name' },
     { label: 'Area', fieldName: 'Area_Name__c', sortable: "true" },
@@ -58,6 +59,8 @@ export default class MakeOrder extends LightningElement {
         let saveProd = await insertProd({oppId: opp, appIds:orders})
         console.log('back',saveProd)
         this.sliderValue = 100; 
+        //let prodsOnly = await readProds({oppId: opp, appIds:orders});
+        console.log(prodsOnly)
         //sandbox
         //this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view`;
         //full

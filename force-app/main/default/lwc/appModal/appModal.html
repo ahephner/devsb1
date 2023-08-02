@@ -20,7 +20,7 @@
                         label="Area Name" onchange={newName} required></lightning-input>
                         <!-- Finish Spray -->
                        <template lwc:if={ornamentalArea}>
-                           <lightning-input class='validate' type='number' label="Spray Gallons"  
+                           <lightning-input class='validate' type='number' label="Finished Spray Gallons"  
                            value={finishSpray} onchange={setFinishSpray} required></lightning-input>
                        </template>
                        <!--SQ FT-->
@@ -45,7 +45,7 @@
                         <template lwc:if={ornamentalArea}>
                             <!-- <lightning-input class='validate' type='number' 
                                     label="Tank Size" value={tankSize} onchange={setTankSize} required></lightning-input> -->
-                                <p class="slds-m-top_large slds-m-bottom_small">Amount of Gallons Required to treat area</p>
+                                <p class="slds-m-top_x-large slds-m-bottom_x-small">Amount of Gallons Required to treat area</p>
                         </template>
                         <template lwc:else>
                             <lightning-input class='validate' type='number' 

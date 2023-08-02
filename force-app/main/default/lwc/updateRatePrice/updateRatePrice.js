@@ -25,6 +25,7 @@ export default class UpdateRatePrice extends LightningElement {
     areaAcres
     @track appTotalPrice = 0.00;
     sqft
+    programId; 
     area
     areaUM
     measure = 'M'; 
@@ -54,6 +55,7 @@ export default class UpdateRatePrice extends LightningElement {
     wasNewNote = false; 
     oppNote
     multiApp; 
+    parentApp; 
     updateMulti = false;
     @track productIds = [];
 
@@ -120,12 +122,13 @@ export default class UpdateRatePrice extends LightningElement {
                 this.appName = this.prodlist[0].Application__r.Name;            
                 this.appDate = this.prodlist[0].Application__r.Date__c;             
                 this.updateAppId = this.prodlist[0].Application__c;            
+                this.programId = this.prodlist[0].Application__r.Program_ID__c;
                 this.areaId = this.prodlist[0].Application__r.Area__c           
                 this.areaName = this.prodlist[0].Area__c            
                 this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
                 this.oppNote = this.prodlist[0].Application__r.Note__c;
                 this.multiApp = this.prodlist[0].Application__r.Multi_Application__c; 
-                            
+                this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;             
                 
     //need for doing math later
                 this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
@@ -470,7 +473,7 @@ prodK
 hiMouse(e){
     this.showProdInfo = true; 
     let index = this.prodlist[e.target.dataset.code]
-    console.log(index)
+    //console.log(index)
     this.productName = index.Product_Name__c;
     this.productCost = index.Product_Cost__c;
     this.levelOne = index.Level_1_UserView__c;
@@ -484,7 +487,7 @@ hiMouse(e){
     this.prodK = index.K__c; 
 }
 byeMouse(e){
-console.log('run mouse')
+//console.log('run mouse')
 }
 
     newAppNote(event){
@@ -499,20 +502,24 @@ setBTN(x){
 get radioOpts(){
     return [
             { label: 'Edit just this event', value: 'one' },
-            { label: 'This and following events', value: 'twoOrMore' },
+            { label: 'Update Series', value: 'series' },
+            {label:'Products in Area', value:'area'},
+            {label:'Products in Program', value:'program'}
         ]
 }
 
     evalUpdates(){
         if(this.radioSelection === undefined){
+           //alert need 
             return
-        }else if(this.radioSelection === "twoOrMore"){
-            this.updateMulti = false;
-            this.updateAll()
+        }else if(this.radioSelection != "one"){
+            //this.updateMulti = true;
+            this.update2()
         }else{
-            this.update();
             this.updateMulti = false;  
+            this.update();
         }
+        
     }
 
     cancelEval(){
@@ -522,13 +529,58 @@ get radioOpts(){
     @api
     evalUpdate(){
         if(this.multiApp){
-            this.updateMulti = true; 
+            this.updateMulti = true;
+            
+ 
         }else{
             this.update(); 
         }
     }
 
-    //Update name and products
+    //UPDATE FOLLOW UP APPLICATIONS TOO 
+    @api
+    async update2(){
+        try {
+            this.loaded = false;
+        //only works if that tab is open when saving
+        //this.oppNote= this.template.querySelector('[data-note="appNote"]').value;
+
+        let params = {
+            appName: this.appName,
+            appDate: this.appDate,
+            appArea: this.areaId, 
+            appNote: this.oppNote
+        }
+
+        let appUpdate = await updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote});
+        let singleUpdate = await updateProducts({products:this.prodlist});
+        let followUp = await multiUpdateProd({prodIds: this.productIds, appDate: this.appDate, parentId: this.prodlist[0].prevAppId, 
+                                              currentRecId: this.prodlist[0].Application__c, parentAp: this.parentApp, updateType: this.radioSelection, 
+                                              area: this.areaId, program: this.programId})
+        this.prodlist = [];
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title:'Success',
+                message:'Updated Products!',
+                variant:'success'
+            })
+        )
+        //close screen
+        this.loaded = false;
+        this.cancel();
+        } catch (error) {
+            console.log(JSON.stringify(error));
+            
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error adding app',
+                    message: JSON.stringify(error),
+                    variant: 'error'
+                })  
+            )
+        }
+        this.loaded = false;
+    }
     @api 
     update(){
         
@@ -545,9 +597,13 @@ get radioOpts(){
         //console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
         updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
             .then(()=>{
-               console.log(JSON.stringify(this.prodlist))
-                updateProducts({products:this.prodlist})
-            }).then((mess)=>{
+               //console.log(JSON.stringify(this.prodlist))
+                 updateProducts({products:this.prodlist});
+               
+            }).then(()=>{
+                     console.log('multiUpdateProd ', this.productIds); 
+                    multiUpdateProd({prodIds: this.productIds, appDate: this.appDate, parentId: this.prodlist[0].prevAppId, currentRecId: this.prodlist[0].Application__c})
+                }).then((mess)=>{
                 //console.log('mess '+mess)
                 this.prodlist = [];
                 this.dispatchEvent(
@@ -560,6 +616,7 @@ get radioOpts(){
                 //tell parent to request appDataTable refresh
                 this.dispatchEvent(new CustomEvent('update'))
             }).then(()=>{
+                this.updateMulti = false
                 this.cancel();
             }).catch((error)=>{
                 //console.log(JSON.stringify(error))
@@ -573,14 +630,6 @@ get radioOpts(){
             })
         }
 
-// IF USER SELECTS TO UPDATE ALL ADDITIONAL APPS AFTER MAKING A CHANGE
-    async updateAll(){
-        this.updateMulti = false;
-        this.loaded = false; 
-        console.log("prodIds: ", this.productIds, " appDate: ", this.appDate, " parentId: ", this.prodlist[0].prevAppId, " currentRecId: ", this.prodlist[0].Application__c)
-        let res = await multiUpdateProd({prodIds: this.productIds, appDate: this.appDate, parentId: this.prodlist[0].prevAppId, currentRecId: this.prodlist[0].Application__c})
-        console.log(res)
-    }
         //Update Pricing and Fertility info displayed to per M or per Acre
     updateMeasure(){
         this.measure = this.measure === 'M' ? 'Acre' : 'M';
@@ -646,4 +695,3 @@ get radioOpts(){
         
     }
 }
-
