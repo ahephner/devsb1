@@ -184,7 +184,15 @@ const ornPerProduct = (prodPrice, prodSize, rate)=>{
   return {per100, perGal}; 
 }
 
+//amount of gallons required to reach tank or spray volume size
+const requiredGals = (size, rate, tankSize) =>{
+      let x = roundNum((((tankSize/100)*rate)/size), 2)
+      let sizeCheck = x <1 ? x= 1 : Math.ceil(x); 
+      return sizeCheck;  
+} 
+
 const finishedGals = (size, rate) => roundNum(((size/rate) * 100), 2)
+
 export{hold, 
       appTotal, 
       alreadyAdded, 
@@ -201,7 +209,8 @@ export{hold,
       ornPerProduct, 
       merge,
       areaTreated,
-      ornAppTotal, 
+      ornAppTotal,
+      requiredGals, 
       finishedGals}
 
  

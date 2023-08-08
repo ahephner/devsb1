@@ -6,7 +6,7 @@ public class appProduct {
        for(area__c x:[select id, name from area__c where program__c = :recordId]){
            aw.add(new areaWrapper(x.name, x.id));
        }
-      // system.debug('aw ' +aw);
+      system.debug('aw ' +aw);
        return aw; 
    }
     
@@ -28,14 +28,14 @@ public class appProduct {
       
         list<application__c> apps = [Select Name, Id, Date__c, Area_Name__c, Total_Price_ap__c, Customer_Name__c, Program_Name__c
                                      from Application__c where Program_ID__c =: recordId];
-      //  system.debug(apps);
+        //system.debug(apps);
         return apps;
             
     }
     //get area details when adding to the program 
     @AuraEnabled
     public static list<Area__c> areaInfo(string ai){
-        list<area__c> a = [select Area_Sq_Feet__c, name, Pref_U_of_M__c from area__c where id =:ai limit 1 ];
+        list<area__c> a = [select Area_Sq_Feet__c, name, Pref_U_of_M__c, Required_Gallons__c from area__c where id =:ai limit 1 ];
         //system.debug(a);
         return a; 
     }
@@ -49,7 +49,7 @@ public class appProduct {
                                       Product_Code__c, Product__r.Product_Type__c,Product__r.N__c, Product__r.K__c, Product__r.P__c,Note_Other__c,
                                       Product__r.hasFertilizer__c, product__r.X1_Gallon_Weight__c, Product__r.Floor_Price__c,Manual_Charge_Size__c,
                                       N__c, P__c, K__c, Application__r.Multi_Application__c, Application__r.prev_app_id__c, Application__r.Parent_Application__c,
-                                      Application__r.Program_ID__c
+                                      Application__r.Program_ID__c, Application__r.Area__r.Required_Gallons__c
                                       from App_Product__c where Application__c =: app];
         
         return prods; 
@@ -77,7 +77,7 @@ public class appProduct {
                 + '  Product2.Floor_Type__c, Product2.Floor_Price__c, Product2.Last_Purchase_Price__c, Agency_Product__c, product2.Total_Product_Items__c, Product2.Temp_Unavailable__c,'
           		+ ' Floor_Price__c, Level_1_UserView__c, Level_One_Margin__c, Level_2_UserView__c, Level_2_Margin__c, Product_Cost__c, Product2.Temp_Mess__c, Product_Type__c, Product_Size__c,'
                 + ' Product2.N__c, Product2.K__c, Product2.P__c, Product2.hasFertilizer__c, product2.X1_Gallon_Weight__c'
-                + ' From PricebookEntry Where IsActive = True AND Include_in_Programs__c = True AND Pricebook2Id =: pbId  AND' ; 
+                + ' From PricebookEntry Where IsActive = True AND Product2.Include_in_Programs__c = True AND Pricebook2Id =: pbId  AND' ; 
      //AND Product2.ProductClass =:pClass
       if(!searchterm.contains('null') && category == 'All' && pf == 'All'){
           //system.debug('1');

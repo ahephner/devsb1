@@ -1,5 +1,5 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum, perProduct, ornPerProduct, areaTreated, sumFert, ornAppTotal, finishedGals} from 'c/programBuilderHelper';
+import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum, perProduct, ornPerProduct, requiredGals, sumFert, ornAppTotal, finishedGals} from 'c/programBuilderHelper';
 import {checkPricing} from 'c/helper';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
@@ -67,7 +67,7 @@ noteOps;
          this.data[index].Rate2__c = Number(e.detail.value);
          
          if(this.data[index].Unit_Area__c != '' && this.data[index].Unit_Area__c != null){
-
+             this.data[index].Units_Required__c = requiredGals(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].sprayVolume);
              let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
              
              //this.data[index].costM = costs.perThousand;

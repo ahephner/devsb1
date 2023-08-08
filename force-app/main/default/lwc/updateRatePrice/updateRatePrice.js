@@ -111,6 +111,7 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.appTotalN += item.N__c;
                                 this.appTotalP += item.P__c;
                                 this.appTotalK += item.K__c;
+                                //used for updating. Pushing id to a list so when something is updated we check against it
                                 prodIds.add(item.Product__c);
                                 return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, manCharge, Note_Other__c, prevAppId}
                             });

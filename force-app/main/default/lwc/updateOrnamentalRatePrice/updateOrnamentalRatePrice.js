@@ -8,7 +8,8 @@ import updateProducts from '@salesforce/apex/addApp.updateProducts';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
 import NOTE from '@salesforce/schema/App_Product__c.Note__c';
-import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, ornPerProduct, ornAppTotal, perProduct, merge, finishedGals, sumFert } from 'c/programBuilderHelper';
+import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, roundNum,
+         ornPerProduct, ornAppTotal, requiredGals, merge, finishedGals, sumFert } from 'c/programBuilderHelper';
 import {checkPricing} from 'c/helper'
 
 export default class UpdateOrnamentalRatePrice extends LightningElement {
@@ -22,7 +23,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
     error; 
     loaded=false; 
     areaSizeM;
-    areaAcres
+    
     @track appTotalPrice = 0.00;
     sqft
     area
@@ -31,6 +32,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
     addMore = false; 
     //for showing area size
     showAcreSize
+    sprayVolume
     //For showing product information
     productName = '';
     productCost = 0;
@@ -51,7 +53,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
     noteOps;
     prodCostG;
     prodCost100;
-    gallonAmounts = 0;
+    reqGallons; 
     appPer100 = 0; 
     //Here is notes per app
     //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
@@ -108,7 +110,8 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
                                 this.appTotalP += item.P__c;
                                 this.appTotalK += item.K__c;
                                 prodIds.add(item.Product__c);
-                                return {...item, sObjectType, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue}
+                                return {...item, sObjectType, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA,
+                                        goodPrice, showNote, agencyProd, btnLabel, btnValue}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
@@ -123,9 +126,9 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
                 this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
                 this.oppNote = this.prodlist[0].Application__r.Note__c;             
                 
-    //need for doing math later
-                this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
-                this.areaAcres = parseInt(this.prodlist[0].Application__r.Area__r.Area_Acres__c);
+    //need for doing math later size of tank or desired volume of finished mix. Set on the area insert
+                this.sprayVolume = parseInt(this.prodlist[0].Application__r.Area__r.Required_Gallons__c);
+                
     //Round totals
                 this.appTotalN = roundNum(this.appTotalN, 4);
                 this.appTotalP = roundNum(this.appTotalP, 4);
@@ -176,14 +179,14 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
                 //console.log('ua '+this.prodlist[index].Unit_Area__c);
                 
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
-                    
+                
+                    this.prodlist[index].Units_Required__c = requiredGals(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c, this.sprayVolume);
                     
                    
                     let costs = ornPerProduct(this.prodlist[index].Unit_Price__c, this.prodList[index].Product_Size__c, this.prodList[index].Rate2__c);
                     this.prodCostG = costs.perGal;
                     this.prodCost100 = costs.per100;
-
-                    this.gallonAmounts = finishedGals(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c);
+                    
                     this.appTotalPrice = ornAppTotal(this.prodlist).total; 
                     this.appPer100 = ornAppTotal(this.prodlist).total100;
 
@@ -214,7 +217,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
                 this.prodCostG = costs.perGal;
                 this.prodCost100 = costs.per100;
                
-                this.gallonAmounts = finishedGals(this.data[index].Product_Size__c,this.data[index].Rate2__c);
+                //this.gallonAmounts = finishedGals(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.sprayVolume);
                 this.appTotalPrice = ornAppTotal(this.prodlist).total; 
                 this.appPer100 = ornAppTotal(this.prodlist).total100;
 
@@ -373,7 +376,7 @@ removeProd(x){
         }
         //need to do update all values.
         this.appTotalPrice = appTotal(this.prodlist);
-        this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2);
+        //this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2);
         if(fert){
             let totalFert = sumFert(this.prodlist)
             this.appTotalN += roundNum(totalFert.N__c, 4);
@@ -450,12 +453,12 @@ hiMouse(e){
     //console.log(index);
     this.productName = index.Product_Name__c;
     this.productCost = index.Product_Cost__c;
-    this.levelOne = index.levelOne;
-    this.levelTwo = index.levelTwo;
-    this.prodFloor = index.floorPrice; 
+    this.levelOne = index.Level_1_UserView__c;
+    this.levelTwo = index.Level_2_UserView__c;
+    this.prodFloor = index.Floor_Price__c; 
     this.prodCostG = ornPerProduct(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c).perGal;
     this.prodCost100 = ornPerProduct(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c).per100;
-    this.gallonAmounts = finishedGals(index.Product_Size__c,index.Rate2__c );
+    this.gallonAmounts = finishedGals(index.Product_Size__c,index.Rate2__c);
     this.prodN = index.N__c;
     this.prodP = index.P__c;
     this.prodK = index.K__c; 

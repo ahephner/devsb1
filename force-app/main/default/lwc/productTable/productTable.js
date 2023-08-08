@@ -125,6 +125,7 @@ export default class ProductTable extends LightningElement {
                     this.areaSQft = resp[0].Area_Sq_Feet__c
                     this.areaUM = resp[0].Pref_U_of_M__c
                     this.ornamental = resp[0].Pref_U_of_M__c === '100 Gal' ? true : false; 
+                    this.sprayVol = resp[0].Required_Gallons__c;
                 })
             }
 //how to call a function from a child comp. if tracking values in parent 
@@ -190,6 +191,7 @@ export default class ProductTable extends LightningElement {
                costA:'',
                Note_Other__c:'', 
                Manual_Charge_Size__c: 0,
+               sprayVolume: this.ornamental ? this.sprayVol: 0,
                manCharge: item.Name.toLowerCase().includes('manual charge')
             }
         } );

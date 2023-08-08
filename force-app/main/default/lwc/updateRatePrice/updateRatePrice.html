@@ -262,11 +262,12 @@
 </template>
 <template if:true={updateMulti}>
     <div class="updateAll">
-        <p class="slds-m-bottom_x-small"><b>You have the ability to mass update your program explained below.</b></p>
+        <p class="slds-m-bottom_x-small"><b>Product rate, price or unit of measure can be mass updated. Read outline below</b></p>
         <ul>
+            <li><b>Just Event:</b>Only update this app</li>
             <li><b>Update Series:</b> If you used the multi-insert tool for applications. This will update the future apps in that series to match this application</li>
-            <li><b>Products in Area:</b> Edits made will match in this area. Will NOT insert any products you just added</li>
-            <li><b>Products in Program:</b>Products in Program: Edits made will match for products entire program. Will NOT insert any products you just added</li>
+            <li><b>Products in Area:</b> Matching products in this area regardless of date. Will NOT insert any products you just added</li>
+            <li><b>Products in Program:</b>Matching products in entire program regardless of date. Will NOT insert any products you just added</li>
         </ul>
         <lightning-radio-group 
         name="radioGroup"
