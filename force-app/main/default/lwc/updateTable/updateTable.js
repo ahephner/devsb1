@@ -98,6 +98,7 @@ wiredareaInfo({error,data}){
 
     handleNext(){
         let txt = this.buttonText; 
+       
         if(!this.ornamental){
             switch (txt) {
                 case 'Save':
@@ -116,7 +117,7 @@ wiredareaInfo({error,data}){
             switch (txt) {
                 case 'Save':
                     this.showButton = true; 
-                    this.template.querySelector('c-update-ornamental-rate-price').evalUpdate();
+                    this.template.querySelector('c-update-ornamental-rate-price').update();
                     break;
                 case 'Done':
                     this.showButton = true;
