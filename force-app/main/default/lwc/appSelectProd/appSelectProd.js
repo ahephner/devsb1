@@ -167,7 +167,7 @@ export default class AppSelectProd extends LightningElement {
             const rowK = e.detail.row.kVal; 
             const fert = e.detail.row.isFert; 
             const galWeight = e.detail.row.galWeight;
-
+            
             
             if(rowAction ==='Add'){
                 let index = this.prod.findIndex(x => x.Id === rowId)

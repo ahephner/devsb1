@@ -20,6 +20,7 @@ export default class ProductTable extends LightningElement {
     //searching product table 
     areaSelected;
     areaId;  
+    ornamental; 
     count = 0; 
     //App Info
     appName;
@@ -30,6 +31,8 @@ export default class ProductTable extends LightningElement {
     customInsert = false; 
     currentStage = 'appInfo'
     applicationNote; 
+    //if an application is the first of a multi-insert
+    parApp; 
    @track selectedProducts = []; 
 
     @wire(MessageContext)
@@ -56,8 +59,7 @@ export default class ProductTable extends LightningElement {
             //control flow for when trying to call refresh apex
             //if an issue look at the reset below I changed to undefined used to be ''
             if(this.areaId){
-               this.handleArea(this.areaId)
-               //console.log('areaId '+this.areaId);
+               this.handleArea(this.areaId);
                
             }
         }
@@ -75,30 +77,55 @@ export default class ProductTable extends LightningElement {
         }
         move(stage){
             stage = this.currentStage;
-            switch(stage){
-                case 'appInfo':
-                    let go = this.template.querySelector('c-app-name-date').next();
-                    go ? this.currentStage = 'selectProd' : '';
-                    break;
-                case 'selectProd':
-                    let ok = this.template.querySelector('c-app-select-prod').next();
-                    //console.log({ok})
-                    ok ? this.currentStage = 'ratePrice' : ''
-                    break;
-                case 'ratePrice':
-                    let final = this.template.querySelector('c-app-rate-price').save();
-                    //console.log({final})
-                    final ? this.currentStage = 'appInfo': '';
-                    break;
-            }
+            if(!this.ornamental){
+                switch(stage){
+                    case 'appInfo':
+                        let go = this.template.querySelector('c-app-name-date').next();
+                        go ? this.currentStage = 'selectProd' : '';
+                        break;
+                    case 'selectProd':
+                        let ok = this.template.querySelector('c-app-select-prod').next();
+                        
+                        ok ? this.currentStage = 'ratePrice' :'';
+                        console.log(this.currentStage)
+                        break;
+                    case 'ratePrice':
+                        let final = this.template.querySelector('c-app-rate-price').save();
+                        final ? this.currentStage = 'appInfo': '';
+                        break;
+                    default:
+                        break;
+                }
+            }else{
+                switch(stage){
+                    case 'appInfo':
+                        let go = this.template.querySelector('c-app-name-date').next();
+                        go ? this.currentStage = 'ornSelectProd' : '';
+                        break;
+                    case 'ornSelectProd':
+                        let ok = this.template.querySelector('c-app-select-prod').next();
+                        
+                        ok ? this.currentStage = 'ornRatePrice' :'';
+                        console.log(this.currentStage)
+                        break;
+                    case 'ornRatePrice':
+                        let final = this.template.querySelector('c-orn-app-rate-price').save();
+                        final ? this.currentStage = 'appInfo': '';
+                        break;
+                    default:
+                        break;
+                }
+            }       
         }
+    
         //get area info for the product calculations
         handleArea(x){  
             areaInfo({ai:x})
                 .then((resp)=>{
                     this.areaSQft = resp[0].Area_Sq_Feet__c
                     this.areaUM = resp[0].Pref_U_of_M__c
-                    //console.log('areaCall '+this.areaSQft);
+                    this.ornamental = resp[0].Pref_U_of_M__c === '100 Gal' ? true : false; 
+                    this.sprayVol = resp[0].Required_Gallons__c;
                 })
             }
 //how to call a function from a child comp. if tracking values in parent 
@@ -129,8 +156,7 @@ export default class ProductTable extends LightningElement {
         this.interval = mess.detail.spread;
         this.dateName = false;
         this.productList = true; 
-        //console.log('spread '+ this.interval);
-        
+        this.parApp = mess.detail.spread != 'once'? true : false;  
     }
 
     //gathers products from appSelectProd then maps over to set values for the appRatePrice that are need for the math functions
@@ -161,12 +187,15 @@ export default class ProductTable extends LightningElement {
                btnLabel:'Add Note',
                btnValue: 'Note',
                showNote: false,
-               Note__c: '',
                costM:'',
-               costA:''
+               costA:'',
+               Note_Other__c:'', 
+               Manual_Charge_Size__c: 0,
+               sprayVolume: this.ornamental ? this.sprayVol: 0,
+               manCharge: item.Name.toLowerCase().includes('manual charge')
             }
         } );
-       
+       console.log(this.selectedProducts)
     }
     save(prod){ 
         //catching values from appRatePrice. It's an array that you can get values using [1]
@@ -176,7 +205,8 @@ export default class ProductTable extends LightningElement {
             appName: this.appName,
             appArea: this.areaId,
             appDate: this.appDate,
-            appNote: this.applicationNote
+            appNote: this.applicationNote,
+            parentApp: this.parApp
         }
         addApplication({wrapper:params})
             .then((resp)=>{

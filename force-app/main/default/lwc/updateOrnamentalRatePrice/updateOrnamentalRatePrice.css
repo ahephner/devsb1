@@ -1,0 +1,29 @@
+.pName{
+    margin-top: 2rem; 
+    display:flex;  
+}
+
+.hover{
+    cursor: pointer;  
+}
+
+.fs{
+    font-size: large;
+}
+
+.btnOptions{
+    background-color: #cc0000;
+    color: black;
+}
+
+.line{
+    border-bottom: solid 1px black;
+}
+
+.lineUp{
+    display: inline-flex; 
+}
+
+.liquid{
+    margin-left: 5px;
+}

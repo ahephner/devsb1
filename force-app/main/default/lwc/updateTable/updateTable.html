@@ -20,11 +20,20 @@
                         </lightning-button-group>
                       </template>
                   </div>
+                  <!-- Control if ornamenatl app show ornamental measurement screen -->
+                  <template if:false={ornamental}>
                     <c-update-rate-price app-id={appId}
-                                        oncancel={closeModal}
-                                        onprice={badPrice}
-                                        onupdate={tellTable}
+                    oncancel={closeModal}
+                    onprice={badPrice}
+                    onupdate={tellTable}
                     ></c-update-rate-price>
+                  </template>
+                  <template if:true={ornamental}>
+                    <c-update-ornamental-rate-price app-id={appId}
+                    oncancel={closeModal}
+                    onprice={badPrice}
+                    onupdate={tellTable}></c-update-ornamental-rate-price>
+                  </template>
                   </template>
                   <template if:true={disableBtn}>
                     <div class='slds-align_absolute-center'>

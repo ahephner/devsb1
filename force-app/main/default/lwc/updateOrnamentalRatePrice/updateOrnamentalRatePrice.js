@@ -5,13 +5,14 @@ import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateApplication from '@salesforce/apex/addApp.updateApplication';
 import updateProducts from '@salesforce/apex/addApp.updateProducts';
-import multiUpdateProd from '@salesforce/apex/addApp.multiUpdateProd';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
 import NOTE from '@salesforce/schema/App_Product__c.Note__c';
-import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated, sumFert } from 'c/programBuilderHelper';
+import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, roundNum,
+         ornPerProduct, ornAppTotal, requiredGals, merge, finishedGals, sumFert } from 'c/programBuilderHelper';
 import {checkPricing} from 'c/helper'
-export default class UpdateRatePrice extends LightningElement {
+
+export default class UpdateOrnamentalRatePrice extends LightningElement {
     @api appId; 
     appName; 
     appDate; 
@@ -22,16 +23,16 @@ export default class UpdateRatePrice extends LightningElement {
     error; 
     loaded=false; 
     areaSizeM;
-    areaAcres
+    
     @track appTotalPrice = 0.00;
     sqft
-    programId; 
     area
     areaUM
     measure = 'M'; 
     addMore = false; 
     //for showing area size
     showAcreSize
+    sprayVolume
     //For showing product information
     productName = '';
     productCost = 0;
@@ -50,25 +51,24 @@ export default class UpdateRatePrice extends LightningElement {
     prodAreaCost = 0;
     goodPricing = true;
     noteOps;
+    prodCostG;
+    prodCost100;
+    reqGallons; 
+    appPer100 = 0; 
     //Here is notes per app
     //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
     wasNewNote = false; 
     oppNote
-    multiApp; 
-    parentApp; 
-    updateMulti = false;
-    @track productIds = [];
 
     connectedCallback(){
         this.loadProducts();
         //console.log('calling') 
     }
+    //for the combo box 
     get unitArea(){
         return [
-            {label:'OZ/M', value:'OZ/M'}, 
-            {label: 'OZ/Acre', value:'OZ/Acre'},
-            {label: 'LB/M', value:'LB/M'},
-            {label: 'LB/Acre', value:'LB/Acre'}
+            {label:'OZ/100 Gal', value:'OZ/100 Gal'},
+            {label:'LB/100 Gal', value:'LB/100 Gal'}
         ];
     }
         //need this to get picklist
@@ -88,6 +88,7 @@ export default class UpdateRatePrice extends LightningElement {
             this.loaded = false;
             let firstLoad = await appProducts({app: this.appId});
             let nonPrice = firstLoad.map(item =>{
+                                let sObjectType = 'App_Product__c'; 
                                 let allowEdit = item.Product__r.Agency_Pricing__c ? item.Product__r.Agency_Pricing__c : item.Product__r.Agency_Pricing__c
                                 let nVal = item.Product__r.N__c;
                                 let pVal = item.Product__r.P__c;
@@ -103,17 +104,14 @@ export default class UpdateRatePrice extends LightningElement {
                                 let agencyProd = item.Product__r.Agency_Pricing__c; 
                                 let btnLabel = 'Add Note';
                                 let btnValue = 'Note';
-                                let  manCharge =  item.Product_Code__c.toLowerCase().includes('manual charge')
-                                let Note_Other__c = item.Note_Other__c;
-                                let prevAppId = item.Application__r.Prev_App_Id__c != undefined ? item.Application__r.Prev_App_Id__c : item.Application__c; 
                                 this.appTotalPrice += item.Total_Price__c;
                                 //console.log(typeof item.N__c);
                                 this.appTotalN += item.N__c;
                                 this.appTotalP += item.P__c;
                                 this.appTotalK += item.K__c;
-                                //used for updating. Pushing id to a list so when something is updated we check against it
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, manCharge, Note_Other__c, prevAppId}
+                                return {...item, sObjectType, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA,
+                                        goodPrice, showNote, agencyProd, btnLabel, btnValue}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
@@ -123,24 +121,21 @@ export default class UpdateRatePrice extends LightningElement {
                 this.appName = this.prodlist[0].Application__r.Name;            
                 this.appDate = this.prodlist[0].Application__r.Date__c;             
                 this.updateAppId = this.prodlist[0].Application__c;            
-                this.programId = this.prodlist[0].Application__r.Program_ID__c;
                 this.areaId = this.prodlist[0].Application__r.Area__c           
                 this.areaName = this.prodlist[0].Area__c            
                 this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
-                this.oppNote = this.prodlist[0].Application__r.Note__c;
-                this.multiApp = this.prodlist[0].Application__r.Multi_Application__c; 
-                this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;             
+                this.oppNote = this.prodlist[0].Application__r.Note__c;             
                 
-    //need for doing math later
-                this.areaSizeM= parseInt(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
-                this.areaAcres = parseInt(this.prodlist[0].Application__r.Area__r.Area_Acres__c);
+    //need for doing math later size of tank or desired volume of finished mix. Set on the area insert
+                this.sprayVolume = parseInt(this.prodlist[0].Application__r.Area__r.Required_Gallons__c);
+                
     //Round totals
                 this.appTotalN = roundNum(this.appTotalN, 4);
                 this.appTotalP = roundNum(this.appTotalP, 4);
                 this.appTotalK = roundNum(this.appTotalK, 4);
                 
-                this.showAcreSize = this.areaUM.includes('Acre') ? true : false; 
-                this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
+                this.appTotalPrice = ornAppTotal(this.prodlist).total; 
+                this.appPer100 = ornAppTotal(this.prodlist).total100;
             this.loaded = true;
         } catch (error) {
             console.error(error);
@@ -152,7 +147,6 @@ export default class UpdateRatePrice extends LightningElement {
             this.dispatchEvent(evt); 
         }
     }
-    
 
     @api
     addProducts(){
@@ -185,20 +179,17 @@ export default class UpdateRatePrice extends LightningElement {
                 //console.log('ua '+this.prodlist[index].Unit_Area__c);
                 
                 if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
-                    this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c )    
-                    this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
-                    this.appTotalPrice = appTotal(this.prodlist)
-                    this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
-                    let costs = perProduct(this.prodlist[index].Total_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c);
-    
-                    this.prodlist[index].costM = costs.perThousand;
-                    this.prodlist[index].costA = costs.perAcre; 
-                    this.prodCostM = costs.perThousand;
-                    this.prodCostA = costs.perAcre;
-                    this.prodAreaCost = this.areaAcres * this.costPerAcre; 
-                    this.treatedAcreage = areaTreated(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c ); 
-                    this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
-                    //console.log(1,this.prodlist[index].Unit_Area__c,2, this.prodlist[index].Rate2__c, 3,this.areaSizeM,4, this.prodlist[index].Product_Size__c)
+                
+                    this.prodlist[index].Units_Required__c = requiredGals(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c, this.sprayVolume);
+                    
+                   
+                    let costs = ornPerProduct(this.prodlist[index].Unit_Price__c, this.prodList[index].Product_Size__c, this.prodList[index].Rate2__c);
+                    this.prodCostG = costs.perGal;
+                    this.prodCost100 = costs.per100;
+                    
+                    this.appTotalPrice = ornAppTotal(this.prodlist).total; 
+                    this.appPer100 = ornAppTotal(this.prodlist).total100;
+
                     if(this.prodlist[index].isFert){
                         let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
                         this.prodlist[index].N__c = fert.n;
@@ -218,23 +209,18 @@ export default class UpdateRatePrice extends LightningElement {
            handleUnitArea(e){
             let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name);
             
+            
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
             if(this.prodlist[index].Rate2__c > 0){
-             this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c );
-             this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
+                let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
+                this.prodCostG = costs.perGal;
+                this.prodCost100 = costs.per100;
+               
+                //this.gallonAmounts = finishedGals(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.sprayVolume);
+                this.appTotalPrice = ornAppTotal(this.prodlist).total; 
+                this.appPer100 = ornAppTotal(this.prodlist).total100;
 
-             let costs = perProduct(this.prodlist[index].Total_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c);
-    
-             this.prodlist[index].costM = costs.perThousand;
-             this.prodlist[index].costA = costs.perAcre; 
-             this.prodCostM = costs.perThousand;
-             this.prodCostA = costs.perAcre;
-             this.prodAreaCost = this.areaAcres * this.costPerAcre; 
-             this.treatedAcreage = areaTreated(this.prodlist[index].Product_Size__c,this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c );
-             this.appTotalPrice = appTotal(this.prodlist);
-             this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
-             this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
             //handle updating fertilizer amounts
              if(this.prodlist[index].isFert){
                 let fert = this.prodlist[index].Product_Type__c === 'Dry' ? calcDryFert(this.prodlist[index].Rate2__c, this.prodlist[index]) : calcLiqFert(this.prodlist[index].Rate2__c, this.prodlist[index]);
@@ -266,35 +252,27 @@ export default class UpdateRatePrice extends LightningElement {
                     this.prodlist[index].Margin__c = roundNum((1 - (this.prodlist[index].Product_Cost__c /this.prodlist[index].Unit_Price__c))*100,2)
                     this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c,2);
                     
-                    let costs = perProduct(this.prodlist[index].Total_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c);
-    
-                    this.prodlist[index].costM = costs.perThousand;
-                    this.prodlist[index].costA = costs.perAcre;
-                    this.prodCostM = costs.perThousand;
-                    this.prodCostA = costs.perAcre; 
-                    this.prodAreaCost = this.areaAcres * this.prodlist[index].costA; 
-                    this.appTotalPrice = appTotal(this.prodlist)
-                    this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
+                    let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
+
+                    this.prodCostG = costs.perGal;
+                    this.prodCost100 = costs.per100;
                     //this.handleWarning()
                 }else{
                     this.prodlist[index].Margin__c = 0;                
                     this.prodlist[index].Margin__c = roundNum(this.prodlist[index].Margin__c, 2);
                     this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c,2)
                     
-                    let costs = perProduct(this.prodlist[index].Total_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c);
-    
-                    this.prodlist[index].costM = costs.perThousand;
-                    this.prodlist[index].costA = costs.perAcre; 
-                    this.prodCostM = costs.perThousand;
-                    this.prodCostA = costs.perAcre;
-                    this.prodAreaCost = this.areaAcres * this.prodlist[index].costA; 
-                    this.appTotalPrice = appTotal(this.prodlist);
-                    this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
+                    let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
+
+                    this.prodCostG = costs.perGal;
+                    this.prodCost100 = costs.per100;
                 }
+                this.appTotalPrice = ornAppTotal(this.prodlist).total; 
+                this.appPer100 = ornAppTotal(this.prodlist).total100;
                 let lOne = this.prodlist[index].Level_1_UserView__c;
                 let floor = this.prodlist[index].Floor_Price__c;
                 let unitPrice = this.prodlist[index].Unit_Price__c;
-                this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
+                
                 this.handleWarning(targetId,lOne, floor, unitPrice, index)
                 }, 1000)
            }
@@ -309,13 +287,10 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.prodlist[index].Unit_Price__c = roundNum(this.prodlist[index].Product_Cost__c /(1- this.prodlist[index].Margin__c/100),2);
                                 this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
 
-                                let costs = perProduct(this.prodlist[index].Total_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c);
+                                let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
     
-                                this.prodlist[index].costM = costs.perThousand;
-                                this.prodlist[index].costA = costs.perAcre;
-                                this.prodCostM = costs.perThousand;
-                                this.prodCostA = costs.perAcre; 
-                                this.prodAreaCost = this.areaAcres * this.prodlist[index].costA; 
+                                this.prodCostG = costs.perGal;
+                                this.prodCost100 = costs.per100;
                                 
                             
                             }else{
@@ -323,48 +298,51 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.prodlist[index].Unit_Price__c = roundNum(this.prodlist[index].Unit_Price__c, 2); 
                                 this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c,2);
                                 
-                                let costs = perProduct(this.prodlist[index].Total_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c, this.prodlist[index].Unit_Area__c);
-    
-                                this.prodlist[index].costM = costs.perThousand;
-                                this.prodlist[index].costA = costs.perAcre;
-                                this.prodCostM = costs.perThousand;
-                                this.prodCostA = costs.perAcre; 
-                                this.prodAreaCost = this.areaAcres * this.prodlist[index].costA; 
+                                let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
+
+                                this.prodCostG = costs.perGal;
+                                this.prodCost100 = costs.per100; 
                                 
                                 
                             }
-                            this.appTotalPrice = appTotal(this.prodlist)
-                            this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
+                            this.appTotalPrice = ornAppTotal(this.prodlist).total; 
+                            this.appPer100 = ornAppTotal(this.prodlist).total100;  
                             
                             let lOne = this.prodlist[index].Level_1_UserView__c;
                             let floor = this.prodlist[index].Floor_Price__c;
                             let unitPrice = this.prodlist[index].Unit_Price__c;
-                            this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
                             this.handleWarning(targetId, lOne, floor, unitPrice, index)
                 },1000)
             }
+            
+            newQty(e){
+                window.clearTimeout(this.delay)
+                     let index = this.prodlist.findIndex(prod => prod.Id === e.target.name)
+                     // eslint-disable-next-line @lwc/lwc/no-async-operation
+                     this.delay = setTimeout(()=>{
+                             this.prodlist[index].Units_Required__c = Number(e.detail.value);
+                             if(Number(e.detail.value) > 0){
+                                 
+                                 this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2)
+                                //  let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
+        
+                                //  this.data[index].costM = costs.perThousand;
+                                //  this.data[index].costA = costs.perAcre; 
+                                //  this.prodCostG = costs.perThousand;
+                                //  this.prodCost100 = costs.perAcre;
+                                //  this.prodAreaCost = this.areaAcres * this.costPerAcre;
+                                                            
+                             }
+                             this.appTotalPrice = ornAppTotal(this.prodlist).total; 
+                             this.appPer100 = ornAppTotal(this.prodlist).total100; 
+                            //  this.totalCostPerG = roundNum(this.appTotalPrice/(this.areaSize/1000),2);
+                 }, 500)
+             }
 
             prodNote(e){
                 console.log(e.detail.value);
                 let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name) 
                 this.prodlist[index].Note__c = e.detail.value; 
-                this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
-            }
-
-//Manual Line Items update. These are for products ATS does not stock 
-            manName(e){
-                let index = this.prodlist.findIndex(prod => prod.Id === e.target.name) 
-                this.prodlist[index].Note_Other__c = e.detail.value;             
-            }
-
-            manSize(e){
-                let index = this.prodlist.findIndex(prod => prod.Id === e.target.name)
-                this.prodlist[index].Manual_Charge_Size__c = Number(e.detail.value); 
-                this.prodlist[index].Product_Size__c = Number(e.detail.value);
-                this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
-                if(this.prodlist[index].Rate2__c > 0){
-                    this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c );
-                }
             }
 //remove product from app
 removeProd(x){
@@ -398,7 +376,7 @@ removeProd(x){
         }
         //need to do update all values.
         this.appTotalPrice = appTotal(this.prodlist);
-        this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2);
+        //this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2);
         if(fert){
             let totalFert = sumFert(this.prodlist)
             this.appTotalN += roundNum(totalFert.N__c, 4);
@@ -422,6 +400,7 @@ listenNewProd(x){
 handleNewProd(x){
     //let passed = x.detail.rowProduct;
     this.prodlist = [...this.prodlist,{
+        sObjectType: 'App_Product__c', 
         Id: '',
         Product__c: x.detail.rowProduct,
         Product_Name__c: x.detail.rowName,
@@ -432,7 +411,7 @@ handleNewProd(x){
         Units_Required__c: 1,
         Unit_Area__c: pref(this.areaUM, x.detail.rowProdType),  
         Unit_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
-        Product_Cost__c: x.detail.rowAgency ? 0.0 : x.detail.rowCost , 
+        Product_Cost__c: x.detail.rowAgency ? 'Agency' : x.detail.rowCost , 
         Margin__c: x.detail.rowAgency ? "" : x.detail.rowMargin, 
         Total_Price__c: x.detail.rowAgency ? x.detail.rowFlrPrice : x.detail.rowUnitPrice,
         Product_Size__c: x.detail.rowSize,
@@ -455,13 +434,10 @@ handleNewProd(x){
         showNote: false,
         btnLabel: 'Add Note',
         btnValue: 'Note', 
-        Product_Type__c: x.detail.rowType,
-        Note_Other__c: '',
-        Manual_Charge_Size__c: 0,
-        manCharge: x.detail.rowName.toLowerCase().includes('manual charge')
+        Product_Type__c: x.detail.rowType
 
     }]
-    this.productIds.includes(x.detail.rowProduct) ? '': this.productIds.push(x.detail.rowProduct);
+    //console.log(this.prodlist.at(-1))
 }
 
 //Display proudct info
@@ -473,16 +449,16 @@ prodP
 prodK
 hiMouse(e){
     this.showProdInfo = true; 
-    let index = this.prodlist[e.target.dataset.code]
-    //console.log(index)
+    let index = this.prodlist[e.target.dataset.code];
+    //console.log(index);
     this.productName = index.Product_Name__c;
     this.productCost = index.Product_Cost__c;
     this.levelOne = index.Level_1_UserView__c;
     this.levelTwo = index.Level_2_UserView__c;
     this.prodFloor = index.Floor_Price__c; 
-    this.prodCostM = index.costM ? index.costM : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perThousand;
-    this.prodCostA = index.costA ? index.costA : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perAcre;
-    this.treatedAcreage = areaTreated(index.Product_Size__c,index.Rate2__c, index.Unit_Area__c );
+    this.prodCostG = ornPerProduct(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c).perGal;
+    this.prodCost100 = ornPerProduct(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c).per100;
+    this.gallonAmounts = finishedGals(index.Product_Size__c,index.Rate2__c);
     this.prodN = index.N__c;
     this.prodP = index.P__c;
     this.prodK = index.K__c; 
@@ -495,93 +471,7 @@ byeMouse(e){
         this.wasNewNote = true; 
         this.oppNote = event.detail.value
     }
-///UPDATE ALL OPTIONS HERE
-radioSelection
-setBTN(x){
-    this.radioSelection = x.target.value; 
-}
-get radioOpts(){
-    return [
-            { label: 'Edit just this event', value: 'one' },
-            { label: 'Update Series', value: 'series' },
-            {label:'Products in Area', value:'area'},
-            {label:'Products in Program', value:'program'}
-        ]
-}
-
-    evalUpdates(){
-        if(this.radioSelection === undefined){
-           //alert need 
-            return
-        }else if(this.radioSelection != "one"){
-            //this.updateMulti = true;
-            this.update2()
-        }else{
-            this.updateMulti = false;  
-            this.update();
-        }
-        
-    }
-
-    cancelEval(){
-        this.updateMulti = false; 
-    }
-///THIS EVALUATES THE MULTI UPDATE APPLICATIONS STARTS THE UPDATE PROCESS!!!!!!!!
-    @api
-    evalUpdate(){
-        if(this.multiApp){
-            this.updateMulti = true;
-            
- 
-        }else{
-            this.update(); 
-        }
-    }
-
-    //UPDATE FOLLOW UP APPLICATIONS TOO 
-    @api
-    async update2(){
-        try {
-            this.loaded = false;
-        //only works if that tab is open when saving
-        //this.oppNote= this.template.querySelector('[data-note="appNote"]').value;
-
-        let params = {
-            appName: this.appName,
-            appDate: this.appDate,
-            appArea: this.areaId, 
-            appNote: this.oppNote
-        }
-
-        let appUpdate = await updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote});
-        let singleUpdate = await updateProducts({products:this.prodlist});
-        let followUp = await multiUpdateProd({prodIds: this.productIds, appDate: this.appDate, parentId: this.prodlist[0].prevAppId, 
-                                              currentRecId: this.prodlist[0].Application__c, parentAp: this.parentApp, updateType: this.radioSelection, 
-                                              area: this.areaId, program: this.programId})
-        this.prodlist = [];
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title:'Success',
-                message:'Updated Products!',
-                variant:'success'
-            })
-        )
-        //close screen
-        this.loaded = false;
-        this.cancel();
-        } catch (error) {
-            console.log(JSON.stringify(error));
-            
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error adding app',
-                    message: JSON.stringify(error),
-                    variant: 'error'
-                })  
-            )
-        }
-        this.loaded = false;
-    }
+//Update name and products
     @api 
     update(){
         
@@ -598,13 +488,9 @@ get radioOpts(){
         //console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
         updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
             .then(()=>{
-               //console.log(JSON.stringify(this.prodlist))
-                 updateProducts({products:this.prodlist});
-               
-            }).then(()=>{
-                     console.log('multiUpdateProd ', this.productIds); 
-                    multiUpdateProd({prodIds: this.productIds, appDate: this.appDate, parentId: this.prodlist[0].prevAppId, currentRecId: this.prodlist[0].Application__c})
-                }).then((mess)=>{
+               console.log(JSON.stringify(this.prodlist))
+                updateProducts({products:this.prodlist})
+            }).then((mess)=>{
                 //console.log('mess '+mess)
                 this.prodlist = [];
                 this.dispatchEvent(
@@ -617,7 +503,6 @@ get radioOpts(){
                 //tell parent to request appDataTable refresh
                 this.dispatchEvent(new CustomEvent('update'))
             }).then(()=>{
-                this.updateMulti = false
                 this.cancel();
             }).catch((error)=>{
                 //console.log(JSON.stringify(error))
@@ -630,7 +515,6 @@ get radioOpts(){
                 ) 
             })
         }
-
         //Update Pricing and Fertility info displayed to per M or per Acre
     updateMeasure(){
         this.measure = this.measure === 'M' ? 'Acre' : 'M';

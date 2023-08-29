@@ -27,11 +27,21 @@
               </template>    
 
               <template if:true={productRates}>
-                <c-app-rate-price selection={selectedProducts}
-                                  area-size={areaSQft}
-                                  onprice={badPrice}
-                                  onsave={save}
-                                  oncancel={closeModal}></c-app-rate-price>
+                <template lwc:if={ornamental}>
+                  <c-orn-app-rate-price selection={selectedProducts}
+                  area-size={areaSQft}
+                  onprice={badPrice}
+                  onsave={save}
+                  oncancel={closeModal}></c-orn-app-rate-price>
+
+                </template>
+                <template lwc:else>
+                  <c-app-rate-price selection={selectedProducts}
+                  area-size={areaSQft}
+                  onprice={badPrice}
+                  onsave={save}
+                  oncancel={closeModal}></c-app-rate-price>
+                </template>
               </template>
               <template if:true={disableBtn}>
                 <div class='slds-align_absolute-center'>

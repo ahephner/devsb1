@@ -28,6 +28,8 @@ const pref = (areaUm, type)=>{
     areaUm ==='M' && type==='Liquid' ?  'OZ/M':
     areaUm ==='Acre' && type==='Dry' ?  'LB/Acre':
     areaUm ==='Acre' && type==='Liquid' ?  'OZ/Acre':
+    areaUm === '100 Gal' && type ==='Liquid' ? 'OZ/100 Gal':
+    areaUm === '100 Gal' && type ==='Dry' ? 'LB/100 Gal':
      ''
 }
 
@@ -137,6 +139,9 @@ const perProduct = (prodPrice, prodSize, rate, unitOfMeasure)=>{
   let perThousand = unitOfMeasure.includes('Acre') ? cost: roundNum(cost/43.56, 2);
   return {perAcre, perThousand}; 
 }
+
+
+
 //acres treated
 const areaTreated = (unitSize, rate, unitMeasure) =>{
   let treated = unitMeasure.includes('/M') ? roundNum((unitSize/rate)/43.56,2) : roundNum((unitSize/rate), 2);
@@ -159,6 +164,34 @@ const merge = (info, levels)=>{
     return info; 
   }
 }
+//Ornamental helpers below. Please name orn"Whatever the function does""
+
+const ornAppTotal = (prod) =>{
+ 
+  let total = prod.reduce((a, b)=>{
+      return Number(a +b.Total_Price__c)
+  }, 0)
+  
+  total = roundRate(total, 2)
+  let total100 = roundRate((total/100), 2)
+  return {total, total100}; 
+}
+
+const ornPerProduct = (prodPrice, prodSize, rate)=>{
+  let perGal = roundNum(prodPrice/prodSize, 2)
+  let per100 = roundNum(perGal*rate, 2);
+
+  return {per100, perGal}; 
+}
+
+//amount of gallons required to reach tank or spray volume size
+const requiredGals = (size, rate, tankSize) =>{
+      let x = roundNum((((tankSize/100)*rate)/size), 2)
+      let sizeCheck = x <1 ? x= 1 : Math.ceil(x); 
+      return sizeCheck;  
+} 
+
+const finishedGals = (size, rate) => roundNum(((size/rate) * 100), 2)
 
 export{hold, 
       appTotal, 
@@ -173,7 +206,11 @@ export{hold,
       roundNum, 
       pricePerUnit,
       perProduct,
+      ornPerProduct, 
       merge,
-      areaTreated}
+      areaTreated,
+      ornAppTotal,
+      requiredGals, 
+      finishedGals}
 
  

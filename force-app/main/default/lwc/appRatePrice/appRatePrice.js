@@ -215,8 +215,25 @@ export default class AppRatePrice extends LightningElement {
                 {label:'OZ/M', value:'OZ/M'}, 
                 {label: 'OZ/Acre', value:'OZ/Acre'},
                 {label: 'LB/M', value:'LB/M'},
-                {label: 'LB/Acre', value:'LB/Acre'}
+                {label: 'LB/Acre', value:'LB/Acre'},
+                {label:'100 Gal', value:'100 Gal'}
             ];
+        }
+//Manual Charge specific info. If the rep is using a product that ATS does not carry this will allow them to set those values for name and size here
+
+        manName(e){
+            let index = this.data.findIndex(prod => prod.Id === e.target.name) 
+            this.data[index].Note_Other__c = e.detail.value;             
+        }
+        manSize(e){
+            let index = this.data.findIndex(prod => prod.Id === e.target.name) 
+            this.data[index].Manual_Charge_Size__c = e.detail.value;
+            this.data[index].Product_Size__c = Number(e.detail.value);
+            if(this.data[index].Rate2__c > 0){
+                this.data[index].Units_Required__c = unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].Product_Size__c );
+                this.appTotalPrice = appTotal(this.data); 
+                this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2)
+            }    
         }
 //handle note 
         prodNote(e){

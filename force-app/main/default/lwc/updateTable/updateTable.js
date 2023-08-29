@@ -5,11 +5,11 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getRecord } from 'lightning/uiRecordApi';
 import AREA from '@salesforce/schema/Application__c.Area__c';
 import SQFT from '@salesforce/schema/Application__c.Area__r.Area_Sq_Feet__c';
-
+import PREFMEASURE from '@salesforce/schema/Application__c.Area__r.Pref_U_of_M__c';
 
 import addProducts from '@salesforce/apex/addApp.addProducts';
 
-const fields = [AREA, SQFT]
+const fields = [AREA, SQFT, PREFMEASURE]
 export default class UpdateTable extends LightningElement {
     updateExposed = false;
     loaded = false; 
@@ -20,6 +20,7 @@ export default class UpdateTable extends LightningElement {
     selectedProducts = [];
     areaId;
     sqFt; 
+    ornamental 
     buttonText = 'Save';
     disableBtn = false; 
     @wire(MessageContext)
@@ -80,30 +81,54 @@ wiredareaInfo({error,data}){
     }else if(data){
         //console.log(data.fields.Area__r.value.fields.Area_Sq_Feet__c.value);
         this.sqFt = data.fields.Area__r.value.fields.Area_Sq_Feet__c.value;
-        this.areaId = data.fields.Area__c.value;   
+        this.areaId = data.fields.Area__c.value;
+        let prefMeasure = data.fields.Area__r.value.fields.Pref_U_of_M__c.value
+        this.ornamental = prefMeasure  === '100 Gal' ? true : false;        
     }
 }
     addProducts(){
         this.buttonText = 'Done';
         this.showButton = false; 
-        this.template.querySelector('c-update-rate-price').addProducts();
+        if(!this.ornamental){
+            this.template.querySelector('c-update-rate-price').addProducts();
+        }else{
+            this.template.querySelector('c-update-ornamental-rate-price').addProducts();
+        }
     }
 
     handleNext(){
         let txt = this.buttonText; 
-        switch (txt) {
-            case 'Save':
-                this.showButton = true; 
-                this.template.querySelector('c-update-rate-price').update();
-                break;
-            case 'Done':
-                this.showButton = true;
-                this.buttonText = 'Save';
-                this.template.querySelector('c-update-rate-price').closeAdd();
-                break
-            default:
-                break;
+       
+        if(!this.ornamental){
+            switch (txt) {
+                case 'Save':
+                    this.showButton = true; 
+                    this.template.querySelector('c-update-rate-price').evalUpdate();
+                    break;
+                case 'Done':
+                    this.showButton = true;
+                    this.buttonText = 'Save';
+                    this.template.querySelector('c-update-rate-price').closeAdd();
+                    break
+                default:
+                    break;
+            }
+        }else{
+            switch (txt) {
+                case 'Save':
+                    this.showButton = true; 
+                    this.template.querySelector('c-update-ornamental-rate-price').update();
+                    break;
+                case 'Done':
+                    this.showButton = true;
+                    this.buttonText = 'Save';
+                    this.template.querySelector('c-update-ornamental-rate-price').closeAdd();
+                    break
+                default:
+                    break;
+            }
         }
+
     }
 
     save(products){
@@ -147,6 +172,7 @@ wiredareaInfo({error,data}){
         this.updateExposed = false;  
         this.showButton = true;
         this.buttonText = 'Save'; 
+        this.disableBtn = false;
     }
 
     badPrice(prod){

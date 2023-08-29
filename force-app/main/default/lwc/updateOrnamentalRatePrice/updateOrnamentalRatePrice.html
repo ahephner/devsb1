@@ -1,7 +1,6 @@
 <template>
  
     <template if:true={loaded}>
-        <template if:false={updateMulti}>
         <template if:true={addMore}>
             <div class="slds-col slds-size_1-of-1">
                 <c-update-add-product ondone={closeAdd}
@@ -23,48 +22,29 @@
             <div class='slds-size_1-of-8 slds-m-left_small slds-m-top_large'>
                 <p class="fs">Area: {areaName}</p>
             </div>
-                <div class='slds-col slds-size_2-of-8 slds-m-top_large' onclick={showAreaSize}>
-                    <template lwc:if={showAcreSize}>
-                        <p class="fs">Area Size: {areaAcres} Acres</p>
-                    </template>
-                    <template lwc:else>
-                        <p class="fs hoover">Area Size: {areaSizeM} sqFt</p>
-                    </template>
-                </div>
+
         </div>
     <div class='slds-grid slds-m-top_small'>
         <div class='slds-col slds-size_9-of-12'>  
             <template for:each={prodlist} for:item="sp" for:index="index">
                <div key={sp.Product_Code__c} class='slds-m-horizontal_xx-small slds-m-bottom_x-small slds-grid' 
                     data-code={index} onmouseenter={hiMouse} onmouseleave={byeMouse}>
-                    <div class="slds-col slds-m-top_large">
+                    <div class="slds-col slds-size_2-of-12 pName">
                         <!-- <lightning-icon icon-name="utility:close" name={sp.Product_Code__c} size='xx-small' class='hover'
-                            alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon> -->
-                            <lightning-button-menu alternative-text="Show menu" icon-size="x-small" name ={sp.Product_Code__c} onselect={handleOnselect}>
-                                <lightning-menu-item value={sp.btnValue} label={sp.btnLabel} ></lightning-menu-item>
-                                <lightning-menu-item value="Delete" label="Delete" class="btnOptions"></lightning-menu-item>
-                            </lightning-button-menu>
+                                        alternative-text='remove' title="Remove" onclick={removeProd} ></lightning-icon> -->
+                                        <lightning-button-menu alternative-text="Show menu" icon-size="x-small" name ={sp.Product_Code__c} onselect={handleOnselect}>
+                                            <lightning-menu-item value={sp.btnValue} label={sp.btnLabel} ></lightning-menu-item>
+                                            <lightning-menu-item value="Delete" label="Delete" class="btnOptions"></lightning-menu-item>
+                                        </lightning-button-menu>
+                        <p>{sp.Product_Name__c}</p>
                     </div>
-                            <template lwc:if={sp.manCharge}>
-                                <!--manual charge name-->
-                                <div class="slds-col slds-size_2-of-12 manLineName" data-margin={sp.Id}>
-                                    <lightning-input type="text"  
-                                                     label="Non-Stock Name" name={sp.Id} 
-                                                     value={sp.Note_Other__c} onchange={manName}></lightning-input>
-                                </div>
-                            </template>
-                            <template lwc:else>
-                                <div class="slds-col slds-size_2-of-12 pName">
-                                    <p>{sp.Product_Name__c}</p>
-                                </div>
-                            </template>
-                        <!-- Non Manual Item -->
-                <template if:false={sp.showNote}>  
-                    <template if:false={sp.manCharge}>
+                 <template if:false={sp.showNote}>
+                    <!--Rate-->  
                         <div class="slds-col slds-size_1-of-12">
                             <lightning-input  type="number"  step="0.001" label="Rate"
                             name={sp.Product_Code__c} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
-                        </div>   
+                        </div> 
+                    <!--Unit of Measure-->      
                         <div class="slds-col slds-size_2-of-12">
                             <lightning-combobox
                             name={sp.Product2Id}
@@ -76,68 +56,30 @@
                             required
                             ></lightning-combobox> 
                         </div>
+                    <!--QTY-->        
+                        <div class='slds-col slds-size_1-of-12'>
+                            <lightning-input type="number" name={sp.Id} class='liquid'
+                                             value={sp.Units_Required__c} label="Qty for app" readonly></lightning-input>
+                        </div>
+                    <!--Unit Price-->                            
                         <div class="slds-col slds-size_2-of-12" data-id={sp.Product2Id}>
                             <lightning-input class='liquid' type="number"  
                                             label={sp.title} name={sp.Product2Id} 
                                             value={sp.Unit_Price__c} onchange={newPrice} 
                                             formatter="currency" step="0.01" read-only={sp.allowEdit}></lightning-input>
                         </div>
+                    <!--Margin-->
                         <div class="slds-col slds-size_2-of-12" data-margin={sp.Product2Id}>
                             <lightning-input class='liquid' type="number"  
                                             label="Margin%" name={sp.Product2Id} 
                                             value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit} ></lightning-input>
                         </div> 
-                        <div class='slds-col slds-size_1-of-12'>
-                            <lightning-input type="number" name="input4" 
-                                            readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
-                        </div>
+                    <!--Line Total-->
                         <div class='slds-col slds-size_1-of-12'>
                             <lightning-input type="number" name="input4" formatter="currency"
                                             readonly value={sp.Total_Price__c} label="Line Total" ></lightning-input>
                         </div>
                 </template>
-<!-- Manual Entry Line Item -->
-                <template if:true={sp.manCharge}>
-                    <div class="slds-col slds-size_1-of-12">
-                        <lightning-input  type="number"  step="0.01" label="Pkg Size"
-                        name={sp.Id} value={sp.Product_Size__c}  onchange={manSize}></lightning-input>
-                    </div>
-                    <div class="slds-col slds-size_1-of-12">
-                        <lightning-input  type="number"  step="0.001" label="Rate"
-                        name={sp.Product_Code__c} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
-                    </div>   
-                    <div class="slds-col slds-size_2-of-12">
-                        <lightning-combobox
-                        name={sp.Product2Id}
-                        label="Unit Area"
-                        value={sp.Unit_Area__c}
-                        placeholder="Select Measure"
-                        options={unitArea}
-                        onchange={handleUnitArea}
-                        required
-                        ></lightning-combobox> 
-                    </div>
-                    <div class="slds-col slds-size_2-of-12" data-id={sp.Product2Id}>
-                        <lightning-input class='liquid' type="number"  
-                                        label={sp.title} name={sp.Product2Id} 
-                                        value={sp.Unit_Price__c} onchange={newPrice} 
-                                        formatter="currency" step="0.01"></lightning-input>
-                    </div>
-                    <!-- <div class="slds-col slds-size_2-of-12" data-margin={sp.Product2Id}>
-                        <lightning-input class='liquid' type="number"  
-                                        label="Margin%" name={sp.Product2Id} 
-                                        value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit} ></lightning-input>
-                    </div>  -->
-                    <div class='slds-col slds-size_2-of-12'>
-                        <lightning-input type="number" name="input4" 
-                                        readonly value={sp.Units_Required__c} label="Units Required" ></lightning-input>
-                    </div>
-                    <div class='slds-col slds-size_1-of-12'>
-                        <lightning-input type="number" name="input4" formatter="currency"
-                                        readonly value={sp.Total_Price__c} label="Line Total" ></lightning-input>
-                    </div>
-                </template>
-            </template>
                 <!-- Note on the product -->
                 <template if:true={sp.showNote}>
                     <div class="slds-col slds-size_8-of-12">
@@ -164,8 +106,8 @@
                         <div class="slds-col slds-size_1-of-1">
                             <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                            Total Cost Per M: ${totalCostPerM}
+                        <div class="slds-col slds-size_1-of-1">
+                            <h1>Total per gallon: <lightning-formatted-number value={appPer100} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                         </div>
                         <div lwc:if={showProdInfo} class='slds-col slds-size_1-of-1'>
                             <div class="slds-col slds-size_1-of-1">
@@ -175,10 +117,10 @@
                                 <p>Product Name: {productName}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                                <p>prod per M: ${prodCostM}</p>
+                                <p>price per gallon spray : ${prodCostG}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
-                                <p>One unit will cover: {treatedAcreage} acres @ current rate</p>
+                                <p>One unit will create: {gallonAmounts} gallons @ current rate</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_small">
                                 <div class="slds-text-heading_small slds-m-top_small slds-align_absolute-center line">
@@ -258,40 +200,6 @@
                       class="slds-m-left_x-small"></lightning-button>
     
 </div> -->
-</template>
-</template>
-<template if:true={updateMulti}>
-    <div class="updateAll">
-        <p class="slds-m-bottom_x-small"><b>Product rate, price or unit of measure can be mass updated. Read outline below</b></p>
-        <ul>
-            <li><b>Just Event:</b>Only update this app</li>
-            <li><b>Update Series:</b> If you used the multi-insert tool for applications. This will update the future apps in that series to match this application</li>
-            <li><b>Products in Area:</b> Matching products in this area regardless of date. Will NOT insert any products you just added</li>
-            <li><b>Products in Program:</b>Matching products in entire program regardless of date. Will NOT insert any products you just added</li>
-        </ul>
-        <lightning-radio-group 
-        name="radioGroup"
-        label="Update Type"
-        options={radioOpts}
-        value={radioSelection}
-        required
-        onchange={setBTN}
-        type="radio">
-        </lightning-radio-group>
-        <br/>
-        <div class="slds-m-top_medium">
-            <lightning-button 
-            variant="brand"
-            label="OK" 
-            onclick={evalUpdates} 
-            ></lightning-button>
-            <lightning-button 
-            variant="destructive-text"
-            label="Cancel" 
-            onclick={cancelEval} 
-            ></lightning-button>
-        </div>
-    </div>
 </template>
 <template if:false={loaded}>
     <lightning-spinner 
