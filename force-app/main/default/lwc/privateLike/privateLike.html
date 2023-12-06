@@ -1,0 +1,38 @@
+<template>
+    <lightning-card icon-name="standard:bookmark" variant="base">
+      <div slot="title">
+          <p>Share your Program or Like Others</p>
+      </div>
+      <div class="slds-grid">
+        <template lwc:if={showPublish}>
+            <div class="slds-col slds-size_1-of-2">
+                <lightning-input
+                 class="slds-m-left_x-large"
+                 data-id="toggle" type="toggle" 
+                 checked={published} onchange={pubProgram}
+                message-toggle-active="Shared" message-toggle-inactive="Publish"></lightning-input>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="slds-col slds-size_1-of-2">
+
+            </div>
+        </template>
+        <!-- Card Body  -->
+        <div class="slds-col slds-size_1-of-2 likeCount">
+            <lightning-button-icon-stateful 
+            icon-name="utility:like" 
+            size="large" 
+            selected={likeState} 
+            onclick={handleLikeButtonClick} 
+            alternative-text="Like" 
+            class="slds-m-left_xx-small" 
+            data-button-number="04"></lightning-button-icon-stateful>
+            <template if:true={showLikes}>
+                <p class="slds-m-left_small slds-m-top_x-small">Likes: {likeCount}</p>
+            </template>
+        </div>
+
+      </div>
+    </lightning-card>
+</template>
