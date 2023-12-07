@@ -3,4 +3,6 @@
 //     query text and running the command:
 //     SFDX: Execute SOQL Query with Currently Selected Text
 
-SELECT Id, Name, Share_Program__c FROM Program__c where Id = 'a0J75000002wBP6EAM' 
+SELECT Id, Name, Share_Program__c FROM Program__c where Id = 'a0J75000002wBP6EAM'; 
+
+SELECT ID, DEVELOPERNAME FROM RECORDTYPE WHERE ID = '012O3000000H9dBIAS';
