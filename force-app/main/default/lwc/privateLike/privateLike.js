@@ -84,7 +84,7 @@ export default class PrivateLike extends LightningElement {
     wiredRecord({data,error}){
         if(data){
             let back = data
-            this.prevLike = back.length > 0 ? back: '';
+            this.prevLike = back === 'Not Found' ? '': back;
             this.likeState = back === 'Not Found' ? false : true;  
         }else if(error){
             let message = "Unknown error";
@@ -107,7 +107,7 @@ export default class PrivateLike extends LightningElement {
         //const buttonNumber = event.target.dataset.buttonNumber;
          
         this.likeState = !this.likeState ? true : false;
-        this.likeCount =  this.likeState ? +1 : -1 
+        this.likeCount =  this.likeState ? this.likeCount +1 : this.likeCount -1 
         this.showLikes = this.likeCount > 0 ? true : false; 
         
         //update record
