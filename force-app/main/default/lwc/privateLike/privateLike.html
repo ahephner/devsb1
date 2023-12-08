@@ -19,7 +19,7 @@
             </div>
         </template>
         <!-- Card Body  -->
-        <div class="slds-col slds-size_1-of-2 likeCount">
+        <div class="slds-col slds-size_1-of-2 countLike">
             <lightning-button-icon-stateful 
             icon-name="utility:like" 
             size="large" 
@@ -28,9 +28,14 @@
             alternative-text="Like" 
             class="slds-m-left_xx-small" 
             data-button-number="04"></lightning-button-icon-stateful>
+        <div>
             <template if:true={showLikes}>
-                <p class="slds-m-left_small slds-m-top_x-small">Likes: {likeCount}</p>
+                <p class="slds-m-left_small">Likes: {likeCount}</p>
             </template>
+            <template if:true={likeState}>
+                <p class="slds-m-left_small">You Liked This</p>
+            </template>
+        </div>
         </div>
 
       </div>
