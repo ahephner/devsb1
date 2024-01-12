@@ -113,7 +113,7 @@ export default class AppRatePrice extends LightningElement {
                 this.prodAreaCost = this.areaAcres * this.costPerAcre;
                 this.treatedAcreage = areaTreated(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].Unit_Area__c );
                 this.appTotalPrice = appTotal(this.data); 
-                this.totalCostPerM = roundNum(Object.values(this.prodlist).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
+                this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
                 //handle fertilizer
                 if(this.data[index].isFert){
                     let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);

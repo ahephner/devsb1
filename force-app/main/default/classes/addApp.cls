@@ -174,9 +174,9 @@ public with sharing class addApp {
                                  date__c from application__c 
                                  where id =:appId];
           
-          list<App_Product__c> ogProd = [select id, product__c, rate2__c, 
+          list<App_Product__c> ogProd = [select id, product__c, rate2__c, Application__c,
                                                  Unit_Area__c,Unit_Price__c,margin__c, units_required__c, 
-                                                    N__c, P__c, K__c, Note__c
+                                                    N__c, P__c, K__c, Note__c, Cost_per_Acre__c,Cost_per_M__c
                                          from App_Product__c where Application__c =: appId];
         
           for(integer i = 1; i<= occurance; i++){

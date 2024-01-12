@@ -480,6 +480,7 @@ handleNewProd(x){
         btnValue: 'Note', 
         totalUsed: 0, 
         Product_Type__c: x.detail.rowType,
+        Product_SDS_Label__c:`https://www.advancedturf.com/?s=${x.detail.rowCode}&post_type=product`,
         Note_Other__c: '',
         Manual_Charge_Size__c: 0,
         manCharge: x.detail.rowName.toLowerCase().includes('manual charge')
