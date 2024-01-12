@@ -18,7 +18,16 @@ const alreadyAdded = (newId, list) =>{
 }
 //this will set the number of required units based on rate. 
 const unitsRequired = (uOFM, rate, areaS, unitS) => {
-  return uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*(areaS/1000)))/unitS) : Math.ceil(((rate*(areaS/1000))/unitS))
+  let req = 0
+  if(rate/unitS === 1){
+    let round = uOFM.includes('Acre')?(((rate/43.56)*(areaS/1000)))/unitS : ((rate*(areaS/1000))/unitS);
+    req = round-Math.floor(round) !=0 && (round - Math.floor(round)) >= 0.25 ? Math.floor(round) + 1 : Math.floor(round);
+    console.log(req);
+    
+  }else{
+    req = uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*(areaS/1000)))/unitS) : Math.ceil(((rate*(areaS/1000))/unitS));
+  }
+  return req; 
 }
  //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
 //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection
@@ -117,30 +126,51 @@ const roundNum = (value, dec)=>{
 //cost per single product. Returns per M and per Acre
 const areaCostCal = (perUnit, rate, unitOfMeasure)=>{
   let d = roundNum(perUnit * rate, 2);
+  console.log('d ', d)
   let perThousand = unitOfMeasure.includes('Acre') ? roundNum(d/43.56, 2): d;
+  console.log('perThousand => ', perThousand)
   let perAcre = unitOfMeasure.includes('Acre') ? d : roundNum(d*43.56, 2);
-
+  console.log('preAcre => ', perAcre)
   return {perThousand, perAcre}
 }
 //price per unit
 const pricePerUnit = (prodPrice, uSize, prodRate,unitMeasure )=>{
-  let areaSize = unitMeasure.includes('Acre') ? uSize/43.56 : uSize; 
-  let price = roundNum(prodPrice/areaSize, 2);
-  let final = areaCostCal(price, prodRate, unitMeasure);
-  return final;
+  // let areaSize = unitMeasure.includes('Acre') ? uSize/43.56 : uSize; 
+  // console.log('area size ', areaSize)
+  // let price = roundNum(prodPrice/areaSize, 2);
+  // console.log('price per unit ', price)
+  // let final = areaCostCal(price, prodRate, unitMeasure);
+  // return final;
+  let pricePerContainerUnit = prodPrice/uSize;
+  let isThouRate = unitMeasure.includes('Acre') ? roundNum(prodRate/43.56,4) : prodRate;
+  let isAcreRate =  unitMeasure.includes('Acre') ? prodRate : roundNum(prodRate*43.56,4); 
+  let perThousand = roundNum(pricePerContainerUnit * isThouRate,2); 
+  let perAcre = roundNum(pricePerContainerUnit * isAcreRate,2); 
+  return {perThousand, perAcre}
 }
 
-
+///THIS FUCKER IS THE PROBLEM RIGHT HERE THIS FUCKING FUCK
 const perProduct = (prodPrice, prodSize, rate, unitOfMeasure)=>{
+
   let perOz = roundNum(prodPrice/prodSize, 2)
   let cost = roundNum(rate * perOz, 2)
+
+  let perAcre = unitOfMeasure.includes('/M') ?  roundNum(cost*43.56, 2): cost;
+  let perThousand = unitOfMeasure.includes('Acre') ? roundNum(cost/43.56, 2): cost;
   
-  let perAcre = unitOfMeasure.includes('/M') ? cost : roundNum(cost*43.56, 2);
-  let perThousand = unitOfMeasure.includes('Acre') ? cost: roundNum(cost/43.56, 2);
   return {perAcre, perThousand}; 
 }
 
+//check how much oz or lbs needed
+const totalUsed = (unitarea, area, rate)=>{
+    let totals = unitarea.includes('OZ/M') ? roundNum(rate * (area/1000),2):
+                 unitarea.includes('OZ/Acre') ? roundNum(rate * (area/43560),2) :
+                 unitarea.includes('LB/M') ? roundNum(rate * (area/1000),2) :
+                 unitarea.includes('LB/Acre') ? roundNum(rate * (area/43560),2) :
+                 1;
+    return totals; 
 
+}
 
 //acres treated
 const areaTreated = (unitSize, rate, unitMeasure) =>{
@@ -153,7 +183,7 @@ const merge = (info, levels)=>{
   
   let merged;
   if(info){
-    console.log('info ' +info);
+    //console.log('info ' +info);
     merged = info.map(res =>({
       ...levels.find((i)=> (i.Product2Id === res.Product__c)),
       ...res
@@ -211,6 +241,8 @@ export{hold,
       areaTreated,
       ornAppTotal,
       requiredGals, 
-      finishedGals}
+      finishedGals,
+      totalUsed
+    }
 
  

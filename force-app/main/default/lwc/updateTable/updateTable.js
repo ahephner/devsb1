@@ -8,11 +8,12 @@ import SQFT from '@salesforce/schema/Application__c.Area__r.Area_Sq_Feet__c';
 import PREFMEASURE from '@salesforce/schema/Application__c.Area__r.Pref_U_of_M__c';
 
 import addProducts from '@salesforce/apex/addApp.addProducts';
-
+import cloneSingleApp from '@salesforce/apex/cpqProgramClone.cloneSingleApp';
 const fields = [AREA, SQFT, PREFMEASURE]
 export default class UpdateTable extends LightningElement {
     updateExposed = false;
-    loaded = false; 
+    loaded = false;
+    showCopyDate = false; 
     subscritption = null; 
     upProdTable = false;
     showButton = true; 
@@ -20,7 +21,7 @@ export default class UpdateTable extends LightningElement {
     selectedProducts = [];
     areaId;
     sqFt; 
-    ornamental 
+    ornamental; 
     buttonText = 'Save';
     disableBtn = false; 
     @wire(MessageContext)
@@ -28,8 +29,6 @@ export default class UpdateTable extends LightningElement {
 //subscribe to message channel
     subscribeToMessage(){
         if(!this.subscritption){
-            console.log('listening');
-            
             this.subscritption = subscribe(
                 this.messageContext,
                 Program_Builder,
@@ -95,7 +94,40 @@ wiredareaInfo({error,data}){
             this.template.querySelector('c-update-ornamental-rate-price').addProducts();
         }
     }
+    copyApp(){
+        this.showCopyDate = true; 
+    }
 
+    closeDatePicker(){
+        this.showCopyDate = false; 
+    }
+
+    async copyProgram(x){
+        this.loaded = false; 
+        let dateUpdate = x.detail; 
+        this.showCopyDate = false; 
+        let mess = await cloneSingleApp({appId: this.appId, copyDate: dateUpdate});
+        if(mess === 'success'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success', 
+                    message: 'App Copied!', 
+                    variant: 'success'
+                }) 
+            );
+            this.tellTable()
+            this.closeModal()
+        }else if(mess!= 'sucess'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error deleting record',
+                    message: JSON.stringify(mess),
+                    variant: 'error'
+                })
+            ) 
+        } 
+        this.loaded = true; 
+    }
     handleNext(){
         let txt = this.buttonText; 
        
@@ -140,7 +172,7 @@ wiredareaInfo({error,data}){
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
-                        message: 'Application created '+ this.appName,
+                        message: 'Application updated '+ this.appName,
                         variant: 'success',
                     }),
                 );

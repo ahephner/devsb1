@@ -1,5 +1,5 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum, perProduct, areaTreated, sumFert} from 'c/programBuilderHelper';
+import {appTotal, calcDryFert, calcLiqFert, unitsRequired, roundNum, perProduct,pricePerUnit, areaTreated, sumFert} from 'c/programBuilderHelper';
 import {checkPricing} from 'c/helper';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
@@ -68,15 +68,15 @@ export default class AppRatePrice extends LightningElement {
                     this.data[index].Units_Required__c = unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].Product_Size__c )    
                     this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c,2);
                     let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
-                    
-                    this.data[index].costM = costs.perThousand;
-                    this.data[index].costA = costs.perAcre; 
-                    this.prodCostM = costs.perThousand;
-                    this.prodCostA = costs.perAcre;
+                    let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
+                    this.data[index].Cost_per_M__c = prodCost.perThousand;
+                    this.data[index].Cost_per_Acre__c = prodCost.perAcre; 
+                    this.prodCostM = prodCost.perThousand;
+                    this.prodCostA = prodCost.perAcre;
                     this.prodAreaCost = this.areaAcres * this.costPerAcre; 
                     this.treatedAcreage = areaTreated(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].Unit_Area__c );
                     this.appTotalPrice = appTotal(this.data);
-                    this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2); 
+                    this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
                     if(this.data[index].isFert){
                         let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);
                         this.data[index].N__c = fert.n;
@@ -104,15 +104,16 @@ export default class AppRatePrice extends LightningElement {
                 this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
 
                 let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
-
-                this.data[index].costM = costs.perThousand;
-                this.data[index].costA = costs.perAcre; 
-                this.prodCostM = costs.perThousand;
-                this.prodCostA = costs.perAcre;
+                let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
+                this.data[index].Cost_per_M__c = prodCost.perThousand;
+                this.data[index].Cost_per_Acre__c = prodCost.perAcre; 
+ 
+                this.prodCostM = prodCost.perThousand;
+                this.prodCostA = prodCost.perAcre;
                 this.prodAreaCost = this.areaAcres * this.costPerAcre;
                 this.treatedAcreage = areaTreated(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].Unit_Area__c );
                 this.appTotalPrice = appTotal(this.data); 
-                this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2);
+                this.totalCostPerM = roundNum(Object.values(this.prodlist).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
                 //handle fertilizer
                 if(this.data[index].isFert){
                     let fert = this.data[index].Product_Type__c === 'Dry' ? calcDryFert(this.data[index].Rate2__c, this.data[index]) : calcLiqFert(this.data[index].Rate2__c, this.data[index]);
@@ -147,27 +148,29 @@ export default class AppRatePrice extends LightningElement {
                         this.data[index].Margin__c = roundNum((1 - (this.data[index].Product_Cost__c /this.data[index].Unit_Price__c))*100, 2);
                         this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                         let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
+                        let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
+                        this.data[index].Cost_per_M__c = prodCost.perThousand;
+                        this.data[index].Cost_per_Acre__c = prodCost.perAcre;
 
-                        this.data[index].costM = costs.perThousand;
-                        this.data[index].costA = costs.perAcre; 
-                        this.prodCostM = costs.perThousand;
-                        this.prodCostA = costs.perAcre;
+                        this.prodCostM = prodCost.perThousand;
+                        this.prodCostA = prodCost.perAcre;
                         this.prodAreaCost = this.areaAcres * this.costPerAcre; 
                     }else{
                         this.data[index].Margin__c = 0;                
                         this.data[index].Margin__c = roundNum(this.data[index].Margin__c, 2);
                         this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                         let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
-
-                        this.data[index].costM = costs.perThousand;
-                        this.data[index].costA = costs.perAcre; 
-                        this.prodCostM = costs.perThousand;
-                        this.prodCostA = costs.perAcre;
+                        let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
+                        
+                        this.data[index].Cost_per_M__c = prodCost.perThousand;
+                        this.data[index].Cost_per_Acre__c = prodCost.perAcre;
+                        this.prodCostM = prodCost.perThousand;
+                        this.prodCostA = prodCost.perAcre;
                         this.prodAreaCost = this.areaAcres * this.costPerAcre;
 
                     }
                     this.appTotalPrice = appTotal(this.data);
-                    this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2);
+                    this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
                     let lOne = Number(this.data[index].levelOne)
                     let floor = Number(this.data[index].floorPrice)
                     let unitPrice = this.data[index].Unit_Price__c
@@ -184,10 +187,11 @@ export default class AppRatePrice extends LightningElement {
                                 this.data[index].Unit_Price__c = roundNum(this.data[index].Product_Cost__c /(1- this.data[index].Margin__c/100), 2)
                                 this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2)
                                 let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
-
-                                this.data[index].costM = costs.perThousand;
-                                this.data[index].costA = costs.perAcre; 
-                                this.prodCostM = costs.perThousand;
+                                let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
+                                
+                                this.data[index].Cost_per_M__c = prodCost.perThousand;
+                                this.data[index].Cost_per_Acre__c = prodCost.perAcre; 
+                                this.prodCostM = prodCost.perThousand;
                                 this.prodCostA = costs.perAcre;
                                 this.prodAreaCost = this.areaAcres * this.costPerAcre;
                                                            
@@ -196,15 +200,16 @@ export default class AppRatePrice extends LightningElement {
                                 this.data[index].Unit_Price__c = this.data[index].Unit_Price__c.toFixed(2);
                                 this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                                 let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
-
-                                this.data[index].costM = costs.perThousand;
-                                this.data[index].costA = costs.perAcre; 
-                                this.prodCostM = costs.perThousand;
-                                this.prodCostA = costs.perAcre;
+                                let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
+                               
+                                this.data[index].Cost_per_M__c = prodCost.perThousand;
+                                this.data[index].Cost_per_Acre__c = prodCost.perAcre;
+                                this.prodCostM = prodCost.perThousand;
+                                this.prodCostA = prodCost.perAcre;
                                 this.prodAreaCost = this.areaAcres * this.costPerAcre;    
                             }
                             this.appTotalPrice = appTotal(this.data); 
-                            this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2);
+                            this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
                 },1500)
             }   
            
@@ -232,7 +237,7 @@ export default class AppRatePrice extends LightningElement {
             if(this.data[index].Rate2__c > 0){
                 this.data[index].Units_Required__c = unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].Product_Size__c );
                 this.appTotalPrice = appTotal(this.data); 
-                this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSize/1000),2)
+                this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
             }    
         }
 //handle note 
@@ -340,8 +345,8 @@ export default class AppRatePrice extends LightningElement {
             this.levelOne = index.levelOne;
             this.levelTwo = index.levelTwo;
             this.prodFloor = index.floorPrice; 
-            this.prodCostM = index.costM ? index.costM : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perThousand;
-            this.prodCostA = index.costA ? index.costA : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perAcre;
+            this.prodCostM =  index.Cost_per_M__c ? index.Cost_per_M__c : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perThousand;
+            this.prodCostA =  index.Cost_per_Acre__c ? index.Cost_per_Acre__c : perProduct(index.Total_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perAcre;
             this.treatedAcreage = areaTreated(index.Product_Size__c,index.Rate2__c, index.Unit_Area__c );
             this.prodN = index.N__c;
             this.prodP = index.P__c;

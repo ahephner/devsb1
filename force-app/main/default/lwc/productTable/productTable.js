@@ -189,6 +189,7 @@ export default class ProductTable extends LightningElement {
                showNote: false,
                costM:'',
                costA:'',
+               url: `https://www.advancedturf.com/?s=${item.ProductCode}&post_type=product`,
                Note_Other__c:'', 
                Manual_Charge_Size__c: 0,
                sprayVolume: this.ornamental ? this.sprayVol: 0,

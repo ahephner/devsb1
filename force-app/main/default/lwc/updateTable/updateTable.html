@@ -17,6 +17,7 @@
                       <template if:true={showButton}>
                         <lightning-button-group>
                             <lightning-button label="Add Product" onclick={addProducts} variant="success"></lightning-button>
+                            <lightning-button label="Quick Copy" class="slds-m-left_x-small" onclick={copyApp} ></lightning-button>
                         </lightning-button-group>
                       </template>
                   </div>
@@ -34,6 +35,16 @@
                     onprice={badPrice}
                     onupdate={tellTable}></c-update-ornamental-rate-price>
                   </template>
+<!-- Copy app -->
+<template if:true={showCopyDate}>
+  <div class="datePicker">
+    <c-date-modal 
+    onclose={closeDatePicker}
+    onsavedate={copyProgram}>
+    </c-date-modal>
+  </div>
+
+</template>
                   </template>
                   <template if:true={disableBtn}>
                     <div class='slds-align_absolute-center'>
@@ -56,6 +67,8 @@
             </div>
           </section>
           <div class="slds-backdrop slds-backdrop_open"></div>
+
+                    
     </template>
 
 </template>

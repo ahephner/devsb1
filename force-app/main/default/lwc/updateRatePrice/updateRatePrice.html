@@ -2,6 +2,8 @@
  
     <template if:true={loaded}>
         <template if:false={updateMulti}>
+
+            <!-- Add more products -->
         <template if:true={addMore}>
             <div class="slds-col slds-size_1-of-1">
                 <c-update-add-product ondone={closeAdd}
@@ -9,7 +11,7 @@
                                             ></c-update-add-product>
                 </div>
         </template>
-        
+
        <template if:false={addMore}> 
         <div class='slds-grid'>
             <div class='slds-col slds-size_2-of-8'>
@@ -55,7 +57,7 @@
                             </template>
                             <template lwc:else>
                                 <div class="slds-col slds-size_2-of-12 pName">
-                                    <p>{sp.Product_Name__c}</p>
+                                    <a href={sp.Product_SDS_Label__c} target="_blank">{sp.Product_Name__c}</a>
                                 </div>
                             </template>
                         <!-- Non Manual Item -->
@@ -174,7 +176,7 @@
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
                                 <p>Product Name: {productName}</p>
                             </div>
-                            <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
+                            <div class="slds-col slds-size_1-of-1 slds-m-top_x-small lineUp">
                                 <p>prod per M: ${prodCostM}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">

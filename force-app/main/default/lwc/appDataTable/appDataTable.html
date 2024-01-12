@@ -4,6 +4,12 @@
                       apps={appList}
                       record-id={recordId}></c-make-order>
     </template>
+    <template if:true={showCopyDate}>
+        <c-date-modal onclose={closeDatePicker}
+                      onsavedate={copyProgram}>
+            
+        </c-date-modal>
+    </template>
     <lightning-card> 
         <div class="slds-grid  slds-wrap">
             <template if:false={loaded}>

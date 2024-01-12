@@ -3,16 +3,18 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
+import cloneSingleApp from '@salesforce/apex/cpqProgramClone.cloneSingleApp';
 //import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
 import LightningConfirm from 'lightning/confirm';
+
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 import {onLoadTotalPrice} from 'c/programBuilderHelper';
 //table actions bottom of file shows how to handle
 const actions = [
     { label: 'Show details', name: 'show_details' },
-    // {label:'Add Products', name:'add_products'},
+     {label:'Copy', name:'copy_app'},
     { label: 'Delete', name: 'delete' },
 ];
 
@@ -47,11 +49,13 @@ export default class AppDataTable extends LightningElement {
     //expose customer copy button
     //getCopy = false; 
     subscription= null;   
-    loaded = false
+    loaded = false;
     showOrder = false; 
+    showCopyDate = false; 
     programName;
     customerName; 
     totalPrice = 0.00; 
+    rowId; 
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
@@ -166,10 +170,40 @@ export default class AppDataTable extends LightningElement {
         })
         return res; 
         }
+
+    closeDatePicker(){
+        this.showCopyDate = false; 
+    }
+
+    async copyProgram(x){
+        let dateUpdate = x.detail; 
+        this.showCopyDate = false; 
+        this.loaded = false; 
+        let mess = await cloneSingleApp({appId: this.rowId, copyDate: dateUpdate});
+        if(mess === 'success'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success', 
+                    message: 'App Copied!', 
+                    variant: 'success'
+                }) 
+            );
+            refreshApex(this.wiredAppList)
+        }else if(mess!= 'sucess'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error deleting record',
+                    message: JSON.stringify(mess),
+                    variant: 'error'
+                })
+            ) 
+        } 
+        this.loaded = true; 
+    }
     //handle table row actions. Delete or pop up to edit. 
     handleRowAction(event) {
         const actionName = event.detail.action.name;
-        const row = event.detail.row.Id;
+        this.rowId = event.detail.row.Id;
         
         switch (actionName) {
             case 'delete':{
@@ -178,7 +212,8 @@ export default class AppDataTable extends LightningElement {
             this.handleConfirm()
                     .then((res)=>{
                         if(res===true){
-                            deleteRecord(row)
+                            this.loaded = false; 
+                            deleteRecord(this.rowId)
                                 .then(() => {
                                     this.dispatchEvent(
                                         new ShowToastEvent({
@@ -186,7 +221,9 @@ export default class AppDataTable extends LightningElement {
                                             message: 'App Deleted', 
                                             variant: 'success'
                                         }) 
-                                    );//this refreshes the table  
+                                    );
+                                    this.loaded = true;
+                                    //this refreshes the table  
                                     return refreshApex(this.wiredAppList)
                                 })
                                 .catch(error => {
@@ -208,21 +245,14 @@ export default class AppDataTable extends LightningElement {
                     updateProdTable: true,
                     addProd: false,
                     updateProd: true,
-                    appId: row
+                    appId: this.rowId
                 }
                 publish(this.messageContext, Program_Builder, payload); 
                 
                 
                 break;
-            case 'add_products': 
-                const payload2 = {
-                    updateProdTable: true,
-                    addProd: true,
-                    updateProd: false,
-                    appId: row
-                }
-                publish(this.messageContext, Program_Builder, payload2);
-                
+            case 'copy_app': 
+               this.showCopyDate = true; 
             default:
         }
 }

@@ -167,7 +167,7 @@ export default class AppSelectProd extends LightningElement {
             const rowK = e.detail.row.kVal; 
             const fert = e.detail.row.isFert; 
             const galWeight = e.detail.row.galWeight;
-            
+            const ProductCode = e.detail.row.Code; 
             
             if(rowAction ==='Add'){
                 let index = this.prod.findIndex(x => x.Id === rowId)
@@ -178,7 +178,8 @@ export default class AppSelectProd extends LightningElement {
                     ...this.selection,{
                         Id: rowId,
                         Name: rowName,
-                        Product__c: rowProduct, 
+                        Product__c: rowProduct,
+                        ProductCode: ProductCode, 
                         Product_Type__c: rowProdType,
                         levelTwo: rowLev2,
                         floorPrice: rowFlrPrice,

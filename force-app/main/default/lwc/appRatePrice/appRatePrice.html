@@ -22,7 +22,7 @@
                                 </template>
                                 <template lwc:else>
                                     <div class="slds-col slds-size_2-of-12 pName">
-                                        <p>{sp.Product_Name__c}</p>
+                                        <a href={sp.url} target="_blank">{sp.Product_Name__c}</a>
                                     </div>
                                 </template>
                             <template if:false={sp.showNote}>
@@ -140,7 +140,7 @@
                                             <div class="slds-col slds-size_1-of-1">
                                                 <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                                             </div>
-                                            <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
+                                            <div class="slds-col slds-size_1-of-1 slds-m-top_x-small lineUp">
                                                 Total Cost Per M: ${totalCostPerM}
                                             </div>
                                             <div lwc:if={showProdInfo} class='slds-col slds-size_1-of-1'>

@@ -63,6 +63,8 @@ export default class AppModal extends LightningElement {
             {label:'Fairways' , value: 'Fairways'},
             {label:'Fairways/Tees' , value: 'Fairways/Tees'},
             {label:'Rough' , value: 'Rough'},
+            {label:'Lawn', value:'Lawn'},
+            {label:'Beds', value:'Beds'}, 
             {label:'Other' , value: 'Other'} 
         ]
     }   
