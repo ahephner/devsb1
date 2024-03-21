@@ -92,7 +92,7 @@ export default class UpdateRatePrice extends LightningElement {
                                 let nVal = item.Product__r.N__c;
                                 let pVal = item.Product__r.P__c;
                                 let kVal = item.Product__r.K__c;
-                                let type = item.Product__r.Product_Type__c; 
+                                let Product_Type__c = item.Product__r.Product_Type__c; 
                                 let isFert = item.Product__r.hasFertilizer__c;
                                 let title = `Unit Price - Flr $${item.Product__r.Floor_Price__c}`; 
                                 let galLb = item.Product__r.X1_Gallon_Weight__c
@@ -114,7 +114,7 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.appTotalK += item.K__c;
                                 //used for updating. Pushing id to a list so when something is updated we check against it
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal,type, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, totalUsed, manCharge, Note_Other__c, prevAppId}
+                                return {...item, allowEdit, nVal, pVal, kVal, Product_Type__c, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, totalUsed, manCharge, Note_Other__c, prevAppId}
                             });
             let idList = [...prodIds]
             let pricing = await getPricing({ids: idList });
@@ -133,8 +133,8 @@ export default class UpdateRatePrice extends LightningElement {
                 this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;             
                 
     //need for doing math later
-                this.areaSizeM= parseFloat(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c);
-                this.areaAcres = parseFloat(this.prodlist[0].Application__r.Area__r.Area_Acres__c);
+                this.areaSizeM= roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c),2);
+                this.areaAcres = roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Acres__c),2);
     //Round totals
                 this.appTotalN = roundNum(this.appTotalN, 4);
                 this.appTotalP = roundNum(this.appTotalP, 4);

@@ -1,0 +1,84 @@
+<style type="text/css">table.table843 {border:solid black 1px; border-collapse:collapse; border-spacing:0px;font-family:Arial Unicode MS,sans-serif; font-size:10pt; width:100% }
+    .table843header {text-align:center;font-weight:bold;border:solid black 1px;color:#FFFFFF;background-color:#167000;}
+    .table843footer {text-align:right;font-weight:bold;border:solid black 1px; height: 30px}
+    .table843RowEven{border:solid black 1px;}
+    .table843RowOdd{border:solid black 1px;}
+    .table843col0{border:solid black 1px;text-align:left;font-weight:normal;font-size:12pt;font-family:Arial Unicode MS,sans-serif;}
+    .table843col1{border:solid black 1px;text-align:left;font-weight:normal;font-size:12pt;font-family:Arial Unicode MS,sans-serif;}
+    .table843col2{border:solid black 1px;text-align:left;font-weight:normal;font-size:12pt;font-family:Arial Unicode MS,sans-serif;}
+    .table843col3{border:solid black 1px;text-align:left;font-weight:normal;font-size:12pt;font-family:Arial Unicode MS,sans-serif;}
+    .table843col4{border:solid black 1px;text-align:left;font-weight:normal;font-size:12pt;font-family:Arial Unicode MS,sans-serif;}
+    .table843col5{border:solid black 1px;text-align:left;font-weight:normal;font-size:12pt;font-family:Arial Unicode MS,sans-serif;}
+    .table843col6{border:solid black 1px;text-align:left;font-weight:normal;font-size:12pt;font-family:Arial Unicode MS,sans-serif;}
+    </style>
+    <table class="table843">
+        <tbody>
+            <tr>
+                <th class="table843header">Product Name</th>
+                <th class="table843header">Oz/M</th>
+                <th class="table843header">Lbs/Acre</th>
+                <th class="table843header">N</th>
+                <th class="table843header">P</th>
+                <th class="table843header">K</th>
+                <th class="table843header">Note</th>
+            </tr>
+        </tbody>
+        <tbody style="page-break-inside: avoid !important; page-break-before: auto !important;"><!--{{!
+    <App_Product__c>
+    <class>table843</class>
+    <listname>app_products__c</listname>
+    <column>product_name__c</column>
+    <column>oz_per_m__c</column>
+    <column>lbs_acre__c</column>
+    <column>n__c</column>
+    <column>p__c</column>
+    <column>k__c</column>
+    <column>note__c</column>
+    </App_Product__c>
+    }}--><!--{{! 
+    <lineitemssoql> <class>table843</class> <listname>App_Product__c</listname> <column>product_name__c</column> <column>Oz_Per_M__c</column> <column format-number="#,###">lbs_acre__c</column> <column format-number="#,###.##" prefix="$">n__c</column> <column format-number="#,###.##" prefix="$">p__c</column><column>k__c</column><column colspan="5" newrow ="true" prefix="Comment: ">Note__c</column><where>Program_Id__c='{{!ObjectID15}}'</where></lineitemssoql>
+    }}-->
+            <tr>
+            </tr>
+        </tbody>
+    </table>
+    
+    <table border="0" class="table1" width="100%">
+        <tbody>
+            <tr>
+                <td class="table1header">Product</td>
+                <td class="table1header">Required Quantity</td>
+                <td align="right" class="table1header">Total Price</td>
+            </tr>
+            <!--{{! <LineItemsSOQL>
+        <class>table1</class>
+        <ListName>App_Product__c</ListName>
+        <soql>Select Product__r.Name, sum(o.Total_Price__c)tp, sum(o.Required_Units__c)tq From App_Product__c o where Program_Id__c='{{!ObjectID15}}' group by o.Product__r.Name</soql>
+        <column>Name</column>
+        <column format-number="#,###">tq</column>
+        <column format-number="#,###.##" prefix="$">tp</column>
+        </LineItemsSOQL> }}-->
+        </tbody>
+    </table>
+    
+    <table border="0" class="table2" width="100%">
+        <tbody>
+            <tr>
+                <td class="table1header">Area Name</td>
+                <td class="table1header">Product</td>
+                <td class="table1header">Required Quantity</td>
+                <td align="right" class="table1header">Total Price</td>
+            </tr>
+            <!--{{! <LineItemsSOQL>
+        <class>table2</class>
+        <ListName>opportunitylineitem</ListName>
+        <soql>Select o.Application__r.Area__r.Name an,o.Product__r.Name pn, sum(o.Total_Price__c)tp, sum(o.Required_Units__c)tq From App_Product__c o where Program_Id__c='{{!ObjectID15}}' group by o.Application__r.Area__r.Name, o.Product__r.Name</soql>
+        <column>an</column>
+        <column>pn</column>
+        <column format-number="#,###">tq</column>
+        <column format-number="#,###.##" prefix="$">tp</column>
+        </LineItemsSOQL> }}-->
+        </tbody>
+    </table>
+    <br />
+    <!-- ******************** END RELATED LIST SECTION UNIQUEID:843********************--><!-- ******************** START RELATED LIST SECTION UNIQUEID:634********************-->
