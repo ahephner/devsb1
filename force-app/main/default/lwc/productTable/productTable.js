@@ -7,6 +7,11 @@ import addApplication from '@salesforce/apex/addApp.addApplication';
 import addProducts from '@salesforce/apex/addApp.addProducts';
 import multiInsert from '@salesforce/apex/addApp.multiInsert';
 import {pref} from 'c/programBuilderHelper';
+//this gets the avaliable price books must pass account id
+import getPriceBooks from '@salesforce/apex/getPriceBooks.getPriceBookIds';
+//this returns either a set of price book id's or array of objects of all the avaliable price books for the account in order of priority. Standard is always there
+import { priorityPricing} from 'c/helperOMS';
+
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class ProductTable extends LightningElement {
     //controls what component is up
@@ -31,6 +36,7 @@ export default class ProductTable extends LightningElement {
     customInsert = false; 
     currentStage = 'appInfo'
     applicationNote; 
+    accId; 
     //if an application is the first of a multi-insert
     parApp; 
    @track selectedProducts = []; 
@@ -56,6 +62,7 @@ export default class ProductTable extends LightningElement {
             this.areaSelected = message.message; 
             this.dateName = true;
             this.areaId = message.areaId;
+            this.accId = message.accountId; 
             //control flow for when trying to call refresh apex
             //if an issue look at the reset below I changed to undefined used to be ''
             if(this.areaId){
@@ -117,16 +124,20 @@ export default class ProductTable extends LightningElement {
                 }
             }       
         }
-    
+    //pricebooks in order. because the helper returns a set() you need to spread out to array. 
+    pbIds; 
         //get area info for the product calculations
-        handleArea(x){  
-            areaInfo({ai:x})
-                .then((resp)=>{
-                    this.areaSQft = resp[0].Area_Sq_Feet__c
-                    this.areaUM = resp[0].Pref_U_of_M__c
-                    this.ornamental = resp[0].Pref_U_of_M__c === '100 Gal' ? true : false; 
-                    this.sprayVol = resp[0].Required_Gallons__c;
-                })
+       async handleArea(x){  
+            let resp = await areaInfo({ai:x})
+            let priceBooks = await getPriceBooks({accountId: this.accId});
+            let pbInfo = await priorityPricing(priceBooks);
+            //returns a SET() need to spread them out into an array before passing over. 
+                this.pbIds = [...pbInfo.priceBookIdArray]; 
+                this.areaSQft = resp[0].Area_Sq_Feet__c
+                this.areaUM = resp[0].Pref_U_of_M__c
+                this.ornamental = resp[0].Pref_U_of_M__c === '100 Gal' ? true : false; 
+                this.sprayVol = resp[0].Required_Gallons__c;
+            
             }
 //how to call a function from a child comp. if tracking values in parent 
     // search(){

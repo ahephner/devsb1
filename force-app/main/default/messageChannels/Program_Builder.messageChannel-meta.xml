@@ -43,4 +43,8 @@
         <fieldName>updateProd</fieldName>
         <description>boolean tells updateTable to show rate pricing update screen</description> 
     </lightningMessageFields>
+        <lightningMessageFields>
+        <fieldName>accountId</fieldName>
+        <description>the account Id to get priority price books</description> 
+    </lightningMessageFields>
 </LightningMessageChannel>

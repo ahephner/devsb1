@@ -2,12 +2,27 @@
 
 import { LightningElement, wire, track, api } from 'lwc';
 //import searchProduct from '@salesforce/apex/appProduct.searchProduct'
-import searchProduct from '@salesforce/apex/appProduct.searchProduct2'
+//import searchProduct from '@salesforce/apex/appProduct.searchProduct2'
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import PROD_OBJECT from '@salesforce/schema/Product__c';
 import { getPicklistValues } from 'lightning/uiObjectInfoApi';
 import prodFamily from '@salesforce/schema/Product__c.Product_Family__c';
+
+// My Imports
+
+import { spellCheck, cpqSearchString, uniqVals, addSingleKey } from 'c/tagHelper';
+import { mergePricing } from 'c/internHelper';
+import searchTag from '@salesforce/apex/quickPriceSearchTag.cpqSearchTag';
+
+const REGEX_SOSL_RESERVED = /(\?|&|\||!|\{|\}|\[|\]|\(|\)|\^|~|\*|:|"|\+|\\)/g;
+const REGEX_STOCK_RES = /(stock|sock|limited|limted|lmited|limit|close-out|close out|closeout|close  out|exempt|exmpet|exemept|southern stock|southernstock|southner stock)/g;
+const REGEX_COMMA = /(,)/g;
+const REGEX_24D = /2,4-D|2 4-d|2, 4-D/gi;
+const REGEX_WAREHOUSE = /wh\s*\d\d\d/gi;
+const REGEX_WHITESPACE = /\s/g;
+
+// End of My Imports
 
 const columnsList = [
     {type: 'button', 
@@ -36,6 +51,7 @@ export default class AppSelectProd extends LightningElement {
     @track loaded = false; 
     columnsList = columnsList; 
     @track prod = []; 
+    @api pricebookids = []; 
     error;
     pfOptions;  
     searchKey;
@@ -77,20 +93,25 @@ export default class AppSelectProd extends LightningElement {
     }
 
    
-    nameChange(event){
+    nameChange(event) {
         this.searchKey = event.target.value.toLowerCase();
-        
-      }
+        this.startEventListener();
+    }
+    
+    watchKeyDown(event) {
+        if (event.key === 'Enter') {
+            this.advancedSearch();
+        }
+    }
 
       //handle enter key tagged. maybe change to this.searhKey === undefined
-      handleKey(evt){
-          if(!this.searchKey){
-              //console.log('sk '+this.searchKey);
-              return;
-          }
-          if(evt.key === 'Enter')
-              this.search();  
-      }
+      handleKey(event) {
+        console.log('pbIds => ', this.pricebookids)
+        if (event.key === 'Enter') {
+            this.advancedSearch();
+        }
+    }
+
       pfChange(event){
           this.pf = event.detail.value;
           this.search(); 
@@ -102,43 +123,138 @@ export default class AppSelectProd extends LightningElement {
           this.search(); 
       }
 
-      search(){
-        this.loaded = false; 
-       //console.log('sk '+this.searchKey); 
-        searchProduct({searchKey: this.searchKey, cat: this.cat, family: this.pf })
-        .then((result) => {
-            this.prod = result.map(item=>{
-                let rowLabel = 'Add';
-                let rowValue = 'Add'; 
-                let rowVariant = 'success';
-                let Name = item.Product2.Name;
-                let Code = item.Product2.ProductCode;
-                let nVal = item.Product2.N__c;
-                let pVal = item.Product2.P__c;
-                let kVal = item.Product2.K__c;
-                let isFert = item.Product2.hasFertilizer__c;
-                let galWeight = item.Product2.X1_Gallon_Weight__c;
-                let Product_Status__c = item.Product2.Product_Status__c;
-                let Floor = item.Agency_Product__c ? item.Floor_Price__c : item.Floor_Price__c;
-                let LevelOne = item.Agency_Product__c ? item.Floor_Price__c : item.Level_1_UserView__c;
-                let LevelTwo = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
-                return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Floor, LevelOne, LevelTwo, nVal, pVal, kVal, isFert, galWeight} 
+      search() {
+        this.advancedSearch();
+    }   
 
-            });
-            //console.log(JSON.stringify(this.prod))
-            this.error = undefined;
-        })
-        .catch((error) => {
-            this.error = error;
-            console.log(this.error);
+      async advancedSearch() {
+
+        this.whSearch = this.template.querySelector('[data-value="searchInput"]').value.trim().toLowerCase().replace(REGEX_WHITESPACE, "").match(REGEX_WAREHOUSE);
+        this.stock = this.template.querySelector('[data-value="searchInput"]').value.trim().toLowerCase().match(REGEX_STOCK_RES);
+        this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value.toLowerCase().replace(REGEX_24D, '2 4-D')
+            .replace(REGEX_COMMA, ' and ').replace(REGEX_SOSL_RESERVED, '?').replace(REGEX_STOCK_RES, '').replace(REGEX_WAREHOUSE, '').trim();
+    
+        if (this.searchTerm.length < 2) {
+            // LIGHTNING ALERT HERE
+            return;
+        }
+    
+        let searchRacks;
+        let backUpQuery;
+        let warehouseCode;
+    
+        if (this.stock) {
+            this.stock = spellCheck(this.stock[0]);
+        }
+    
+        let buildSearchInfo = cpqSearchString(this.searchTerm, this.stock, this.whSearch);
+        this.searchQuery = buildSearchInfo.builtTerm;
+        searchRacks = buildSearchInfo.wareHouseSearch;
+        backUpQuery = buildSearchInfo.backUpQuery;
+        warehouseCode = buildSearchInfo.warehouseCode;
+    
+        this.loaded = false;
+    
+        try {
+            let data = await searchTag({ searchKey: this.searchQuery, searchWareHouse: searchRacks, backUpSearch: backUpQuery, warehouseKey: warehouseCode })
+            let tags = data.tags !== undefined ? data.tags : [];
+            let backUpSearchUsed = data.backUpSearchUsed;
+            let pricing = data.pricing;
+    
+            console.log('PRICING: ', pricing)
+            let once = tags.length > 1 ? await uniqVals(tags) : tags;
+            console.log("ONCE: ", once);
+            this.searchSize = once.length;
             
-        })
-        .finally(() => {
-            this.searchKey = undefined; 
-            this.loaded = true; 
-        })
+            // Sorting logic here (as in the original advanced search)
+    
+            let final = mergePricing(once, 'Product__c', pricing, 'Product2Id', 'Level_1_UserView__c');
+            final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Floor_Margin__c');
+            final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Level_2_UserView__c');
+            final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Product_Cost__c');
+            final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Level_2_Margin__c');
+    
+            console.log("FINAL: ", final)
+
+            this.prod = await final.map((item, index) => ({
+                rowLabel: 'Add',
+                rowValue: 'Add',
+                rowVariant: 'success',
+                Name: item.Product_Name__c,
+                Code: item.Product_Code__c,
+                Product_Status__c: item.Stock_Status__c,
+                Floor: item.Floor_Margin__c,
+                LevelOne: item.Level_1_UserView__c,
+                LevelTwo: item.Level_2_UserView__c,
+                Id: item.Product__c,
+                Product2Id: item.Product__c,
+                Product_Type__c: item.Product_Type__c,
+                Floor_Price__c: item.Floor_Margin__c,
+                Level_2_Margin__c: item.Level_2_Margin__c,
+                Agency_Product__c: item.Agency_Product__c,
+                Product_Cost__c: item.Product_Cost__c,
+                Product_Size__c: item.Product_Size__c,
+                nVal: item.N__c,
+                pVal: item.P__c,
+                kVal: item.K__c,
+                isFert: item.hasFertilizer__c,
+                galWeight: item.X1_Gallon_Weight__c
+            }));
+    
+            if (backUpSearchUsed) {
+                let DIDNT_FIND_AT_WAREHOUSE = [{ Id: '1343', Name: `Not yet tagged for ${this.whSearch}, confirm Inventory after Selection` }];
+                this.prod = [...DIDNT_FIND_AT_WAREHOUSE, ...this.prod];
+            }
+    
+        } catch (error) {
+            console.error(error);
+            this.error = error;
+        } finally {
+            this.loaded = true;
+        }
+
+    // Console log the final value of prod
+    console.log('prod array:', this.prod);
+    
+    }
+
+    //   search(){
+    //     this.loaded = false; 
+    //    //console.log('sk '+this.searchKey); 
+    //     searchProduct({searchKey: this.searchKey, cat: this.cat, family: this.pf })
+    //     .then((result) => {
+    //         this.prod = result.map(item=>{
+    //             let rowLabel = 'Add';
+    //             let rowValue = 'Add'; 
+    //             let rowVariant = 'success';
+    //             let Name = item.Product2.Name;
+    //             let Code = item.Product2.ProductCode;
+    //             let nVal = item.Product2.N__c;
+    //             let pVal = item.Product2.P__c;
+    //             let kVal = item.Product2.K__c;
+    //             let isFert = item.Product2.hasFertilizer__c;
+    //             let galWeight = item.Product2.X1_Gallon_Weight__c;
+    //             let Product_Status__c = item.Product2.Product_Status__c;
+    //             let Floor = item.Agency_Product__c ? item.Floor_Price__c : item.Floor_Price__c;
+    //             let LevelOne = item.Agency_Product__c ? item.Floor_Price__c : item.Level_1_UserView__c;
+    //             let LevelTwo = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
+    //             return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Floor, LevelOne, LevelTwo, nVal, pVal, kVal, isFert, galWeight} 
+
+    //         });
+    //         //console.log(JSON.stringify(this.prod))
+    //         this.error = undefined;
+    //     })
+    //     .catch((error) => {
+    //         this.error = error;
+    //         console.log(this.error);
+            
+    //     })
+    //     .finally(() => {
+    //         this.searchKey = undefined; 
+    //         this.loaded = true; 
+    //     })
         
-      }
+    //   }
    
      doneLoad(){
          window.clearTimeout(this.delay); 

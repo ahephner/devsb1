@@ -1,9 +1,12 @@
 import { LightningElement, wire, api } from 'lwc';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import {refreshApex} from '@salesforce/apex';
+import ACC_REC from '@salesforce/schema/Program__c.Account__c';
 import { MessageContext, publish} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
+const FIELDS = [ACC_REC]; 
 /* https://developer.salesforce.com/docs/component-library/documentation/en/lwc/lwc.reference_salesforce_modules */
 export default class AddProductButton extends LightningElement {
     @api recordId; 
@@ -13,6 +16,11 @@ export default class AddProductButton extends LightningElement {
     @wire(MessageContext)
         messageContext; 
     
+    @wire(getRecord, { recordId: "$recordId", fields: FIELDS })
+    account;
+    get accID(){
+        return getFieldValue(this.account.data, ACC_REC);
+    }
     @wire(getAreas, {recordId: '$recordId'})
         areaList
     //get area options
@@ -22,6 +30,7 @@ export default class AddProductButton extends LightningElement {
     }
     //used to select area plus alert the user in the comp. Will use this to verify an area was set before products added
     selectArea(e){
+        
         this.area = e.detail.value; 
         //areaName = e.target.areaOptions.find(opt => opt.value === e.detail.value).label; 
         //Wrong I was trying to call my areaOptions not what the system has as target.options
@@ -37,12 +46,14 @@ export default class AddProductButton extends LightningElement {
     }
 
     openModal(){
+       
         //open productTable if area is selected
         if(this.area){
             const payload = {
                 connector: true,
                 message: this.selectedLabel,
-                areaId: this.area
+                areaId: this.area,
+                accountId: this.accID
             }
             publish(this.messageContext, Program_Builder, payload); 
        }else{
