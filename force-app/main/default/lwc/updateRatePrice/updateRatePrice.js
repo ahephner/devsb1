@@ -18,6 +18,7 @@ export default class UpdateRatePrice extends LightningElement {
     updateAppId;
     areaId; 
     areaName;
+    accountId; 
     @track prodlist;
     error; 
     loaded=false; 
@@ -97,7 +98,10 @@ export default class UpdateRatePrice extends LightningElement {
                                 let title = `Unit Price - Flr $${item.Product__r.Floor_Price__c}`; 
                                 let galLb = item.Product__r.X1_Gallon_Weight__c
                                 let costM;
-                                let costA; 
+                                let costA;
+                                // let altPriceBookId__c = item.altPriceBookId__c;
+                                let altPriceBookName__c = item.altPriceBookName__c;
+                                // let altPriceBookEntryId__c = item.altPriceBookEntryId__c; 
                                 let goodPrice = true; 
                                 let showNote = false;
                                 let agencyProd = item.Product__r.Agency_Pricing__c; 
@@ -106,6 +110,7 @@ export default class UpdateRatePrice extends LightningElement {
                                 let totalUsed = item.Total_Used_f__c;
                                 let  manCharge =  item.Product_Code__c.toLowerCase().includes('manual charge')
                                 let Note_Other__c = item.Note_Other__c;
+                                let Product_SDS_Label__c = item.Product__r.Website_Label__c
                                 let prevAppId = item.Application__r.Prev_App_Id__c != undefined ? item.Application__r.Prev_App_Id__c : item.Application__c; 
                                 this.appTotalPrice += item.Total_Price__c;
                                 //console.log(typeof item.N__c);
@@ -114,24 +119,25 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.appTotalK += item.K__c;
                                 //used for updating. Pushing id to a list so when something is updated we check against it
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal, Product_Type__c, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, btnLabel, btnValue, totalUsed, manCharge, Note_Other__c, prevAppId}
+                                return {...item, allowEdit, nVal, pVal, kVal, Product_Type__c, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, altPriceBookName__c, btnLabel,Product_SDS_Label__c, btnValue, totalUsed, manCharge, Note_Other__c, prevAppId}
                             });
-            let idList = [...prodIds]
-            let pricing = await getPricing({ids: idList });
-            this.prodlist = await merge(nonPrice, pricing);
-            //console.log(JSON.stringify(this.prodlist))
-            //get your app and area info for the pop up screen
-                this.appName = this.prodlist[0].Application__r.Name;            
-                this.appDate = this.prodlist[0].Application__r.Date__c;             
-                this.updateAppId = this.prodlist[0].Application__c;            
-                this.programId = this.prodlist[0].Application__r.Program_ID__c;
-                this.areaId = this.prodlist[0].Application__r.Area__c           
-                this.areaName = this.prodlist[0].Area__c            
-                this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
-                this.oppNote = this.prodlist[0].Application__r.Note__c;
-                this.multiApp = this.prodlist[0].Application__r.Multi_Application__c; 
-                this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;             
-                
+                            let idList = [...prodIds]
+                            let pricing = await getPricing({ids: idList });
+                            this.prodlist = await merge(nonPrice, pricing);
+                            //console.log(JSON.stringify(this.prodlist))
+                            //get your app and area info for the pop up screen
+                            this.accountId = this.prodlist[0].Application__r.Area__r.Program__r.Account__c
+                            this.appName = this.prodlist[0].Application__r.Name;            
+                            this.appDate = this.prodlist[0].Application__r.Date__c;             
+                            this.updateAppId = this.prodlist[0].Application__c;            
+                            this.programId = this.prodlist[0].Application__r.Program_ID__c;
+                            this.areaId = this.prodlist[0].Application__r.Area__c           
+                            this.areaName = this.prodlist[0].Area__c            
+                            this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
+                            this.oppNote = this.prodlist[0].Application__r.Note__c;
+                            this.multiApp = this.prodlist[0].Application__r.Multi_Application__c; 
+                            this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;             
+                            
     //need for doing math later
                 this.areaSizeM= roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c),2);
                 this.areaAcres = roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Acres__c),2);
@@ -460,6 +466,9 @@ handleNewProd(x){
         Cost_per_Acre__c: 0, 
         Product_Size__c: x.detail.rowSize,
         allowEdit: x.detail.rowAgency ? true : false,
+        altPriceBookEntryId__c: x.detail.alt_PBE_Id,
+        altPriceBookId__c: x.detail.alt_PB_Id,
+        altPriceBookName__c: x.detail.alt_PB_Name,
         Area__c:  this.areaId,
         nVal: x.detail.rowN,
         pVal: x.detail.rowP,
@@ -479,8 +488,8 @@ handleNewProd(x){
         btnLabel: 'Add Note',
         btnValue: 'Note', 
         totalUsed: 0, 
-        Product_Type__c: x.detail.rowType,
-        Product_SDS_Label__c:`https://www.advancedturf.com/?s=${x.detail.rowCode}&post_type=product`,
+        Product_Type__c: x.detail.rowProdType,
+        Product_SDS_Label__c:x.detail.rowWebSiteLabel,
         Note_Other__c: '',
         Manual_Charge_Size__c: 0,
         manCharge: x.detail.rowName.toLowerCase().includes('manual charge')
@@ -496,12 +505,14 @@ handleNewProd(x){
 prodN
 prodP
 prodK
+foundPriceBook
 hiMouse(e){
     this.showProdInfo = true; 
     let index = this.prodlist[e.target.dataset.code]
     //console.log(index)
     this.productName = index.Product_Name__c;
-    this.productCost = index.Product_Cost__c;
+    this.productCost = index.agencyProd ? 'Agency':index.Product_Cost__c;
+    this.foundPriceBook = index.altPriceBookName__c;
     this.levelOne = index.Level_1_UserView__c;
     this.levelTwo = index.Level_2_UserView__c;
     this.prodFloor = index.Floor_Price__c; 

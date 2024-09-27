@@ -29,3 +29,7 @@
 .lineUp{
     margin-bottom: 1%;
 }
+
+.lowVolume{
+    display: -webkit-inline-box
+}

@@ -36,7 +36,9 @@ public with sharing class addApp {
                              ap.Units_Required__c = temp.Units_Required__c;
                              ap.N__c = temp.N__c;
                              ap.P__c = temp.P__c;
-                             ap.K__c = temp.K__c;  
+                             ap.K__c = temp.K__c; 
+                             ap.isLowVol__c = temp.isLowVol__c;
+                             ap.Spray_Vol_M__c = temp.Spray_Vol_M__c; 
                              ap.Note__c = temp.Note__c;
                              ap.Note_Other__c = temp.Note_Other__c; 
                              ap.Manual_Charge_Size__c = temp.Manual_Charge_Size__c; 

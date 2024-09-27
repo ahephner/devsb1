@@ -22,7 +22,7 @@ const unitsRequired = (uOFM, rate, areaS, unitS) => {
   if(rate/unitS === 1){
     let round = uOFM.includes('Acre')?(((rate/43.56)*(areaS/1000)))/unitS : ((rate*(areaS/1000))/unitS);
     req = round-Math.floor(round) !=0 && (round - Math.floor(round)) >= 0.25 ? Math.floor(round) + 1 : Math.floor(round);
-    console.log(req);
+    
     
   }else{
     req = uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*(areaS/1000)))/unitS) : Math.ceil(((rate*(areaS/1000))/unitS));
@@ -149,7 +149,7 @@ const pricePerUnit = (prodPrice, uSize, prodRate,unitMeasure )=>{
   return {perThousand, perAcre}
 }
 
-///THIS FUCKER IS THE PROBLEM RIGHT HERE THIS FUCKING FUCK
+
 const perProduct = (prodPrice, prodSize, rate, unitOfMeasure)=>{
 
   let perOz = roundNum(prodPrice/prodSize, 2)
@@ -183,7 +183,7 @@ const merge = (info, levels)=>{
   
   let merged;
   if(info){
-    //console.log('info ' +info);
+    console.log('info ' +info);
     merged = info.map(res =>({
       ...levels.find((i)=> (i.Product2Id === res.Product__c)),
       ...res
@@ -223,6 +223,30 @@ const requiredGals = (size, rate, tankSize) =>{
 
 const finishedGals = (size, rate) => roundNum(((size/rate) * 100), 2)
 
+const lowVolume = (rate, productSize, sprayVol, cost)=>{
+  //per 100 gallon dilution rate=> how many oz of product to mix per 100
+  let mixDilution = roundNum(rate/100, 4);
+  //how much is spread over a 1000 sqft depends on the volume applied per 1000
+  let perThousand = mixDilution * sprayVol;
+  let costPerSize = roundNum(cost/productSize,2)
+  //cost per 1000
+  let costperThousand = roundNum(costPerSize * perThousand,2); 
+  let costPerAcre = roundNum(costperThousand * 43.56,2);
+  return{
+      singleThousand:costperThousand,
+      singleAcre: costPerAcre
+  }
+}
+const lvUnits = (areaSize, sprayVol, prodSize, prodRate)=>{
+  let areaS = roundNum(areaSize,2)
+  let finishedRate = (prodRate/100)*sprayVol
+  //convert from per 1,000 to single
+  let ozNeeded = ((sprayVol/1000)*areaS)*128;
+  //total gals needed
+  let prodsNeed = Math.ceil((ozNeeded * finishedRate)/prodSize);
+  return prodsNeed; 
+  //final = above divided by prodSize
+}
 export{hold, 
       appTotal, 
       alreadyAdded, 
@@ -242,7 +266,7 @@ export{hold,
       ornAppTotal,
       requiredGals, 
       finishedGals,
-      totalUsed
+      totalUsed,
+      lowVolume,
+      lvUnits
     }
-
- 

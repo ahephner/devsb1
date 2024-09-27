@@ -6,10 +6,11 @@ import { getRecord } from 'lightning/uiRecordApi';
 import AREA from '@salesforce/schema/Application__c.Area__c';
 import SQFT from '@salesforce/schema/Application__c.Area__r.Area_Sq_Feet__c';
 import PREFMEASURE from '@salesforce/schema/Application__c.Area__r.Pref_U_of_M__c';
-
 import addProducts from '@salesforce/apex/addApp.addProducts';
 import cloneSingleApp from '@salesforce/apex/cpqProgramClone.cloneSingleApp';
-const fields = [AREA, SQFT, PREFMEASURE]
+const fields = [AREA, SQFT, PREFMEASURE];
+
+
 export default class UpdateTable extends LightningElement {
     updateExposed = false;
     loaded = false;
@@ -83,8 +84,10 @@ wiredareaInfo({error,data}){
         this.areaId = data.fields.Area__c.value;
         let prefMeasure = data.fields.Area__r.value.fields.Pref_U_of_M__c.value
         this.ornamental = prefMeasure  === '100 Gal' ? true : false;        
+
     }
 }
+    
     addProducts(){
         this.buttonText = 'Done';
         this.showButton = false; 

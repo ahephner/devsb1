@@ -11,10 +11,11 @@ import prodFamily from '@salesforce/schema/Product__c.Product_Family__c';
 
 // My Imports
 
-import { spellCheck, cpqSearchString, uniqVals, addSingleKey } from 'c/tagHelper';
+import { spellCheck, programBuilderSearchString, uniqVals, addSingleKey } from 'c/tagHelper';
 import { mergePricing } from 'c/internHelper';
 import searchTag from '@salesforce/apex/quickPriceSearchTag.cpqSearchTag';
-
+//returns priority pricing
+import priorityPrice from '@salesforce/apex/getPriceBooks.priorityBestPrice'; 
 const REGEX_SOSL_RESERVED = /(\?|&|\||!|\{|\}|\[|\]|\(|\)|\^|~|\*|:|"|\+|\\)/g;
 const REGEX_STOCK_RES = /(stock|sock|limited|limted|lmited|limit|close-out|close out|closeout|close  out|exempt|exmpet|exemept|southern stock|southernstock|southner stock)/g;
 const REGEX_COMMA = /(,)/g;
@@ -106,7 +107,7 @@ export default class AppSelectProd extends LightningElement {
 
       //handle enter key tagged. maybe change to this.searhKey === undefined
       handleKey(event) {
-        console.log('pbIds => ', this.pricebookids)
+        //console.log('pbIds => ', this.pricebookids)
         if (event.key === 'Enter') {
             this.advancedSearch();
         }
@@ -147,7 +148,7 @@ export default class AppSelectProd extends LightningElement {
             this.stock = spellCheck(this.stock[0]);
         }
     
-        let buildSearchInfo = cpqSearchString(this.searchTerm, this.stock, this.whSearch);
+        let buildSearchInfo = programBuilderSearchString(this.searchTerm, this.stock, this.whSearch);
         this.searchQuery = buildSearchInfo.builtTerm;
         searchRacks = buildSearchInfo.wareHouseSearch;
         backUpQuery = buildSearchInfo.backUpQuery;
@@ -161,9 +162,9 @@ export default class AppSelectProd extends LightningElement {
             let backUpSearchUsed = data.backUpSearchUsed;
             let pricing = data.pricing;
     
-            console.log('PRICING: ', pricing)
+            //console.log('PRICING: ', pricing)
             let once = tags.length > 1 ? await uniqVals(tags) : tags;
-            console.log("ONCE: ", once);
+            //console.log("ONCE: ", once);
             this.searchSize = once.length;
             
             // Sorting logic here (as in the original advanced search)
@@ -173,8 +174,8 @@ export default class AppSelectProd extends LightningElement {
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Level_2_UserView__c');
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Product_Cost__c');
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Level_2_Margin__c');
-    
-            console.log("FINAL: ", final)
+            final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Floor_Price__c');
+            //console.log("FINAL: ", final)
 
             this.prod = await final.map((item, index) => ({
                 rowLabel: 'Add',
@@ -188,17 +189,18 @@ export default class AppSelectProd extends LightningElement {
                 LevelTwo: item.Level_2_UserView__c,
                 Id: item.Product__c,
                 Product2Id: item.Product__c,
-                Product_Type__c: item.Product_Type__c,
-                Floor_Price__c: item.Floor_Margin__c,
+                Product_Type__c: item.Product__r.Product_Type__c,
+                Floor_Price__c: item.Floor_Price__c,
                 Level_2_Margin__c: item.Level_2_Margin__c,
-                Agency_Product__c: item.Agency_Product__c,
+                Agency_Product__c: item.Product__r.Agency_Pricing__c,
                 Product_Cost__c: item.Product_Cost__c,
-                Product_Size__c: item.Product_Size__c,
-                nVal: item.N__c,
-                pVal: item.P__c,
-                kVal: item.K__c,
-                isFert: item.hasFertilizer__c,
-                galWeight: item.X1_Gallon_Weight__c
+                Product_Size__c: item.Product__r.Size__c,
+                nVal: item.Product__r.N__c,
+                pVal: item.Product__r.P__c,
+                kVal: item.Product__r.K__c,
+                isFert: item.Product__r.hasFertilizer__c,
+                galWeight: item.Product__r.X1_Gallon_Weight__c,
+                Product_SDS_Label__c: item.Product__r.Website_Label__c
             }));
     
             if (backUpSearchUsed) {
@@ -214,7 +216,7 @@ export default class AppSelectProd extends LightningElement {
         }
 
     // Console log the final value of prod
-    console.log('prod array:', this.prod);
+    //console.log('prod array:', this.prod);
     
     }
 
@@ -265,55 +267,63 @@ export default class AppSelectProd extends LightningElement {
 
 
 //Handles adding the products to this.Selection array when the green add button is hit on the product table
-        handleRowAction(e){            
-            const rowAction = e.detail.action.name; 
-            const rowName = e.detail.row.Name;
-            const rowId = e.detail.row.Id;
-            const rowProduct = e.detail.row.Product2Id; 
-            const rowProdType = e.detail.row.Product_Type__c;
-            const rowLev2 = e.detail.row.Level_2_UserView__c;
-            const rowLev1 = e.detail.row.Level_1_UserView__c; 
-            const rowFlrPrice = e.detail.row.Floor_Price__c; 
-            const rowMargin = e.detail.row.Level_2_Margin__c;
-            const rowAgency = e.detail.row.Agency_Product__c;
-            const rowCost = e.detail.row.Product_Cost__c;
-            const rowSize = e.detail.row.Product_Size__c; 
-            const rowN = e.detail.row.nVal;
-            const rowP = e.detail.row.pVal;
-            const rowK = e.detail.row.kVal; 
-            const fert = e.detail.row.isFert; 
-            const galWeight = e.detail.row.galWeight;
-            const ProductCode = e.detail.row.Code; 
-            
-            if(rowAction ==='Add'){
-                let index = this.prod.findIndex(x => x.Id === rowId)
-                this.prod[index].rowLabel = 'X';
-                this.prod[index].rowAction = 'remove';
-                this.prod[index].rowVariant = 'destructive'
-                this.selection = [
-                    ...this.selection,{
-                        Id: rowId,
-                        Name: rowName,
-                        Product__c: rowProduct,
-                        ProductCode: ProductCode, 
-                        Product_Type__c: rowProdType,
-                        levelTwo: rowLev2,
-                        floorPrice: rowFlrPrice,
-                        levelOne: rowLev1,
-                        unitCost: rowCost,
-                        margin: rowMargin,
-                        agency: rowAgency,
-                        nVal: rowN,
-                        pVal: rowP,
-                        kVal: rowK,
-                        Product_Size__c: rowSize,
-                        isFert: fert,
-                        galWeight: galWeight,
-                        goodPrice: true,
-                        title: `Unit Price - Flr $${rowFlrPrice}`
-                    }
-                ]  
-                this.prod = [...this.prod]
+    async    handleRowAction(e){            
+                const rowAction = e.detail.action.name; 
+                const rowName = e.detail.row.Name;
+                const rowId = e.detail.row.Id;
+                const rowProduct = e.detail.row.Product2Id; 
+                const rowProdType = e.detail.row.Product_Type__c;
+                const rowLev2 = e.detail.row.Level_2_UserView__c;
+                const rowLev1 = e.detail.row.Level_1_UserView__c; 
+                const rowFlrPrice = e.detail.row.Floor_Price__c; 
+                const rowMargin = e.detail.row.Level_2_Margin__c;
+                const rowAgency = e.detail.row.Agency_Product__c;
+                const rowCost = e.detail.row.Product_Cost__c;
+                const rowSize = e.detail.row.Product_Size__c; 
+                const rowN = e.detail.row.nVal;
+                const rowP = e.detail.row.pVal;
+                const rowK = e.detail.row.kVal; 
+                const fert = e.detail.row.isFert; 
+                const galWeight = e.detail.row.galWeight;
+                const ProductCode = e.detail.row.Code; 
+                const rowWebSiteURL = e.detail.row.Product_SDS_Label__c
+                
+                if(rowAction ==='Add'){
+                    let index = this.prod.findIndex(x => x.Id === rowId)
+                    this.prod[index].rowLabel = 'X';
+                    this.prod[index].rowAction = 'remove';
+                    this.prod[index].rowVariant = 'destructive'
+                    let priceInfo = await priorityPrice({priceBookIds: this.pricebookids, productId: rowProduct})
+                    
+                    this.selection = [
+                        ...this.selection,{
+                            Id: rowId,
+                            Name: rowName,
+                            Product__c: rowProduct,
+                            ProductCode: ProductCode, 
+                            Product_Type__c: rowProdType,
+                            UnitPrice: priceInfo[0].UnitPrice,
+                            alt_PBE_Id: priceInfo[0].Id,
+                            alt_PB_Name: priceInfo[0].Pricebook2.Name,
+                            alt_PB_Id: priceInfo[0].Pricebook2Id,
+                            levelTwo: rowLev2,
+                            floorPrice: rowFlrPrice,
+                            levelOne: rowLev1,
+                            unitCost: rowCost,
+                            margin: rowMargin,
+                            agency: rowAgency,
+                            nVal: rowN,
+                            pVal: rowP,
+                            kVal: rowK,
+                            Product_Size__c: rowSize,
+                            isFert: fert,
+                            galWeight: galWeight,
+                            goodPrice: true,
+                            title: `Unit Price - Flr $${rowFlrPrice}`,
+                            labelURL: rowWebSiteURL
+                        }
+                    ]  
+                    this.prod = [...this.prod]
             }else if(rowAction==='remove'){
                 console.log('remove');
                 

@@ -6,8 +6,15 @@ import PROD_OBJECT from '@salesforce/schema/Product__c';
 import { getPicklistValues } from 'lightning/uiObjectInfoApi';
 import prodFamily from '@salesforce/schema/Product__c.Product_Family__c';
 
+
+//this gets the avaliable price books must pass account id
+import getPriceBooks from '@salesforce/apex/getPriceBooks.getPriceBookIds';
+//this returns either a set of price book id's or array of objects of all the avaliable price books for the account in order of priority. Standard is always there
+import { priorityPricing} from 'c/helperOMS';
+//priority pricing
+import priorityPrice from '@salesforce/apex/getPriceBooks.priorityBestPrice'; 
 // New imports
-import { spellCheck, cpqSearchString, uniqVals, addSingleKey } from 'c/tagHelper';
+import { spellCheck, programBuilderSearchString, uniqVals, addSingleKey } from 'c/tagHelper';
 import { mergePricing } from 'c/internHelper';
 import searchTag from '@salesforce/apex/quickPriceSearchTag.cpqSearchTag';
 
@@ -40,6 +47,7 @@ const columnsList = [
 
 export default class UpdateAddProduct extends LightningElement {
     @api recordId; 
+    @api accid; 
     columns = columnsList;
     @track prod = []; 
     loaded;
@@ -48,11 +56,22 @@ export default class UpdateAddProduct extends LightningElement {
     cat = 'All'; 
     searchKey; 
     eventListening = false; 
+    pbIds; 
 
     connectedCallback() {
+        //fire function to get price books 
+       
         this.loaded = true; 
     }
-
+    @wire(getPriceBooks,{accountId: '$accid'})
+        wiredBooks({data,error}){
+            if(data){
+                this.pbids = [...priorityPricing(data).priceBookIdArray];
+                //console.log('pbids =>',this.pbids)
+            }else if(error){
+                console.error(error)
+            }
+        }
     @wire(getObjectInfo, {objectApiName: PROD_OBJECT})
     prodInfo;
 
@@ -133,12 +152,12 @@ export default class UpdateAddProduct extends LightningElement {
             this.stock = spellCheck(this.stock[0]);
         }
     
-        let buildSearchInfo = cpqSearchString(this.searchTerm, this.stock, this.whSearch);
+        let buildSearchInfo = programBuilderSearchString(this.searchTerm, this.stock, this.whSearch);
         this.searchQuery = buildSearchInfo.builtTerm;
         searchRacks = buildSearchInfo.wareHouseSearch;
         backUpQuery = buildSearchInfo.backUpQuery;
         warehouseCode = buildSearchInfo.warehouseCode;
-    
+    console.log(buildSearchInfo)
         this.loaded = false;
     
         try {
@@ -155,6 +174,7 @@ export default class UpdateAddProduct extends LightningElement {
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Level_2_UserView__c');
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Product_Cost__c');
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Level_2_Margin__c');
+            final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Floor_Price__c');
     
             this.prod = await final.map((item, index) => ({
                 rowLabel: 'Add',
@@ -166,7 +186,8 @@ export default class UpdateAddProduct extends LightningElement {
                 Price: item.Agency_Product__c ? item.Floor_Margin__c : item.Level_2_UserView__c,
                 Id: item.Product__c,
                 Product2Id: item.Product__c,
-                Product_Type__c: item.Product_Type__c,
+                Product_Type__c: item.Product__r.Product_Type__c,
+                Website_Label__c: item.Product__r.Website_Label__c,
                 Floor_Price__c: item.Floor_Margin__c,
                 Level_2_Margin__c: item.Level_2_Margin__c,
                 Agency_Product__c: item.Agency_Product__c,
@@ -228,38 +249,41 @@ export default class UpdateAddProduct extends LightningElement {
         
     //   }
 
-    addLineItem(e) {
-        const rowAction = e.detail.action.name; 
-        const prodId = e.detail.row.Id; 
-       
-        const newProd = {    
-            rowName: e.detail.row.Name,
-            rowId: e.detail.row.Id,
-            rowCode: e.detail.row.Code, 
-            rowProduct: e.detail.row.Product2Id, 
-            rowProdType: e.detail.row.Product_Type__c,
-            rowUnitPrice: e.detail.row.Level_2_UserView__c,
-            rowFlrPrice: e.detail.row.Floor_Price__c, 
-            rowLevelOne: e.detail.row.Level_1_UserView__c,
-            rowMargin: e.detail.row.Level_2_Margin__c,
-            rowAgency: e.detail.row.Agency_Product__c,
-            rowCost: e.detail.row.Product_Cost__c,
-            rowSize: e.detail.row.Product_Size__c, 
-            rowN: e.detail.row.nVal,
-            rowP: e.detail.row.pVal,
-            rowK: e.detail.row.kVal,
-            isFert: e.detail.row.isFert,
-            galWeight: e.detail.row.galWeight,
-            rowType: e.detail.row.Product_Type__c
-        };
+    async    addLineItem(e) {
+                const rowAction = e.detail.action.name; 
+                const prodId = e.detail.row.Id; 
+                let priceInfo = await priorityPrice({priceBookIds: this.pbids, productId: prodId})
+                const newProd = {    
+                    rowName: e.detail.row.Name,
+                    rowId: e.detail.row.Id,
+                    rowCode: e.detail.row.Code, 
+                    rowProduct: e.detail.row.Product2Id, 
+                    rowProdType: e.detail.row.Product_Type__c,
+                    rowUnitPrice: priceInfo[0].UnitPrice,
+                    alt_PBE_Id: priceInfo[0].Id,
+                    alt_PB_Name: priceInfo[0].Pricebook2.Name,
+                    alt_PB_Id: priceInfo[0].Pricebook2Id,
+                    rowFlrPrice: e.detail.row.Floor_Price__c, 
+                    rowLevelOne: e.detail.row.Level_1_UserView__c,
+                    rowMargin: e.detail.row.Level_2_Margin__c,
+                    rowAgency: e.detail.row.Agency_Product__c,
+                    rowCost: e.detail.row.Product_Cost__c,
+                    rowSize: e.detail.row.Product_Size__c, 
+                    rowN: e.detail.row.nVal,
+                    rowP: e.detail.row.pVal,
+                    rowK: e.detail.row.kVal,
+                    isFert: e.detail.row.isFert,
+                    galWeight: e.detail.row.galWeight,
+                    rowWebSiteLabel: e.detail.row.Website_Label__c
+                };
 
-        if (rowAction === 'Add') {
-            let index = this.prod.findIndex(x => x.Id === prodId);
-            this.prod[index].rowLabel = 'X';
-            this.prod[index].rowAction = 'remove';
-            this.prod[index].rowVariant = 'destructive';
-            this.prod = [...this.prod];
-            this.dispatchEvent(new CustomEvent('newprod', {detail: newProd}));
+                if (rowAction === 'Add') {
+                    let index = this.prod.findIndex(x => x.Id === prodId);
+                    this.prod[index].rowLabel = 'X';
+                    this.prod[index].rowAction = 'remove';
+                    this.prod[index].rowVariant = 'destructive';
+                    this.prod = [...this.prod];
+                    this.dispatchEvent(new CustomEvent('newprod', {detail: newProd}));
+                }
         }
-    }
 }

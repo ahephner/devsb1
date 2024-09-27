@@ -7,6 +7,7 @@
         <template if:true={addMore}>
             <div class="slds-col slds-size_1-of-1">
                 <c-update-add-product ondone={closeAdd}
+                                      accid={accountId}
                                       onnewprod={listenNewProd}
                                             ></c-update-add-product>
                 </div>
@@ -186,6 +187,9 @@
                                 <div class="slds-text-heading_small slds-m-top_small slds-align_absolute-center line">
                                     Pricing Guide
                                 </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                                <p>From Price Book: {foundPriceBook}</p>
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
                                 <p>Product Cost: ${productCost}</p>
