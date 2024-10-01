@@ -9,7 +9,7 @@ import multiUpdateProd from '@salesforce/apex/addApp.multiUpdateProd';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
 import NOTE from '@salesforce/schema/App_Product__c.Note__c';
-import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated, sumFert, totalUsed } from 'c/programBuilderHelper';
+import { appTotal, alreadyAdded, pref,calcDryFert, calcLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated, sumFert, totalUsed,lowVolume, lvUnits } from 'c/programBuilderHelper';
 import {checkPricing, sumByKey} from 'c/helper'
 export default class UpdateRatePrice extends LightningElement {
     @api appId; 
@@ -69,7 +69,8 @@ export default class UpdateRatePrice extends LightningElement {
             {label:'OZ/M', value:'OZ/M'}, 
             {label: 'OZ/Acre', value:'OZ/Acre'},
             {label: 'LB/M', value:'LB/M'},
-            {label: 'LB/Acre', value:'LB/Acre'}
+            {label: 'LB/Acre', value:'LB/Acre'},
+            {label:'100 Gal', value:'100 Gal'}
         ];
     }
         //need this to get picklist
@@ -104,6 +105,7 @@ export default class UpdateRatePrice extends LightningElement {
                                 // let altPriceBookEntryId__c = item.altPriceBookEntryId__c; 
                                 let goodPrice = true; 
                                 let showNote = false;
+                                let unitAreaStyles = item.isLowVol__c ? 'slds-col slds-size_2-of-12 lowVolume' : 'slds-col slds-size_2-of-12';
                                 let agencyProd = item.Product__r.Agency_Pricing__c; 
                                 let btnLabel = 'Add Note';
                                 let btnValue = 'Note';
@@ -119,7 +121,7 @@ export default class UpdateRatePrice extends LightningElement {
                                 this.appTotalK += item.K__c;
                                 //used for updating. Pushing id to a list so when something is updated we check against it
                                 prodIds.add(item.Product__c);
-                                return {...item, allowEdit, nVal, pVal, kVal, Product_Type__c, isFert, title, galLb, costM,costA, goodPrice, showNote, agencyProd, altPriceBookName__c, btnLabel,Product_SDS_Label__c, btnValue, totalUsed, manCharge, Note_Other__c, prevAppId}
+                                return {...item, allowEdit, nVal, pVal, kVal, Product_Type__c, isFert, title, galLb, costM,costA, goodPrice, showNote, unitAreaStyles, agencyProd, altPriceBookName__c, btnLabel,Product_SDS_Label__c, btnValue, totalUsed, manCharge, Note_Other__c, prevAppId}
                             });
                             let idList = [...prodIds]
                             let pricing = await getPricing({ids: idList });
@@ -231,7 +233,7 @@ export default class UpdateRatePrice extends LightningElement {
             
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
-            if(this.prodlist[index].Rate2__c > 0){
+            if(this.prodlist[index].Rate2__c > 0 && e.detail.value!= '100 Gal'){
              this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c );
              this.prodlist[index].totalUsed = totalUsed(this.prodlist[index].Unit_Area__c, this.areaSizeM, this.prodlist[index].Rate2__c);
              this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
@@ -240,6 +242,8 @@ export default class UpdateRatePrice extends LightningElement {
              let prodCost = pricePerUnit(this.prodlist[index].Unit_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c,this.prodlist[index].Unit_Area__c);
              this.prodlist[index].Cost_per_M__c = prodCost.perThousand;
              this.prodlist[index].Cost_per_Acre__c = prodCost.perAcre; 
+             this.prodlist[index].isLowVol__c = false;
+             this.prodlist[index].unitAreaStyles = 'slds-col slds-size_2-of-12'
              //this.prodCostM = costs.perThousand;
              this.prodCostM = prodCost.perThousand;
             
@@ -264,6 +268,27 @@ export default class UpdateRatePrice extends LightningElement {
                 this.appTotalP = roundNum(totalFert.P__c, 4);
                 this.appTotalK = roundNum(totalFert.K__c, 4);
             }
+            }else if(e.detail.value ==='100 Gal'){
+                this.data[index].isLowVol__c = true; 
+                this.data[index].unitAreaStyles = 'slds-col slds-size_2-of-12 lowVolume'
+
+                let {Rate2__c, Product_Size__c, Unit_Price__c, Spray_Vol_M__c, Cost_per_Acre__c} = this.data[index];
+                if(Spray_Vol_M__c>0 && Rate2__c> 0){
+                     let finished = lowVolume(Rate2__c, Product_Size__c, sprayVolum, Unit_Price__c) 
+                
+                    //updateValues
+                     this.prodlist[index].Units_Required__c = lvUnits(this.areaSize, sprayVolum, Product_Size__c, Rate2__c);
+                     this.prodlist[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2); 
+
+                     this.prodlist[index].Cost_per_M__c = finished.singleThousand;
+                     this.prodlist[index].Cost_per_Acre__c = finished.singleAcre;
+                     this.prodCostM = finished.singleThousand;;
+                     this.prodCostA = finished.singleAcre;
+                     //this.prodAreaCost = this.areaAcres * this.costPerAcre;
+                     this.treatedAcreage = areaTreated(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].Unit_Area__c );
+                     this.appTotalPrice = appTotal(this.data); 
+                     this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
+                }
             }
         }
 
