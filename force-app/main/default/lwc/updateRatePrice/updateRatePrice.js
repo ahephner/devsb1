@@ -519,6 +519,7 @@ removeProd(x){
 }
 //catch new prod
 listenNewProd(x){
+    console.log('new prod')
         const newProd = x.detail.rowProduct;
         const alreadyThere = alreadyAdded(newProd, this.prodlist);
         if(!alreadyThere){

@@ -5,6 +5,7 @@
             size="large"></lightning-spinner>
     </template>
     <template if:true={loaded}>
+        <template if:true={viewSearch}>
         <div class="slds-grid slds-gutters_none">
             <div class="slds-col slds-size_3-of-12 slds-p-right_xxx-small">
                 <lightning-input 
@@ -42,18 +43,28 @@
                     title="Search" 
                     onclick={advancedSearch}
                     class="slds-m-left_x-small"></lightning-button>
+                    <lightning-button  class='slds-m-left_small' variant="destructive" label="View Historic" title="View Historic" onclick={viewHistoric}></lightning-button>
             </div>
         </div>
+    </template>
         <div class="slds-grid">
-            <div class="slds-col slds-size_3-of-3">
-                <lightning-datatable
-                    key-field="Id"
-                    data={prod}
-                    hide-checkbox-column
-                    columns={columns}
-                    onrowaction={addLineItem}>
-                </lightning-datatable>
-            </div>
+            <template if:true={viewSearch}>
+                <div class="slds-col slds-size_3-of-3">
+                    <lightning-datatable
+                        key-field="Id"
+                        data={prod}
+                        hide-checkbox-column
+                        columns={columns}
+                        onrowaction={addLineItem}>
+                    </lightning-datatable>
+                </div>
+        </template>
+            <template if:false={viewSearch}>
+                <c-opp-historic onclose={handleHistoricData}
+                                onhisproduct={handleHistoricProducts}
+                                date={apdate}
+                                acc={accid}></c-opp-historic>
+            </template>
         </div>
     </template>
 </template>
