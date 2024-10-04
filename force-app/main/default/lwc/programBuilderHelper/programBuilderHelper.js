@@ -224,26 +224,30 @@ const requiredGals = (size, rate, tankSize) =>{
 const finishedGals = (size, rate) => roundNum(((size/rate) * 100), 2)
 
 const lowVolume = (rate, productSize, sprayVol, cost)=>{
-  //per 100 gallon dilution rate=> how many oz of product to mix per 100
-  let mixDilution = roundNum(rate/100, 4);
-  //how much is spread over a 1000 sqft depends on the volume applied per 1000
-  let perThousand = mixDilution * sprayVol;
-  let costPerSize = roundNum(cost/productSize,2)
+  let costPerOz = (cost/productSize);
+  let rateInfo = (rate/100) *sprayVol
+  //treats
+  let treats = roundNum((productSize /rateInfo)/43.56,2)
+  
   //cost per 1000
-  let costperThousand = roundNum(costPerSize * perThousand,2); 
+  let costperThousand = roundNum(costPerOz * rateInfo,2); 
   let costPerAcre = roundNum(costperThousand * 43.56,2);
   return{
       singleThousand:costperThousand,
-      singleAcre: costPerAcre
+      singleAcre: costPerAcre,
+      acresTreated: treats
   }
 }
 const lvUnits = (areaSize, sprayVol, prodSize, prodRate)=>{
-  let areaS = roundNum(areaSize,2)
-  let finishedRate = (prodRate/100)*sprayVol
+  let areaS = roundNum((areaSize/1000),2)
+  
+  let finishedRate = sprayVol * (prodRate/100)
+  
   //convert from per 1,000 to single
-  let ozNeeded = ((sprayVol/1000)*areaS)*128;
+  let ozNeeded = roundNum((finishedRate * areaS)/prodSize,2)
+
   //total gals needed
-  let prodsNeed = Math.ceil((ozNeeded * finishedRate)/prodSize);
+  let prodsNeed = Math.ceil(ozNeeded);
   return prodsNeed; 
   //final = above divided by prodSize
 }

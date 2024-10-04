@@ -52,12 +52,15 @@ export default class AppSelectProd extends LightningElement {
     @track loaded = false; 
     columnsList = columnsList; 
     @track prod = []; 
-    @api pricebookids = []; 
+    @api pricebookids = [];
+    @api appdate; 
+    @api custid;  
     error;
     pfOptions;  
     searchKey;
     pf = 'All';
     cat = 'All';
+    viewSearch = true; 
     //needs to be @track so we can follow reactive properties on an array or obj in childern
     @track selection = [];
     connectedCallback(){
@@ -219,7 +222,14 @@ export default class AppSelectProd extends LightningElement {
     //console.log('prod array:', this.prod);
     
     }
-
+    handleHistoricData(){
+        this.viewSearch = !this.viewSearch ? true:false; 
+    }
+    viewHistoric(){
+        this.viewSearch = false; 
+        this.template.querySelector('c-opp-historic').openHistory();
+        console.log('open up')
+    }
     //   search(){
     //     this.loaded = false; 
     //    //console.log('sk '+this.searchKey); 

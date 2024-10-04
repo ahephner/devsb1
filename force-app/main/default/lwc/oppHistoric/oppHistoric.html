@@ -1,0 +1,19 @@
+<template>
+<template if:false={nothingFound}>
+    <div class='slds-grid'>
+        <div class='slds-col slds-size_6-of-8'>
+    <lightning-datatable
+    key-field="Id"
+    data={prod}
+    hide-checkbox-column
+    columns={columnsList}
+    onrowaction={handleRowAction}>
+</lightning-datatable>
+</div>
+</div>
+</template>
+<template if:true={nothingFound}>
+    <p>{mess}</p>
+</template>
+    
+</template>

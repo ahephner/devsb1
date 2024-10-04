@@ -194,7 +194,7 @@ export default class UpdateRatePrice extends LightningElement {
                 this.prodlist[index].Rate2__c = Number(e.detail.value);
                 //console.log('ua '+this.prodlist[index].Unit_Area__c);
                 
-                if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null){
+                if(this.prodlist[index].Unit_Area__c != '' && this.prodlist[index].Unit_Area__c != null && this.prodlist[index].Unit_Area__c != '100 Gal' ){
                     this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c )    
                     this.prodlist[index].totalUsed = totalUsed(this.prodlist[index].Unit_Area__c, this.areaSizeM, this.prodlist[index].Rate2__c);
                     this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
@@ -223,7 +223,29 @@ export default class UpdateRatePrice extends LightningElement {
                         this.appTotalK = roundNum(totalFert.K__c, 4);
 
                     }
-                }
+                }else if(this.data[index].Unit_Area__c ==='100 Gal'){
+                    this.prodlist[index].isLowVol__c = true; 
+                    this.prodlist[index].unitAreaStyles = 'slds-col slds-size_2-of-12 lowVolume'
+    
+                    let {Rate2__c, Product_Size__c, Unit_Price__c, Spray_Vol_M__c, Cost_per_Acre__c} = this.data[index];
+                    if(Spray_Vol_M__c>0 && Rate2__c> 0){
+                         let finished = lowVolume(Rate2__c, Product_Size__c, sprayVolum, Unit_Price__c) 
+                    
+                        //updateValues
+                        this.prodlist[index].Units_Required__c = lvUnits(this.areaSizeM, sprayVolum, Product_Size__c, Rate2__c);
+                        this.prodlist[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
+                         
+                         this.prodlist[index].Cost_per_M__c = finished.singleThousand;
+                         this.prodlist[index].Cost_per_Acre__c = finished.singleAcre;
+                         this.prodCostM = finished.singleThousand;;
+                         this.prodCostA = finished.singleAcre;
+                         //this.prodAreaCost = this.areaAcres * this.costPerAcre;
+                         this.treatedAcreage = areaTreated(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].Unit_Area__c );
+                         this.appTotalPrice = appTotal(this.data); 
+                         this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
+                    }
+    
+                   }
                 
             },500 ) 
            }
@@ -274,10 +296,10 @@ export default class UpdateRatePrice extends LightningElement {
 
                 let {Rate2__c, Product_Size__c, Unit_Price__c, Spray_Vol_M__c, Cost_per_Acre__c} = this.data[index];
                 if(Spray_Vol_M__c>0 && Rate2__c> 0){
-                     let finished = lowVolume(Rate2__c, Product_Size__c, sprayVolum, Unit_Price__c) 
+                     let finished = lowVolume(Rate2__c, Product_Size__c, Spray_Vol_M__c, Unit_Price__c) 
                 
                     //updateValues
-                     this.prodlist[index].Units_Required__c = lvUnits(this.areaSize, sprayVolum, Product_Size__c, Rate2__c);
+                     this.prodlist[index].Units_Required__c = lvUnits(this.areaSizeM, Spray_Vol_M__c, Product_Size__c, Rate2__c);
                      this.prodlist[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2); 
 
                      this.prodlist[index].Cost_per_M__c = finished.singleThousand;
@@ -291,6 +313,41 @@ export default class UpdateRatePrice extends LightningElement {
                 }
             }
         }
+
+        handleLowVol(e){
+            let index = this.prodlist.findIndex(prod => prod.Id === e.target.name);
+            
+            if(this.prodlist[index].Rate2__c === undefined || this.prodlist[index].Rate2__c<=0){
+                return;
+            }else{
+                window.clearTimeout(this.delay);
+                
+                this.delay = setTimeout(()=>{
+                    
+                 let sprayVolum = Number(e.detail.value); 
+                 let {Rate2__c, Product_Size__c, Unit_Price__c} = this.prodlist[index];
+                 let finished = lowVolume(Rate2__c, Product_Size__c, sprayVolum, Unit_Price__c) 
+                 
+                 //updateValues
+                 this.prodlist[index].Units_Required__c = lvUnits(this.areaSizeM, sprayVolum, Product_Size__c, Rate2__c);
+                 this.prodlist[index].Total_Price__c = roundNum(this.prodlist[index].Units_Required__c * this.prodlist[index].Unit_Price__c, 2);
+                 
+                 this.prodlist[index].Spray_Vol_M__c = sprayVolum; 
+                 this.prodlist[index].Cost_per_M__c = finished.singleThousand;
+                 this.prodlist[index].Cost_per_Acre__c = finished.singleAcre;
+                 this.prodlist[index].Acres_Treated__c = finished.acresTreated;
+                 this.prodCostM = finished.singleThousand;
+                 this.prodCostA = finished.singleAcre;
+                 this.treatedAcreage = finished.acresTreated
+                 //this.prodAreaCost = this.areaAcres * this.costPerAcre;
+                 this.treatedAcreage = areaTreated(this.data[index].Product_Size__c,this.data[index].Rate2__c, this.data[index].Unit_Area__c );
+                 this.appTotalPrice = appTotal(this.data); 
+                 this.totalCostPerM = roundNum(Object.values(this.data).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
+
+                },500)
+
+            }
+           }
 
         
            lineTotal = (units, charge)=> (units * charge).toFixed(2);
@@ -517,8 +574,9 @@ handleNewProd(x){
         Product_SDS_Label__c:x.detail.rowWebSiteLabel,
         Note_Other__c: '',
         Manual_Charge_Size__c: 0,
-        manCharge: x.detail.rowName.toLowerCase().includes('manual charge')
-
+        manCharge: x.detail.rowName.toLowerCase().includes('manual charge'),
+        isLowVol__c: false,
+        Spray_Vol_M__c: ''
     }]
     this.productIds.includes(x.detail.rowProduct) ? '': this.productIds.push(x.detail.rowProduct);
 }
@@ -541,9 +599,9 @@ hiMouse(e){
     this.levelOne = index.Level_1_UserView__c;
     this.levelTwo = index.Level_2_UserView__c;
     this.prodFloor = index.Floor_Price__c; 
-    this.prodCostM =  pricePerUnit(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perThousand;
-    this.prodCostA =  pricePerUnit(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perAcre;
-    this.treatedAcreage = areaTreated(index.Product_Size__c,index.Rate2__c, index.Unit_Area__c );
+    this.prodCostM = index.isLowVol__c ? index.Cost_per_M__c : pricePerUnit(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perThousand;
+    this.prodCostA =  index.isLowVol__c ? index.Cost_per_Acre__c :pricePerUnit(index.Unit_Price__c, index.Product_Size__c, index.Rate2__c, index.Unit_Area__c).perAcre;
+    this.treatedAcreage = index.isLowVol__c ? index.Acres_Treated__c : areaTreated(index.Product_Size__c,index.Rate2__c, index.Unit_Area__c );
     this.prodN = index.N__c;
     this.prodP = index.P__c;
     this.prodK = index.K__c; 

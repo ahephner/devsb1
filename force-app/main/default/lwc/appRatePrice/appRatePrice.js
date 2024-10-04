@@ -164,6 +164,7 @@ export default class AppRatePrice extends LightningElement {
 
                      this.data[index].Cost_per_M__c = finished.singleThousand;
                      this.data[index].Cost_per_Acre__c = finished.singleAcre;
+                     this.data[index].Acres_Treated__c = finished.acresTreated
                      this.prodCostM = finished.singleThousand;;
                      this.prodCostA = finished.singleAcre;
                      //this.prodAreaCost = this.areaAcres * this.costPerAcre;

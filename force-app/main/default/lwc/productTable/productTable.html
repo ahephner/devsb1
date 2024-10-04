@@ -23,6 +23,8 @@
               <!-- <c-app-product-list></c-app-product-list> -->
               <template if:true={productList}>
                   <c-app-select-prod pricebookids={pbIds}
+                                     appdate={appDate}
+                                     custid={accId}
                                      onclose={closeModal}
                                      onmove={gatherProducts}></c-app-select-prod>
               </template>    

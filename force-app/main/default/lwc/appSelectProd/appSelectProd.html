@@ -5,6 +5,7 @@
             size="large"></lightning-spinner>
     </template>
     <template if:true={loaded}> 
+        <template if:true={viewSearch}>
         <div class="slds-grid">
             <div class='slds-col slds-size_3-of-8'>
                 <lightning-input 
@@ -35,6 +36,7 @@
             </div> -->
             <div class='slds-col slds-size_1-of-8 slds-m-top_large slds-m-left_small'>   
                 <lightning-button variant="brand" label="Search" title="Search" onclick={advancedSearch}></lightning-button>
+                <lightning-button  class='slds-m-left_small' variant="brand" label="View Historic" title="View Historic" onclick={viewHistoric}></lightning-button>
             </div>
         </div>
         <div class='slds-grid'>
@@ -52,5 +54,11 @@
                                      onupdate={handleRemove}></c-app-selected-prod>
             </div>
         </div>
+    </template>
+    <template if:false={viewSearch}>
+        <c-opp-historic onclose={handleHistoricData}
+                        date={appdate}
+                        acc={custid}></c-opp-historic>
+    </template>
     </template>
 </template>
