@@ -230,43 +230,44 @@ export default class AppSelectProd extends LightningElement {
         this.template.querySelector('c-opp-historic').openHistory();
         console.log('open up')
     }
-    //   search(){
-    //     this.loaded = false; 
-    //    //console.log('sk '+this.searchKey); 
-    //     searchProduct({searchKey: this.searchKey, cat: this.cat, family: this.pf })
-    //     .then((result) => {
-    //         this.prod = result.map(item=>{
-    //             let rowLabel = 'Add';
-    //             let rowValue = 'Add'; 
-    //             let rowVariant = 'success';
-    //             let Name = item.Product2.Name;
-    //             let Code = item.Product2.ProductCode;
-    //             let nVal = item.Product2.N__c;
-    //             let pVal = item.Product2.P__c;
-    //             let kVal = item.Product2.K__c;
-    //             let isFert = item.Product2.hasFertilizer__c;
-    //             let galWeight = item.Product2.X1_Gallon_Weight__c;
-    //             let Product_Status__c = item.Product2.Product_Status__c;
-    //             let Floor = item.Agency_Product__c ? item.Floor_Price__c : item.Floor_Price__c;
-    //             let LevelOne = item.Agency_Product__c ? item.Floor_Price__c : item.Level_1_UserView__c;
-    //             let LevelTwo = item.Agency_Product__c ? item.Floor_Price__c : item.Level_2_UserView__c; 
-    //             return {...item, rowLabel, rowValue, rowVariant, Name, Code, Product_Status__c, Floor, LevelOne, LevelTwo, nVal, pVal, kVal, isFert, galWeight} 
 
-    //         });
-    //         //console.log(JSON.stringify(this.prod))
-    //         this.error = undefined;
-    //     })
-    //     .catch((error) => {
-    //         this.error = error;
-    //         console.log(this.error);
+    async handleHistoricProducts(e){
+        console.log('app ', e.detail)
+        let {
+            Id, Name, Product__c, ProductCode, Product_Type__c, floorPrice, unitCost, agency, 
+            nVal, pVal, kVal, Product_Size__c, isFert, galWeight, goodPrice, labelURL}= e.detail
+            let priceInfo = await priorityPrice({priceBookIds: this.pricebookids, productId: Product__c})
+
             
-    //     })
-    //     .finally(() => {
-    //         this.searchKey = undefined; 
-    //         this.loaded = true; 
-    //     })
-        
-    //   }
+            this.selection = [
+                ...this.selection,{
+                    Id: Id,
+                    Name: Name,
+                    Product__c: Product__c,
+                    ProductCode: ProductCode, 
+                    Product_Type__c: Product_Type__c,
+                    UnitPrice: priceInfo[0].UnitPrice,
+                    alt_PBE_Id: priceInfo[0].Id,
+                    alt_PB_Name: priceInfo[0].Pricebook2.Name,
+                    alt_PB_Id: priceInfo[0].Pricebook2Id,
+                    
+                    floorPrice: priceInfo[0].Floor_Price__c,
+                    
+                    unitCost: agency? '': priceInfo[0].Product_Cost__c,
+                    margin: agency? '' : priceInfo[0].Floor_Margin__c,
+                    agency: agency,
+                    nVal: nVal,
+                    pVal: pVal,
+                    kVal: kVal,
+                    Product_Size__c: Product_Size__c,
+                    isFert: isFert,
+                    galWeight: galWeight,
+                    goodPrice: goodPrice,
+                    title: `Unit Price - Flr $${priceInfo[0].Floor_Price__c}`,
+                    labelURL: labelURL
+                }
+            ]  
+    }
    
      doneLoad(){
          window.clearTimeout(this.delay); 
@@ -320,7 +321,7 @@ export default class AppSelectProd extends LightningElement {
                             floorPrice: rowFlrPrice,
                             levelOne: rowLev1,
                             unitCost: rowCost,
-                            margin: rowMargin,
+                            margin: priorityPrice[0].Floor_Margin__c,
                             agency: rowAgency,
                             nVal: rowN,
                             pVal: rowP,
