@@ -72,7 +72,7 @@
                         </div>   
                         <div class={sp.unitAreaStyles}>
                             <lightning-combobox
-                            name={sp.Id}
+                            name={sp.Product2Id}
                             label="Unit Area"
                             value={sp.Unit_Area__c}
                             placeholder="Select Measure"
@@ -203,12 +203,9 @@
                             <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
                                 <p>Product Floor: ${prodFloor}</p>
                             </div>
-                            <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
-                                <p>Product Level 1: ${levelOne}</p>
-                            </div>
-                            <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
-                                <p>Product Level 2: ${levelTwo}</p>
-                            </div>
+                            <!-- <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                                <p>Price Book List Price: ${levelOne}</p>
+                            </div> -->
                         </div>
                         <div lwc:else>
                             <div class="slds-text-heading_small slds-m-top_small">Mouse over products to see info</div>

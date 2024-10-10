@@ -58,7 +58,7 @@ export default class OppHistoric extends LightningElement{
                 Code: item.ProductCode,
                 Product_Status__c: item.Product2.Product_Status__c,
                 prevCharge: item.CPQ_Unit_Price__c,
-                Id: item.Product2Id,
+                Id: item.Id,
                 Product2Id: item.Product2Id,
                 Product_Type__c: item.Product2.Product_Type__c,
                 Floor_Price__c: item.Product2.Floor_Price__c,
@@ -119,7 +119,7 @@ export default class OppHistoric extends LightningElement{
                     this.prod[index].rowLabel = 'X';
                     this.prod[index].rowAction = 'remove';
                     this.prod[index].rowVariant = 'destructive'
-                    
+                    console.log('dispatch 1')
                     this.dispatchEvent(new CustomEvent('hisproduct', { 
                     detail:{
                             Id: rowId,
@@ -127,11 +127,6 @@ export default class OppHistoric extends LightningElement{
                             Product__c: rowProduct,
                             ProductCode: ProductCode, 
                             Product_Type__c: rowProdType,
-                            // UnitPrice: priceInfo[0].UnitPrice,
-                            // alt_PBE_Id: priceInfo[0].Id,
-                            // alt_PB_Name: priceInfo[0].Pricebook2.Name,
-                            // alt_PB_Id: priceInfo[0].Pricebook2Id,
-                            
                             floorPrice: rowFlrPrice,
                             
                             unitCost: rowCost,

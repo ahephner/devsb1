@@ -135,12 +135,7 @@ const areaCostCal = (perUnit, rate, unitOfMeasure)=>{
 }
 //price per unit
 const pricePerUnit = (prodPrice, uSize, prodRate,unitMeasure )=>{
-  // let areaSize = unitMeasure.includes('Acre') ? uSize/43.56 : uSize; 
-  // console.log('area size ', areaSize)
-  // let price = roundNum(prodPrice/areaSize, 2);
-  // console.log('price per unit ', price)
-  // let final = areaCostCal(price, prodRate, unitMeasure);
-  // return final;
+
   let pricePerContainerUnit = prodPrice/uSize;
   let isThouRate = unitMeasure.includes('Acre') ? roundNum(prodRate/43.56,4) : prodRate;
   let isAcreRate =  unitMeasure.includes('Acre') ? prodRate : roundNum(prodRate*43.56,4); 

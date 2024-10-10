@@ -222,7 +222,7 @@ export default class UpdateAddProduct extends LightningElement {
         this.viewSearch = false; 
     }
 
-    async handleHistoricProducts(e){
+    async addHistory(e){
         
         let {
             Id, Name, Product__c, ProductCode, Product_Type__c, floorPrice, unitCost, agency, 
@@ -252,12 +252,38 @@ export default class UpdateAddProduct extends LightningElement {
                     Product_Size__c: Product_Size__c,
                     isFert: isFert,
                     galWeight: galWeight,
-                    goodPrice: goodPrice,
+                    goodPrice: priceInfo[0].UnitPrice >= priceInfo[0].Floor_Price__c ? true:false,
                     title: `Unit Price - Flr $${priceInfo[0].Floor_Price__c}`,
                     labelURL: labelURL
                 } 
-                console.table(historyProd)
-            this.dispatchEvent(new CustomEvent('hisprod', {detail: historyProd}));
+                //this.dispatchEvent(new CustomEvent('newprod', {detail: historyProd}));
+                this.dispatchEvent(new CustomEvent('hisprod', {detail: {
+                    Id: Id,
+                    Name: Name,
+                    Product__c: Product__c,
+                    ProductCode: ProductCode, 
+                    Product_Type__c: Product_Type__c,
+                    UnitPrice: priceInfo[0].UnitPrice,
+                    alt_PBE_Id: priceInfo[0].Id,
+                    alt_PB_Name: priceInfo[0].Pricebook2.Name,
+                    alt_PB_Id: priceInfo[0].Pricebook2Id,
+                    
+                    floorPrice: priceInfo[0].Floor_Price__c,
+                    
+                    unitCost: agency? '': priceInfo[0].Product_Cost__c,
+                    margin: agency? '' : priceInfo[0].Floor_Margin__c,
+                    agency: agency,
+                    nVal: nVal,
+                    pVal: pVal,
+                    kVal: kVal,
+                    Product_Size__c: Product_Size__c,
+                    isFert: isFert,
+                    galWeight: galWeight,
+                    goodPrice: priceInfo[0].UnitPrice >= priceInfo[0].Floor_Price__c ? true:false,
+                    title: `Unit Price - Flr $${priceInfo[0].Floor_Price__c}`,
+                    labelURL: labelURL
+                }}));
+                console.table('dispatch 2')
     }
 
     async    addLineItem(e) {

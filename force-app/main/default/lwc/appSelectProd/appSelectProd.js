@@ -241,7 +241,7 @@ export default class AppSelectProd extends LightningElement {
             
             this.selection = [
                 ...this.selection,{
-                    Id: Id,
+                    Id: Product__c,
                     Name: Name,
                     Product__c: Product__c,
                     ProductCode: ProductCode, 
@@ -253,8 +253,8 @@ export default class AppSelectProd extends LightningElement {
                     
                     floorPrice: priceInfo[0].Floor_Price__c,
                     
-                    unitCost: agency? '': priceInfo[0].Product_Cost__c,
-                    margin: agency? '' : priceInfo[0].Floor_Margin__c,
+                    unitCost: agency ? '': priceInfo[0].Product_Cost__c,
+                    margin: agency ? '' : priceInfo[0].Floor_Margin__c,
                     agency: agency,
                     nVal: nVal,
                     pVal: pVal,
@@ -321,7 +321,7 @@ export default class AppSelectProd extends LightningElement {
                             floorPrice: rowFlrPrice,
                             levelOne: rowLev1,
                             unitCost: rowCost,
-                            margin: priorityPrice[0].Floor_Margin__c,
+                            margin: priceInfo[0].Floor_Margin__c,
                             agency: rowAgency,
                             nVal: rowN,
                             pVal: rowP,
