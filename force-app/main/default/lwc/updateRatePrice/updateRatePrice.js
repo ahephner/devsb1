@@ -294,6 +294,9 @@ export default class UpdateRatePrice extends LightningElement {
             let index = this.prodlist.findIndex(prod => prod.Product2Id === e.target.name);
             
             this.prodlist[index].Unit_Area__c = e.detail.value;
+            //show low volume or not
+            this.prodlist[index].isLowVol__c = e.detail.value!= '100 Gal'? false: true;;
+            this.prodlist[index].unitAreaStyles = e.detail.value!= '100 Gal' ?'slds-col slds-size_2-of-12': 'slds-col slds-size_2-of-12 lowVolume'
             
             if(this.prodlist[index].Rate2__c > 0 && e.detail.value!= '100 Gal'){
              this.prodlist[index].Units_Required__c = unitsRequired(this.prodlist[index].Unit_Area__c, this.prodlist[index].Rate2__c, this.areaSizeM, this.prodlist[index].Product_Size__c );
@@ -304,8 +307,7 @@ export default class UpdateRatePrice extends LightningElement {
              let prodCost = pricePerUnit(this.prodlist[index].Unit_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c,this.prodlist[index].Unit_Area__c);
              this.prodlist[index].Cost_per_M__c = prodCost.perThousand;
              this.prodlist[index].Cost_per_Acre__c = prodCost.perAcre; 
-             this.prodlist[index].isLowVol__c = false;
-             this.prodlist[index].unitAreaStyles = 'slds-col slds-size_2-of-12'
+
              //this.prodCostM = costs.perThousand;
              this.prodCostM = prodCost.perThousand;
             
@@ -331,9 +333,6 @@ export default class UpdateRatePrice extends LightningElement {
                 this.appTotalK = roundNum(totalFert.K__c, 4);
             }
             }else if(e.detail.value ==='100 Gal'){
-                this.prodlist[index].isLowVol__c = true; 
-                this.prodlist[index].unitAreaStyles = 'slds-col slds-size_2-of-12 lowVolume'
-
                 let {Rate2__c, Product_Size__c, Unit_Price__c, Spray_Vol_M__c, Cost_per_Acre__c} = this.prodlist[index];
                 if(Spray_Vol_M__c>0 && Rate2__c> 0){
                      let finished = lowVolume(Rate2__c, Product_Size__c, Spray_Vol_M__c, Unit_Price__c) 
@@ -627,7 +626,7 @@ handleNewProd(x){
         Note_Other__c: '',
         Manual_Charge_Size__c: 0,
         //for style updates
-        unitAreaStyle:'slds-col slds-size_2-of-12',
+        unitAreaStyles:'slds-col slds-size_2-of-12',
         manCharge: x.detail.rowName.toLowerCase().includes('manual charge'),
         isLowVol__c: false,
         Spray_Vol_M__c: ''
@@ -680,7 +679,7 @@ handleHistoric(x){
         Manual_Charge_Size__c: 0,
         manCharge:false, //x.detail.Name.toLowerCase().includes('manual charge'),
         //for style update ultra low volume
-        unitAreaStyle:'slds-col slds-size_2-of-12',
+        unitAreaStyles:'slds-col slds-size_2-of-12',
         isLowVol__c: false,
         Spray_Vol_M__c: ''
     }]

@@ -122,7 +122,8 @@ export default class AppRatePrice extends LightningElement {
                //console.log('index ' +index + ' detail '+e.detail.value );
                
                this.data[index].Unit_Area__c = e.detail.value;
-               
+               this.data[index].isLowVol__c = e.detail.value!= '100 Gal'? false: true;
+               this.data[index].unitAreaStyles = e.detail.value!= '100 Gal' ?'slds-col slds-size_2-of-12': 'slds-col slds-size_2-of-12 lowVolume'
                if(this.data[index].Rate2__c > 0 && e.detail.value!= '100 Gal'){
                 this.data[index].Units_Required__c = unitsRequired(this.data[index].Unit_Area__c, this.data[index].Rate2__c, this.areaSize, this.data[index].Product_Size__c );
                 this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
@@ -131,9 +132,8 @@ export default class AppRatePrice extends LightningElement {
                 let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
                 this.data[index].Cost_per_M__c = prodCost.perThousand;
                 this.data[index].Cost_per_Acre__c = prodCost.perAcre; 
-                this.data[index].isLowVol__c = false;
-                this.data[index].unitAreaStyles = 'slds-col slds-size_2-of-12'
-
+               
+                 
                 this.prodCostM = prodCost.perThousand;
                 this.prodCostA = prodCost.perAcre;
                 this.prodAreaCost = this.areaAcres * this.costPerAcre;
@@ -154,8 +154,6 @@ export default class AppRatePrice extends LightningElement {
                     this.appTotalK = roundNum(totalFert.K__c, 4); 
                 } 
                }else if(e.detail.value==='100 Gal'){
-                this.data[index].isLowVol__c = true; 
-                this.data[index].unitAreaStyles = 'slds-col slds-size_2-of-12 lowVolume'
 
                 let {Rate2__c, Product_Size__c, Unit_Price__c, Spray_Vol_M__c, Cost_per_Acre__c} = this.data[index];
                 if(Spray_Vol_M__c>0 && Rate2__c> 0){

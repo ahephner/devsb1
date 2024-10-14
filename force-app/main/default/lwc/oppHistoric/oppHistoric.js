@@ -47,38 +47,45 @@ export default class OppHistoric extends LightningElement{
                 value: item.value
 }))
             let data = await history({appdate: this.date,custId:this.acc})
-            this.prod = await data.map((item, index) => ({
-                rowLabel: 'Add',
-                rowValue: 'Add',
-                rowVariant: 'success',
-                closeDate: item.Opportunity.CloseDate,
-                stage: item.Opportunity.StageName,
-                oppName: item.Opportunity.Name,
-                Name: item.Product2.Name,
-                Code: item.ProductCode,
-                Product_Status__c: item.Product2.Product_Status__c,
-                prevCharge: item.CPQ_Unit_Price__c,
-                Id: item.Id,
-                Product2Id: item.Product2Id,
-                Product_Type__c: item.Product2.Product_Type__c,
-                Floor_Price__c: item.Product2.Floor_Price__c,
-                //Level_2_Margin__c: item.Level_2_Margin__c,
-                Agency_Product__c: item.Product2.Agency_Pricing__c,
-                Product_Cost__c: item.Product2.Product_Cost__c,
-                Product_Size__c: item.Product2.Size__c,
-                nVal: item.Product2.N__c,
-                pVal: item.Product2.P__c,
-                kVal: item.Product2.K__c,
-                sub: item.Product2.Subcategory__c,
-                isFert: item.Product2.hasFertilizer__c,
-                galWeight: item.Product2.X1_Gallon_Weight__c,
-                Product_SDS_Label__c: item.Product2.Website_Label__c
-            }));
-            this.loaded=true;
-            this.preFilter = [...this.prod] 
+            if(data){
+                this.prod = await data.map((item, index) => ({
+                    rowLabel: 'Add',
+                    rowValue: 'Add',
+                    rowVariant: 'success',
+                    closeDate: item.Opportunity.CloseDate,
+                    stage: item.Opportunity.StageName,
+                    oppName: item.Opportunity.Name,
+                    Name: item.Product2.Name,
+                    Code: item.ProductCode,
+                    Product_Status__c: item.Product2.Product_Status__c,
+                    prevCharge: item.CPQ_Unit_Price__c,
+                    Id: item.Id,
+                    Product2Id: item.Product2Id,
+                    Product_Type__c: item.Product2.Product_Type__c,
+                    Floor_Price__c: item.Product2.Floor_Price__c,
+                    //Level_2_Margin__c: item.Level_2_Margin__c,
+                    Agency_Product__c: item.Product2.Agency_Pricing__c,
+                    Product_Cost__c: item.Product2.Product_Cost__c,
+                    Product_Size__c: item.Product2.Size__c,
+                    nVal: item.Product2.N__c,
+                    pVal: item.Product2.P__c,
+                    kVal: item.Product2.K__c,
+                    sub: item.Product2.Subcategory__c,
+                    isFert: item.Product2.hasFertilizer__c,
+                    galWeight: item.Product2.X1_Gallon_Weight__c,
+                    Product_SDS_Label__c: item.Product2.Website_Label__c
+                }));
+                this.loaded=true;
+                this.preFilter = [...this.prod] 
+            }else{
+                this.loaded=true;
+                this.nothingFound = true;
+                this.mess = 'no history or error on load'; 
+            }
+
         }else{
             this.nothingFound = true;
-            this.mess = 'error trying to load'; 
+            this.mess = 'no history or error on load'; 
         }    
 
     }
