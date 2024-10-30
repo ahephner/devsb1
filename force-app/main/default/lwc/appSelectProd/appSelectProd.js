@@ -254,7 +254,7 @@ export default class AppSelectProd extends LightningElement {
                     floorPrice: priceInfo[0].Floor_Price__c,
                     
                     unitCost: agency ? '': priceInfo[0].Product_Cost__c,
-                    margin: agency ? '' : priceInfo[0].Floor_Margin__c,
+                    margin: agency ? '' : priceInfo[0].List_Margin_Calculated__c,
                     agency: agency,
                     nVal: nVal,
                     pVal: pVal,
@@ -321,7 +321,7 @@ export default class AppSelectProd extends LightningElement {
                             floorPrice: rowFlrPrice,
                             levelOne: rowLev1,
                             unitCost: rowCost,
-                            margin: priceInfo[0].Floor_Margin__c,
+                            margin: priceInfo[0].List_Margin_Calculated__c,
                             agency: rowAgency,
                             nVal: rowN,
                             pVal: rowP,

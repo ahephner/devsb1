@@ -19,15 +19,19 @@ const alreadyAdded = (newId, list) =>{
 //this will set the number of required units based on rate. 
 const unitsRequired = (uOFM, rate, areaS, unitS) => {
   let req = 0
+  let roundHundred; 
   if(rate/unitS === 1){
     let round = uOFM.includes('Acre')?(((rate/43.56)*(areaS/1000)))/unitS : ((rate*(areaS/1000))/unitS);
-    req = round-Math.floor(round) !=0 && (round - Math.floor(round)) >= 0.25 ? Math.floor(round) + 1 : Math.floor(round);
-    
+    //req = round-Math.floor(round) !=0 && (round - Math.floor(round)) >= 0.25 ? Math.floor(round) + 1 : Math.floor(round);
+    roundHundred = uOFM.includes('Acre') ? (((rate/43.56)*(areaS/1000))/unitS) : ((rate*(areaS/1000))/unitS);
     
   }else{
-    req = uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*(areaS/1000)))/unitS) : Math.ceil(((rate*(areaS/1000))/unitS));
+    //req = uOFM.includes('Acre') ? Math.ceil((((rate/43.56)*(areaS/1000)))/unitS) : Math.ceil(((rate*(areaS/1000))/unitS));
+    roundHundred = uOFM.includes('Acre') ? roundNum((((rate/43.56)*(areaS/1000))/unitS),2) : roundNum(((rate*(areaS/1000))/unitS),2);
   }
-  return req; 
+  //console.log('test ', test);
+  
+  return roundHundred; 
 }
  //this function takes in the selected area's prefered unit of measure and the application products type and then will determine what the 
 //initial unit of measure for the product is. This initial value can be overwritten by the user if desired. It is invoked above upon product selection

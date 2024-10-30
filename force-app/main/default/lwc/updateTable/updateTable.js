@@ -1,6 +1,7 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, api } from 'lwc';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
+import getAreas from '@salesforce/apex/appProduct.getAreas';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getRecord } from 'lightning/uiRecordApi';
 import AREA from '@salesforce/schema/Application__c.Area__c';
@@ -12,6 +13,7 @@ const fields = [AREA, SQFT, PREFMEASURE];
 
 
 export default class UpdateTable extends LightningElement {
+    @api recordId;
     updateExposed = false;
     loaded = false;
     showCopyDate = false; 
@@ -23,6 +25,7 @@ export default class UpdateTable extends LightningElement {
     areaId;
     sqFt; 
     ornamental; 
+    areaOptions=[]
     buttonText = 'Save';
     disableBtn = false; 
     @wire(MessageContext)
@@ -47,7 +50,8 @@ export default class UpdateTable extends LightningElement {
         this.upProdTable = message.updateProd; 
         this.addProduct = message.addProd; 
         this.loaded = true;
-        this.buttonText = 'Save'
+        this.buttonText = 'Save';
+        this.areaOptions = message.areaArray; 
     }
 //life cycle hooks
     unsubscribeFromMessageChannel(){
@@ -61,6 +65,7 @@ export default class UpdateTable extends LightningElement {
     disconnectedCallback(){
         this.unsubscribeFromMessageChannel(); 
     }
+   
 //get the areaInfo need for making calculations in the pricing
 @wire(getRecord,{recordId:'$appId', fields: fields})
 wiredareaInfo({error,data}){
@@ -107,9 +112,10 @@ wiredareaInfo({error,data}){
 
     async copyProgram(x){
         this.loaded = false; 
-        let dateUpdate = x.detail; 
+        let dateUpdate = x.detail.date;
+        let areaid = x.detail.area 
         this.showCopyDate = false; 
-        let mess = await cloneSingleApp({appId: this.appId, copyDate: dateUpdate});
+        let mess = await cloneSingleApp({appId: this.appId, copyDate: dateUpdate, aId: areaid});
         if(mess === 'success'){
             this.dispatchEvent(
                 new ShowToastEvent({

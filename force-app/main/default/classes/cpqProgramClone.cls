@@ -109,7 +109,7 @@ public class cpqProgramClone {
   }
     
     @AuraEnabled
-    public static string cloneSingleApp(string appId, Date copyDate){
+    public static string cloneSingleApp(string appId, Date copyDate, string aId){
         string messBack; 
         try{
             Application__c newApp = new Application__c(); 
@@ -123,7 +123,7 @@ public class cpqProgramClone {
             newApp = ogApp.clone(false, false, false, false); 
             newApp.Name = newApp.Name + ' c';
             newApp.Date__c = copyDate; 
-            
+            newApp.Area__c = aId; 
             insert newApp; 
             id idForAppProduct = newApp.Id; 
             

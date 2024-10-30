@@ -15,10 +15,24 @@
             </header>
             <!-- Modal/Popup Box LWC body starts here -->
             <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+               <div class="slds-grid slds-wrap">
                 <lightning-input type="date" 
+                                 class="slds-col slds-size_1-of-1"
                                  name="input1" 
                                  label="Date for Application Copy"
                                  onchange={handleDate} ></lightning-input>
+                                 <lightning-combobox
+                                 name="ship"
+                                 label="Area"
+                                 value={areaId}
+                                 placeholder="Areas"
+                                 options={selOptions}
+                                 onchange={handleAreaChange}
+                                 required
+                                 class="slds-col slds-size_1-of-1 slds-m-bottom_x-small"
+                                 ></lightning-combobox>
+               </div> 
+
             </div>
             <!-- Modal/Popup Box LWC footer starts here -->
             <footer class="slds-modal__footer">

@@ -5,7 +5,9 @@
                       record-id={recordId}></c-make-order>
     </template>
     <template if:true={showCopyDate}>
-        <c-date-modal onclose={closeDatePicker}
+        <c-date-modal selectedareaid={copyAreaId}
+                      areas={areaOptions}
+                      onclose={closeDatePicker}
                       onsavedate={copyProgram}>
             
         </c-date-modal>

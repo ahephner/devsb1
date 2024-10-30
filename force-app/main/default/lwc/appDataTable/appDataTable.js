@@ -176,10 +176,11 @@ export default class AppDataTable extends LightningElement {
     }
 
     async copyProgram(x){
-        let dateUpdate = x.detail; 
+        let dateUpdate = x.detail.date;
+        let areaId = x.detail.area 
         this.showCopyDate = false; 
         this.loaded = false; 
-        let mess = await cloneSingleApp({appId: this.rowId, copyDate: dateUpdate});
+        let mess = await cloneSingleApp({appId: this.rowId, copyDate: dateUpdate, aId: areaId});
         if(mess === 'success'){
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -200,11 +201,13 @@ export default class AppDataTable extends LightningElement {
         } 
         this.loaded = true; 
     }
+    copyAreaId; 
     //handle table row actions. Delete or pop up to edit. 
     handleRowAction(event) {
         const actionName = event.detail.action.name;
         this.rowId = event.detail.row.Id;
-        
+        this.copyAreaId = event.detail.row.Area__c;
+        console.log(1, this.copyAreaId)
         switch (actionName) {
             case 'delete':{
                     // eslint-disable-next-line no-case-declarations
@@ -245,7 +248,8 @@ export default class AppDataTable extends LightningElement {
                     updateProdTable: true,
                     addProd: false,
                     updateProd: true,
-                    appId: this.rowId
+                    appId: this.rowId,
+                    areaArray: this.areaOptions
                 }
                 publish(this.messageContext, Program_Builder, payload); 
                 

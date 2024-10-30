@@ -177,24 +177,24 @@ export default class UpdateAddProduct extends LightningElement {
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Product_Cost__c');
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Level_2_Margin__c');
             final = mergePricing(final, 'Product__c', pricing, 'Product2Id', 'Floor_Price__c');
-    
+            
             this.prod = await final.map((item, index) => ({
                 rowLabel: 'Add',
                 rowValue: 'Add',
                 rowVariant: 'success',
-                Name: item.Product_Name__c,
+                Name: item.Product__r.ERP_Name__c,
                 Code: item.Product_Code__c,
                 Product_Status__c: item.Stock_Status__c,
-                Price: item.Agency_Product__c ? item.Floor_Margin__c : item.Level_2_UserView__c,
+                Price: item.Product__r.Agency_Pricing__c ? item.Floor_Price__c : item.Level_2_UserView__c,
                 Id: item.Product__c,
                 Product2Id: item.Product__c,
                 Product_Type__c: item.Product__r.Product_Type__c,
                 Website_Label__c: item.Product__r.Website_Label__c,
-                Floor_Price__c: item.Floor_Margin__c,
+                Floor_Price__c: item.Floor_Price__c,
                 Level_2_Margin__c: item.Level_2_Margin__c,
-                Agency_Product__c: item.Agency_Product__c,
+                Agency_Product__c: item.Product__r.Agency_Pricing__c,
                 Product_Cost__c: item.Product_Cost__c,
-                Product_Size__c: item.Product_Size__c,
+                Product_Size__c: item.Product__r.Size__c,
                 nVal: item.N__c,
                 pVal: item.P__c,
                 kVal: item.K__c,
@@ -244,7 +244,7 @@ export default class UpdateAddProduct extends LightningElement {
                     floorPrice: priceInfo[0].Floor_Price__c,
                     
                     unitCost: agency? '': priceInfo[0].Product_Cost__c,
-                    margin: agency? '' : priceInfo[0].Floor_Margin__c,
+                    margin: agency? '' : priceInfo[0].List_Margin_Calculated__c,
                     agency: agency,
                     nVal: nVal,
                     pVal: pVal,
@@ -271,7 +271,7 @@ export default class UpdateAddProduct extends LightningElement {
                     floorPrice: priceInfo[0].Floor_Price__c,
                     
                     unitCost: agency? '': priceInfo[0].Product_Cost__c,
-                    margin: agency? '' : priceInfo[0].Floor_Margin__c,
+                    margin: agency? '' : priceInfo[0].List_Margin_Calculated__c,
                     agency: agency,
                     nVal: nVal,
                     pVal: pVal,
@@ -283,7 +283,7 @@ export default class UpdateAddProduct extends LightningElement {
                     title: `Unit Price - Flr $${priceInfo[0].Floor_Price__c}`,
                     labelURL: labelURL
                 }}));
-                console.table('dispatch 2')
+               
     }
 
     async    addLineItem(e) {
@@ -302,7 +302,7 @@ export default class UpdateAddProduct extends LightningElement {
                     alt_PB_Id: priceInfo[0].Pricebook2Id,
                     rowFlrPrice: e.detail.row.Floor_Price__c, 
                     rowLevelOne: e.detail.row.Level_1_UserView__c,
-                    rowMargin: e.detail.row.Level_2_Margin__c,
+                    rowMargin: priceInfo[0].List_Margin_Calculated__c,
                     rowAgency: e.detail.row.Agency_Product__c,
                     rowCost: e.detail.row.Product_Cost__c,
                     rowSize: e.detail.row.Product_Size__c, 

@@ -38,11 +38,12 @@
 <!-- Copy app -->
 <template if:true={showCopyDate}>
   <div class="datePicker">
-    <c-date-modal 
+    <c-date-modal selectedareaid={areaId}
+    areas={areaOptions}
     onclose={closeDatePicker}
     onsavedate={copyProgram}>
     </c-date-modal>
-  </div>
+ </div>
 
 </template>
                   </template>
