@@ -3,6 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
+import getProds from '@salesforce/apex/appProduct.dataTableBuildFilter';
 import cloneSingleApp from '@salesforce/apex/cpqProgramClone.cloneSingleApp';
 //import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
@@ -53,6 +54,7 @@ export default class AppDataTable extends LightningElement {
     showOrder = false; 
     showCopyDate = false; 
     programName;
+    productList = []; 
     customerName; 
     totalPrice = 0.00; 
     rowId; 
@@ -83,7 +85,7 @@ export default class AppDataTable extends LightningElement {
 
     @wire(getApps, {recordId: '$recordId'})
         wiredList(result){
-            //console.log('app table recordID', this.recordId)
+            //console.log('app table recordID', this.recordId)   
             this.wiredAppList = result; 
             if(result.data){
                 
@@ -93,13 +95,43 @@ export default class AppDataTable extends LightningElement {
                 this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
                 this.error = undefined; 
                 this.totalPrice = onLoadTotalPrice(result.data); 
-                this.loaded = true;     
+                this.loaded = true;
+                
             }else if(result.error){
                 this.error = result.error 
                 this.appList = undefined; 
             }
 
         }
+
+        @wire(getProds, {program:'$recordId'})
+            wiredProds(result){
+                if(result.data){
+                    this.buildProdFilter(result.data);
+                }else if(result.error){
+                    console.error('prod load => '+result.error.body.message); 
+                }
+            }
+        allProds = []
+        prodFilterValue
+        buildProdFilter(data){
+            
+            let initArray= [];
+            for(let i = 0; i<data.length; i++){
+                let name = data[i].Product_Name__c;
+                let id = data[i].Id;
+                let appId = data[i].Application__r.Id; 
+                let obj = {label:name, value:id, app:appId}
+                initArray.findIndex(x=>x.label === obj.label) === -1 ? initArray.push(obj) : '';
+                this.allProds.push(obj)
+            }
+            
+            this.productList = [{label:'All', value:'All'}, ...initArray];
+            this.prodFilterValue = 'All'; 
+            console.log(5, this.productList);
+            
+        }
+
 //get areas for searching the table by area
 //this was a pain to get to work. Since returned data is immutable have to make a copy then you can add to it    
     @wire(getAreas, {recordId: '$recordId'})
@@ -146,6 +178,33 @@ export default class AppDataTable extends LightningElement {
     //     //console.log(this.query);
                     
     // }
+    filterProd(x){
+    x.preventDefault();
+       let prodFilter = x.target.options.find(opt => opt.value === x.detail.value);
+       this.prodFilterValue = prodFilter.value; 
+       console.log('l ', prodFilter.label, ' v ', prodFilter.value)
+       if(prodFilter.label==='All'){
+        this.appList = this.copy
+        //this.getCopy = false; 
+    }else{
+        //this.allProds = this.allProds.filter()
+        this.appList = this.copy
+        let getApps = this.allProds.filter(x => x.label.includes(prodFilter.label))
+        // let apps = []
+        // for(let i=0;i<getApps.length;i++){
+        //     let id = this.appList.filter(x => x.Id.includes(getApps[i].app))
+        //     apps.push(id)
+            
+        // }
+        // this.appList = [...apps]
+        this.appList = this.appList.filter(obj1 => {
+            return getApps.some(obj2 => obj1.Id === obj2.app)
+        })
+
+        //this.getCopy = true; 
+    }
+
+    }
 //search by area
 //set area id to pass to pdf creator
     selectArea(x){
@@ -158,6 +217,7 @@ export default class AppDataTable extends LightningElement {
         }else{
             //console.log('areaName2 '+areaName);
             this.appList = this.copy
+            
             this.appList = this.appList.filter(x => x.Area_Name__c === areaName)
             //this.getCopy = true; 
         }

@@ -47,6 +47,15 @@
                             options={areaOptions}
                             onchange={selectArea} ></lightning-combobox>
                     </div>
+                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
+                            <lightning-combobox
+                            name='box'
+                            class='areaBox'
+                            label="Filter by Product"
+                            value={prodFilterValue}
+                            options={productList}
+                            onchange={filterProd} ></lightning-combobox>
+                    </div>
                     <lightning-button-group class="slds-col slds-size_1-of-3 slds-m-bottom_none slds-m-top_large">
                             <lightning-button variant="destructive" label="Make Order" title="Make Order"
                             onclick={makeOrder} class="slds-m-left_small"></lightning-button>
