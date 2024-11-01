@@ -180,7 +180,8 @@ private class test_appProduct {
         apList.add(ap2); 
         insert apList; 
         Test.startTest(); 
-        	list<App_Product__c> prodList = appProduct.appProducts(application.Id);         	
+        	list<App_Product__c> prodList = appProduct.appProducts(application.Id);        
+        	list<App_Product__c> filter = appProduct.dataTableBuildFilter(prog.Id);
         Test.stopTest();
         	list<App_Product__c> nl = [select id from App_Product__c where application__c =: application.id]; 
         	system.assertEquals(2, nl.size());
@@ -205,9 +206,9 @@ private class test_appProduct {
         Date myDate = Date.newInstance(2023, 9, 9);
 		//create test customer
         Account cust = new Account();
-        cust.Name = 'Test123456';
+        cust.Name = 'AJ Hephner';
         cust.Type = 'Customer';
-        cust.Customer_Name__c = 'Test Customer 123456';
+        cust.Customer_Name__c = 'AJ Hephner';
         insert cust;
         
         //product creation
@@ -287,7 +288,7 @@ private class test_appProduct {
  		//production 0122M000001ElAYQA0
  		//sandbox 01275000000CgcYAAS
         //create test opportunity
-		opportunity opp = new opportunity(name = 'test name', accountID= cust.id, pricebook2id = pricebookId,recordTypeId= '01275000000CgcYAAS',
+		opportunity opp = new opportunity(name = 'test name', accountID= cust.id, pricebook2id = pricebookId,recordTypeId= '0122M000001ElAYQA0',
                                          stagename='Working', closedate = myDate, Warehouse__c = warehouse.Id, Order_Type__c='EOP', Ship_Type__c='DS');
         
         insert opp;
