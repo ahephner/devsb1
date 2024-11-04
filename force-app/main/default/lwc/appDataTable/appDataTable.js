@@ -127,9 +127,7 @@ export default class AppDataTable extends LightningElement {
             }
             
             this.productList = [{label:'All', value:'All'}, ...initArray];
-            this.prodFilterValue = 'All'; 
-            console.log(5, this.productList);
-            
+            this.prodFilterValue = 'All';  
         }
 
 //get areas for searching the table by area
@@ -182,24 +180,32 @@ export default class AppDataTable extends LightningElement {
     x.preventDefault();
        let prodFilter = x.target.options.find(opt => opt.value === x.detail.value);
        this.prodFilterValue = prodFilter.value; 
-       console.log('l ', prodFilter.label, ' v ', prodFilter.value)
-       if(prodFilter.label==='All'){
+       
+    if(prodFilter.label==='All' && (this.areaId===undefined || this.areaId ==='All')){
         this.appList = this.copy
         //this.getCopy = false; 
     }else{
         //this.allProds = this.allProds.filter()
         this.appList = this.copy
         let getApps = this.allProds.filter(x => x.label.includes(prodFilter.label))
-        // let apps = []
-        // for(let i=0;i<getApps.length;i++){
-        //     let id = this.appList.filter(x => x.Id.includes(getApps[i].app))
-        //     apps.push(id)
-            
-        // }
-        // this.appList = [...apps]
-        this.appList = this.appList.filter(obj1 => {
-            return getApps.some(obj2 => obj1.Id === obj2.app)
-        })
+        
+        if(this.areaId != undefined && this.areaId != 'All' && prodFilter.label !='All' ){
+            console.log('area plus product')
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app && obj1.Area__c === this.areaId)
+            })
+        }else if(prodFilter.label !='All' && (this.areaId===undefined || this.areaId ==='All')){
+            console.log('product searching')
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app)
+            })
+        }else if(prodFilter.label ==='All' && (this.areaId != undefined || this.areaId !='All')){
+            console.log('use area filter')
+            let labelName = this.areaOptions.find(i=> i.value === this.refs.areaBox.value)//.label
+            console.log(labelName)
+            this.selectArea(labelName); 
+        }
+        
 
         //this.getCopy = true; 
     }
@@ -208,8 +214,18 @@ export default class AppDataTable extends LightningElement {
 //search by area
 //set area id to pass to pdf creator
     selectArea(x){
-        let areaName = x.target.options.find(opt => opt.value === x.detail.value).label;
-        this.areaId = x.detail.value; 
+        let areaName;
+        
+        if(typeof x === 'object'){
+            console.log('top')
+            areaName = x.target.options.find(opt => opt.value === x.detail.value).label;
+            this.areaId = x.detail.value; 
+
+        }else{
+            //areaName = x.label; 
+            //this.areaId = x.value; 
+            console.log('areaName ', x.label, ' value ', x.value);
+        }
 
         if(areaName==='All'){
             this.appList = this.copy
