@@ -246,7 +246,7 @@ const lvUnits = (areaSize, sprayVol, prodSize, prodRate)=>{
   let ozNeeded = roundNum((finishedRate * areaS)/prodSize,2)
 
   //total gals needed
-  let prodsNeed = Math.ceil(ozNeeded);
+  let prodsNeed = roundNum(ozNeeded, 2);
   return prodsNeed; 
   //final = above divided by prodSize
 }
