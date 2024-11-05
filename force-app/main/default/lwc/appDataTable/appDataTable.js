@@ -144,7 +144,7 @@ export default class AppDataTable extends LightningElement {
             ops.unshift({label:'All', value:'All'})
             //console.log('ops '+ops);
             }
-
+            this.area= 'All'
             return ops;
             //if there are issues in the future
             //you can replace the above with return this.areaList.data
@@ -203,7 +203,7 @@ export default class AppDataTable extends LightningElement {
             console.log('use area filter')
             let labelName = this.areaOptions.find(i=> i.value === this.refs.areaBox.value)//.label
             console.log(labelName)
-            this.selectArea(labelName); 
+            this.selectArea(labelName, true); 
         }
         
 
@@ -213,29 +213,45 @@ export default class AppDataTable extends LightningElement {
     }
 //search by area
 //set area id to pass to pdf creator
-    selectArea(x){
+    selectArea(x, y){
         let areaName;
         
-        if(typeof x === 'object'){
-            console.log('top')
+        if(y){
+            areaName = x.label; 
+            this.areaId = x.value; 
+            
+        }else{
             areaName = x.target.options.find(opt => opt.value === x.detail.value).label;
             this.areaId = x.detail.value; 
-
-        }else{
-            //areaName = x.label; 
-            //this.areaId = x.value; 
-            console.log('areaName ', x.label, ' value ', x.value);
         }
 
-        if(areaName==='All'){
+        if(areaName==='All' && this.prodFilterValue==='All'){
             this.appList = this.copy
             //this.getCopy = false; 
-        }else{
+        }else if(areaName !='All' && this.prodFilterValue==='All'){
             //console.log('areaName2 '+areaName);
             this.appList = this.copy
             
             this.appList = this.appList.filter(x => x.Area_Name__c === areaName)
             //this.getCopy = true; 
+        }else if(areaName ==='All' && this.prodFilterValue!='All'){
+            let prodFilter = this.productList.find(opt => opt.value === this.refs.prodBox.value);
+            let getApps = this.allProds.filter(x => x.label.includes(prodFilter.label))
+            this.appList = this.copy
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app)
+            })
+        }else{
+            //product selected new area picked but it is not all value
+            let prodFilter = this.productList.find(opt => opt.value === this.refs.prodBox.value);
+            let getApps = this.allProds.filter(x => x.label.includes(prodFilter.label))
+            this.appList = this.copy
+            //filter area
+            this.appList = this.appList.filter(x => x.Area_Name__c === areaName)
+            //filter product
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app)
+            })
         }
     }
     async  handleConfirm(){
