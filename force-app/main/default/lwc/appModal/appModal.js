@@ -1,6 +1,7 @@
 import { LightningElement, api } from 'lwc';
 import { createRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import getPickListValues from '@salesforce/apex/lwcHelper.getPickListValues';
 import AREA_OBJECT from '@salesforce/schema/Area__c'; 
 import NAME_FIELD from '@salesforce/schema/Area__c.Name';
 import DATE_FIELD from '@salesforce/schema/Area__c.Date__c';
@@ -11,6 +12,7 @@ import PROGRAM_FIELD from '@salesforce/schema/Area__c.Program__c';
 import PREFUOFM from '@salesforce/schema/Area__c.Pref_U_of_M__c'; 
 import ORN_AREA from '@salesforce/schema/Area__c.Ornamental_Area__c';
 import GALS_REQ from '@salesforce/schema/Area__c.Required_Gallons__c';
+import TURF_TYPE from '@salesforce/schema/Area__c.Turf_Type__c';
 import {roundRate} from 'c/programBuilderHelper';
 export default class AppModal extends LightningElement {
     openAppModal = false; 
@@ -28,6 +30,8 @@ export default class AppModal extends LightningElement {
     btnLabel = 'Turf Area';
     tankSize;
     finishSpray = 0; 
+    typeOptions;
+    stand; 
     @api recId; 
 
     changeAreaType(){
@@ -49,11 +53,19 @@ export default class AppModal extends LightningElement {
         this.areaName = '';
         this.prefUM = ''; 
         this.openAppModal = true; 
+        this.turfTypes(); 
     }
     closeModal(){
         this.openAppModal = false;
     }
-
+    async turfTypes(){
+        let getFilters = await getPickListValues({objName:'Area__c', fieldAPI:'Turf_Type__c'})
+        this.typeOptions = await getFilters.map(item=>({
+            ...item,
+            label: item.label,
+            value: item.value
+}))
+    }
     //get api values from object settings
     get setNotes(){
         return [
@@ -96,6 +108,9 @@ export default class AppModal extends LightningElement {
         this.feet = this.areaAcres * 43560; 
                     
     }
+    setType(e){
+        this.stand = e.detail.value; 
+    }
     newType(e){
         this.note = e.detail.value; 
         //console.log(this.note, ' this note');
@@ -132,6 +147,7 @@ export default class AppModal extends LightningElement {
         fields[PREFUOFM.fieldApiName]= this.prefUM;
         fields[ORN_AREA.fieldApiName] = this.ornamentalArea;
         fields[GALS_REQ.fieldApiName] = this.finishSpray; 
+        fields[TURF_TYPE.fieldApiName] = this.stand; 
         const recordInput = {apiName: AREA_OBJECT.objectApiName, fields};
         //create record
         createRecord(recordInput)

@@ -209,6 +209,7 @@ export default class ProductTable extends LightningElement {
                url: item.labelURL,
                Note_Other__c:'', 
                Manual_Charge_Size__c: 0,
+               url: item.labelURL,
                sprayVolume: this.ornamental ? this.sprayVol: 0,
                manCharge: item.Name.toLowerCase().includes('manual charge')
             }

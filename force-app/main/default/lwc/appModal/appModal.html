@@ -29,8 +29,17 @@
                              value={feet} onchange={newFeet} required></lightning-input>
                        </template>
                        <!-- <p>HI GUYSSSSSS</p> -->
-                        <!-- Date -->
-                        <lightning-input type="date" label="Date" onchange={newDate}></lightning-input>
+                        <!-- Turf Type -->
+                        <lightning-combobox
+                          name="turftype"
+                          label="Turf Type"
+                          value={stand}
+                          placeholder="Select Type"
+                          options={typeOptions}
+                          onchange={setType} 
+                           
+                           
+                        ></lightning-combobox>
                     </div>
                                 <div class="slds-col slds-size_1-of-2">
                                         <lightning-combobox
