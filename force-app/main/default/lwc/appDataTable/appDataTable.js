@@ -3,16 +3,19 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
+import getProds from '@salesforce/apex/appProduct.dataTableBuildFilter';
+import cloneSingleApp from '@salesforce/apex/cpqProgramClone.cloneSingleApp';
 //import savePDF_File from '@salesforce/apex/AttachPDFController2.savePDF_File';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { APPLICATION_SCOPE,MessageContext,publish,subscribe, unsubscribe} from 'lightning/messageService';
 import LightningConfirm from 'lightning/confirm';
+
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
 import {onLoadTotalPrice} from 'c/programBuilderHelper';
 //table actions bottom of file shows how to handle
 const actions = [
     { label: 'Show details', name: 'show_details' },
-    // {label:'Add Products', name:'add_products'},
+     {label:'Copy', name:'copy_app'},
     { label: 'Delete', name: 'delete' },
 ];
 
@@ -47,11 +50,14 @@ export default class AppDataTable extends LightningElement {
     //expose customer copy button
     //getCopy = false; 
     subscription= null;   
-    loaded = false
+    loaded = false;
     showOrder = false; 
+    showCopyDate = false; 
     programName;
+    productList = []; 
     customerName; 
     totalPrice = 0.00; 
+    rowId; 
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
@@ -79,7 +85,7 @@ export default class AppDataTable extends LightningElement {
 
     @wire(getApps, {recordId: '$recordId'})
         wiredList(result){
-            //console.log('app table recordID', this.recordId)
+            //console.log('app table recordID', this.recordId)   
             this.wiredAppList = result; 
             if(result.data){
                 
@@ -89,13 +95,41 @@ export default class AppDataTable extends LightningElement {
                 this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
                 this.error = undefined; 
                 this.totalPrice = onLoadTotalPrice(result.data); 
-                this.loaded = true;     
+                this.loaded = true;
+                
             }else if(result.error){
                 this.error = result.error 
                 this.appList = undefined; 
             }
 
         }
+
+        @wire(getProds, {program:'$recordId'})
+            wiredProds(result){
+                if(result.data){
+                    this.buildProdFilter(result.data);
+                }else if(result.error){
+                    console.error('prod load => '+result.error.body.message); 
+                }
+            }
+        allProds = []
+        prodFilterValue
+        buildProdFilter(data){
+            
+            let initArray= [];
+            for(let i = 0; i<data.length; i++){
+                let name = data[i].Product_Name__c;
+                let id = data[i].Id;
+                let appId = data[i].Application__r.Id; 
+                let obj = {label:name, value:id, app:appId}
+                initArray.findIndex(x=>x.label === obj.label) === -1 ? initArray.push(obj) : '';
+                this.allProds.push(obj)
+            }
+            
+            this.productList = [{label:'All', value:'All'}, ...initArray];
+            this.prodFilterValue = 'All';  
+        }
+
 //get areas for searching the table by area
 //this was a pain to get to work. Since returned data is immutable have to make a copy then you can add to it    
     @wire(getAreas, {recordId: '$recordId'})
@@ -110,7 +144,7 @@ export default class AppDataTable extends LightningElement {
             ops.unshift({label:'All', value:'All'})
             //console.log('ops '+ops);
             }
-
+            this.area= 'All'
             return ops;
             //if there are issues in the future
             //you can replace the above with return this.areaList.data
@@ -142,20 +176,82 @@ export default class AppDataTable extends LightningElement {
     //     //console.log(this.query);
                     
     // }
+    filterProd(x){
+    x.preventDefault();
+       let prodFilter = x.target.options.find(opt => opt.value === x.detail.value);
+       this.prodFilterValue = prodFilter.value; 
+       
+    if(prodFilter.label==='All' && (this.areaId===undefined || this.areaId ==='All')){
+        this.appList = this.copy
+        //this.getCopy = false; 
+    }else{
+        //this.allProds = this.allProds.filter()
+        this.appList = this.copy
+        let getApps = this.allProds.filter(x => x.label.includes(prodFilter.label))
+        
+        if(this.areaId != undefined && this.areaId != 'All' && prodFilter.label !='All' ){
+            console.log('area plus product')
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app && obj1.Area__c === this.areaId)
+            })
+        }else if(prodFilter.label !='All' && (this.areaId===undefined || this.areaId ==='All')){
+            console.log('product searching')
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app)
+            })
+        }else if(prodFilter.label ==='All' && (this.areaId != undefined || this.areaId !='All')){
+            console.log('use area filter')
+            let labelName = this.areaOptions.find(i=> i.value === this.refs.areaBox.value)//.label
+            console.log(labelName)
+            this.selectArea(labelName, true); 
+        }
+        
+
+        //this.getCopy = true; 
+    }
+
+    }
 //search by area
 //set area id to pass to pdf creator
-    selectArea(x){
-        let areaName = x.target.options.find(opt => opt.value === x.detail.value).label;
-        this.areaId = x.detail.value; 
+    selectArea(x, y){
+        let areaName;
+        
+        if(y){
+            areaName = x.label; 
+            this.areaId = x.value; 
+            
+        }else{
+            areaName = x.target.options.find(opt => opt.value === x.detail.value).label;
+            this.areaId = x.detail.value; 
+        }
 
-        if(areaName==='All'){
+        if(areaName==='All' && this.prodFilterValue==='All'){
             this.appList = this.copy
             //this.getCopy = false; 
-        }else{
+        }else if(areaName !='All' && this.prodFilterValue==='All'){
             //console.log('areaName2 '+areaName);
             this.appList = this.copy
+            
             this.appList = this.appList.filter(x => x.Area_Name__c === areaName)
             //this.getCopy = true; 
+        }else if(areaName ==='All' && this.prodFilterValue!='All'){
+            let prodFilter = this.productList.find(opt => opt.value === this.refs.prodBox.value);
+            let getApps = this.allProds.filter(x => x.label.includes(prodFilter.label))
+            this.appList = this.copy
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app)
+            })
+        }else{
+            //product selected new area picked but it is not all value
+            let prodFilter = this.productList.find(opt => opt.value === this.refs.prodBox.value);
+            let getApps = this.allProds.filter(x => x.label.includes(prodFilter.label))
+            this.appList = this.copy
+            //filter area
+            this.appList = this.appList.filter(x => x.Area_Name__c === areaName)
+            //filter product
+            this.appList = this.appList.filter(obj1 => {
+                return getApps.some(obj2 => obj1.Id === obj2.app)
+            })
         }
     }
     async  handleConfirm(){
@@ -166,11 +262,44 @@ export default class AppDataTable extends LightningElement {
         })
         return res; 
         }
+
+    closeDatePicker(){
+        this.showCopyDate = false; 
+    }
+
+    async copyProgram(x){
+        let dateUpdate = x.detail.date;
+        let areaId = x.detail.area 
+        this.showCopyDate = false; 
+        this.loaded = false; 
+        let mess = await cloneSingleApp({appId: this.rowId, copyDate: dateUpdate, aId: areaId});
+        if(mess === 'success'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success', 
+                    message: 'App Copied!', 
+                    variant: 'success'
+                }) 
+            );
+            refreshApex(this.wiredAppList)
+        }else if(mess!= 'sucess'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error deleting record',
+                    message: JSON.stringify(mess),
+                    variant: 'error'
+                })
+            ) 
+        } 
+        this.loaded = true; 
+    }
+    copyAreaId; 
     //handle table row actions. Delete or pop up to edit. 
     handleRowAction(event) {
         const actionName = event.detail.action.name;
-        const row = event.detail.row.Id;
-        
+        this.rowId = event.detail.row.Id;
+        this.copyAreaId = event.detail.row.Area__c;
+        console.log(1, this.copyAreaId)
         switch (actionName) {
             case 'delete':{
                     // eslint-disable-next-line no-case-declarations
@@ -178,7 +307,8 @@ export default class AppDataTable extends LightningElement {
             this.handleConfirm()
                     .then((res)=>{
                         if(res===true){
-                            deleteRecord(row)
+                            this.loaded = false; 
+                            deleteRecord(this.rowId)
                                 .then(() => {
                                     this.dispatchEvent(
                                         new ShowToastEvent({
@@ -186,7 +316,9 @@ export default class AppDataTable extends LightningElement {
                                             message: 'App Deleted', 
                                             variant: 'success'
                                         }) 
-                                    );//this refreshes the table  
+                                    );
+                                    this.loaded = true;
+                                    //this refreshes the table  
                                     return refreshApex(this.wiredAppList)
                                 })
                                 .catch(error => {
@@ -208,21 +340,15 @@ export default class AppDataTable extends LightningElement {
                     updateProdTable: true,
                     addProd: false,
                     updateProd: true,
-                    appId: row
+                    appId: this.rowId,
+                    areaArray: this.areaOptions
                 }
                 publish(this.messageContext, Program_Builder, payload); 
                 
                 
                 break;
-            case 'add_products': 
-                const payload2 = {
-                    updateProdTable: true,
-                    addProd: true,
-                    updateProd: false,
-                    appId: row
-                }
-                publish(this.messageContext, Program_Builder, payload2);
-                
+            case 'copy_app': 
+               this.showCopyDate = true; 
             default:
         }
 }

@@ -4,6 +4,14 @@
                       apps={appList}
                       record-id={recordId}></c-make-order>
     </template>
+    <template if:true={showCopyDate}>
+        <c-date-modal selectedareaid={copyAreaId}
+                      areas={areaOptions}
+                      onclose={closeDatePicker}
+                      onsavedate={copyProgram}>
+            
+        </c-date-modal>
+    </template>
     <lightning-card> 
         <div class="slds-grid  slds-wrap">
             <template if:false={loaded}>
@@ -33,11 +41,22 @@
                     <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
                             <lightning-combobox
                             name='box'
+                            lwc:ref="areaBox"
                             class='areaBox'
                             label="Filter by Area"
                             value={area}
                             options={areaOptions}
                             onchange={selectArea} ></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_none">
+                            <lightning-combobox
+                            name='box'
+                            lwc:ref="prodBox"
+                            class='areaBox'
+                            label="Filter by Product"
+                            value={prodFilterValue}
+                            options={productList}
+                            onchange={filterProd} ></lightning-combobox>
                     </div>
                     <lightning-button-group class="slds-col slds-size_1-of-3 slds-m-bottom_none slds-m-top_large">
                             <lightning-button variant="destructive" label="Make Order" title="Make Order"

@@ -29,6 +29,9 @@
     margin-right: 6%;
 }
 
+.lowVolume{
+    display: -webkit-inline-box
+}
 .updateAll{
     border: black solid 1px;
     width: 63%;
@@ -40,4 +43,9 @@
     top: 14.5%;
     background: white;
     border-radius: 25px;
+}
+
+
+.lineUp{
+    margin-bottom: 1%;
 }

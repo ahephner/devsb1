@@ -22,7 +22,7 @@
                                 </template>
                                 <template lwc:else>
                                     <div class="slds-col slds-size_2-of-12 pName">
-                                        <p>{sp.Product_Name__c}</p>
+                                        <a href={sp.url} target="_blank">{sp.Product_Name__c}</a>
                                     </div>
                                 </template>
                             <template if:false={sp.showNote}>
@@ -52,7 +52,12 @@
                                     onchange={handleUnitArea}
                                     required
                                     ></lightning-combobox> 
+                                    <template if:true={sp.isLowVol__c}>
+                                        <lightning-input  type="number"  step="0.001" label="Gal per 1000"
+                                        name={sp.Id} value={sp.Spray_Vol_M__c}  onchange={handleLowVol}></lightning-input>
+                                    </template>
                                 </div>
+
                 <!--price per unit-->
                                 <div class="slds-col slds-size_2-of-12">
                                     <div data-id={sp.Id}>
@@ -78,7 +83,7 @@
                                     <lightning-input  type="number"  step="0.001" label="Rate"
                                     name={sp.Id} value={sp.Rate2__c}  onchange={newRate}></lightning-input>
                                 </div>   
-                                <div class="slds-col slds-size_2-of-12">
+                                <div class={sp.unitAreaStyles}>
                                     <lightning-combobox
                                     name={sp.Id}
                                     label="Unit Area"
@@ -88,6 +93,10 @@
                                     onchange={handleUnitArea}
                                     required
                                     ></lightning-combobox> 
+                                    <template if:true={sp.isLowVol__c}>
+                                        <lightning-input  type="number"  step="0.001" label="Gal per 1000"
+                                        name={sp.Id} value={sp.Spray_Vol_M__c}  onchange={handleLowVol}></lightning-input>
+                                    </template>
                                 </div>
                                 <div class="slds-col slds-size_2-of-12">
                                     <div data-id={sp.Id}>
@@ -140,7 +149,7 @@
                                             <div class="slds-col slds-size_1-of-1">
                                                 <h1>App Total: <lightning-formatted-number value={appTotalPrice} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
                                             </div>
-                                            <div class="slds-col slds-size_1-of-1 slds-m-top_x-small">
+                                            <div class="slds-col slds-size_1-of-1 slds-m-top_x-small lineUp">
                                                 Total Cost Per M: ${totalCostPerM}
                                             </div>
                                             <div lwc:if={showProdInfo} class='slds-col slds-size_1-of-1'>
@@ -168,11 +177,11 @@
                                                     <p>Product Floor: ${prodFloor}</p>
                                                 </div>
                                                 <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
-                                                    <p>Product Level 1: ${levelOne}</p>
+                                                    <p>Price Book: {priceBookName}</p>
                                                 </div>
-                                                <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                                                <!-- <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
                                                     <p>Product Level 2: ${levelTwo}</p>
-                                                </div>
+                                                </div> -->
                                             </div>
                                             <div lwc:else>
                                                 <div class="slds-text-heading_small slds-m-top_small">Mouse over products to see info</div>

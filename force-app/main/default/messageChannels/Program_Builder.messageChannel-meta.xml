@@ -1,46 +1,54 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
-    <masterLabel>ProgramBuilder</masterLabel>
-    <isExposed>true</isExposed>
     <description>Message Channel to pass App updates</description>
-     <lightningMessageFields>
-        <fieldName>operator</fieldName>
+    <isExposed>true</isExposed>
+    <lightningMessageFields>
         <description>This is the operator type of the manipulation</description>
+        <fieldName>operator</fieldName>
     </lightningMessageFields>
     <lightningMessageFields>
-         <fieldName>constant</fieldName>
         <description>This is the number for the manipulation</description>
-     </lightningMessageFields>
-     <lightningMessageFields>
-        <fieldName>connector</fieldName>
+        <fieldName>constant</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
         <description>To wake up modals</description>
+        <fieldName>connector</fieldName>
     </lightningMessageFields>
     <lightningMessageFields>
+        <description>To pass string values</description>
         <fieldName>message</fieldName>
-        <description>To pass string values</description> 
     </lightningMessageFields>
-        <lightningMessageFields>
+    <lightningMessageFields>
+        <description>To pass selected area id along</description>
         <fieldName>areaId</fieldName>
-        <description>To pass selected area id along</description> 
     </lightningMessageFields>
     <lightningMessageFields>
+        <description>Boolean to tell the dataTable to refresh</description>
         <fieldName>updateTable</fieldName>
-        <description>Boolean to tell the dataTable to refresh</description> 
     </lightningMessageFields>
     <lightningMessageFields>
+        <description>Boolean to tell the updateTable to open</description>
         <fieldName>updateProdTable</fieldName>
-        <description>Boolean to tell the updateTable to open</description> 
     </lightningMessageFields>
     <lightningMessageFields>
+        <description>appId of selected application</description>
         <fieldName>appId</fieldName>
-        <description>appId of selected application</description> 
     </lightningMessageFields>
     <lightningMessageFields>
+        <description>boolean tells updateTable to show add product screen</description>
         <fieldName>addProd</fieldName>
-        <description>boolean tells updateTable to show add product screen</description> 
     </lightningMessageFields>
     <lightningMessageFields>
+        <description>boolean tells updateTable to show rate pricing update screen</description>
         <fieldName>updateProd</fieldName>
-        <description>boolean tells updateTable to show rate pricing update screen</description> 
     </lightningMessageFields>
+    <lightningMessageFields>
+        <description>the account Id to get priority price books</description>
+        <fieldName>accountId</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <description>areas available</description> 
+        <fieldName>areaArray</fieldName>
+    </lightningMessageFields>
+    <masterLabel>ProgramBuilder</masterLabel>
 </LightningMessageChannel>

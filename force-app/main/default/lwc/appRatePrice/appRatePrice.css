@@ -25,3 +25,11 @@
     background-color: #cc0000;
     color: black;
 }
+
+.lineUp{
+    margin-bottom: 1%;
+}
+
+.lowVolume{
+    display: -webkit-inline-box
+}

@@ -5,15 +5,18 @@
             size="large"></lightning-spinner>
     </template>
     <template if:true={loaded}> 
+        <template if:true={viewSearch}>
         <div class="slds-grid">
             <div class='slds-col slds-size_3-of-8'>
-                <lightning-input type="text" variant="standard" 
-                                 name="name" label="Product" 
-                                 placeholder="Search for prod.."
-                                 onchange={nameChange}
-                                 onkeydown={handleKey}></lightning-input>
+                <lightning-input 
+                    type="search" 
+                    label="Advanced Search" 
+                    placeholder="Search for products, warehouses, stock..."
+                    onkeyup={handleKey}
+                    data-value="searchInput"
+                ></lightning-input>
             </div>
-             <div class='slds-col slds-size_2-of-8'>
+             <!-- <div class='slds-col slds-size_2-of-8'>
                 <lightning-combobox
                     name="prodFamily"
                     label="Product Family"
@@ -30,14 +33,18 @@
                 placeholder="Select Progress"
                 options={catOptions}
                 onchange={catChange} ></lightning-combobox>
-            </div>
-            <div class='slds-col slds-size_1-of-8 slds-m-top_large slds-m-left_small'>   
-                <lightning-button variant="brand" label="Search" title="Search" onclick={search}></lightning-button>
+            </div> -->
+            <div class='slds-col slds-size_3-of-8 slds-m-top_large slds-m-left_small'>   
+                <lightning-button variant="brand" label="Search" title="Search" onclick={advancedSearch}></lightning-button>
+                <lightning-button  class='slds-m-left_small' variant="destructive" label="View Historic" title="View Historic" onclick={viewHistoric}></lightning-button>
             </div>
         </div>
+    </template>
         <div class='slds-grid'>
-            <div class='slds-col slds-size_6-of-8'>
-                <lightning-datatable
+            <template if:true={viewSearch}>
+
+                <div class='slds-col slds-size_6-of-8'>
+                    <lightning-datatable
                     key-field="Id"
                     data={prod}
                     hide-checkbox-column
@@ -45,26 +52,19 @@
                     onrowaction={handleRowAction}>
                 </lightning-datatable>
             </div>
+        </template>
+        <template if:false={viewSearch}>
+            <c-opp-historic onclose={handleHistoricData}
+                            onhisproduct={handleHistoricProducts}
+                            date={appdate}
+                            acc={custid}></c-opp-historic>
+        </template>
             <div class='slds-col slds-size_2-of-8'>
                 <c-app-selected-prod selection={selection}
                                      onupdate={handleRemove}></c-app-selected-prod>
             </div>
-    </div>
-    <!-- <div style="width: 1367px; display:inline-flex">
-        <div style="width:1100px">
-            <lightning-datatable
-                key-field="Id"
-                data={prod}
-                hide-checkbox-column
-                columns={columnsList}
-                onrowaction={handleRowAction}>
-            </lightning-datatable>
         </div>
-        <div style="width: 467px">
-            <c-app-selected-prod selection={selection}
-                                 onupdate={handleRemove}></c-app-selected-prod>
-        </div>
-</div> -->
-
+    
+    
     </template>
 </template>

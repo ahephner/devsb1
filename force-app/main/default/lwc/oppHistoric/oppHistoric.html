@@ -1,0 +1,51 @@
+<template>
+    <template if:false={loaded}>
+        <lightning-spinner 
+            alternative-text="Loading" 
+            size="large"></lightning-spinner>
+    </template>
+<template if:true={loaded}>
+<template if:false={nothingFound}>
+    <div class="slds-grid">
+        <div class="slds-col slds-size_3-of-8">
+            <select name="address" class="slds-select"  onchange={selectChange}>
+            
+            <template for:each={options} for:item='x'>
+
+                    <option key={x.value} value={x.value}>{x.label}</option>
+            </template>
+          </select>
+        </div>
+        <div class="slds-col slds-size_3-of-8 displayLine">
+            <lightning-button 
+            class='slds-m-left_small' 
+            variant="destructive"
+            label="Back" 
+            onclick={handleToSearch} 
+          ></lightning-button>
+
+          <span class="slds-m-left_small displayLine">
+            <h1>Info</h1>
+            <lightning-helptext 
+              content={helpMessage}
+            ></lightning-helptext>
+          </span>
+        </div>
+    </div>
+    <div class='slds-grid'>
+        <div class='slds-col slds-size_8-of-8'>
+    <lightning-datatable
+    key-field="Id"
+    data={prod}
+    hide-checkbox-column
+    columns={columnsList}
+    onrowaction={handleRowAction}>
+</lightning-datatable>
+</div>
+</div>
+</template>
+<template if:true={nothingFound}>
+    <p>{mess}</p>
+</template>
+</template>
+</template>

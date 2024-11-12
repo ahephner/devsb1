@@ -1,18 +1,22 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, api } from 'lwc';
 import { APPLICATION_SCOPE,MessageContext, publish, subscribe, unsubscribe} from 'lightning/messageService';
 import Program_Builder from '@salesforce/messageChannel/Program_Builder__c';
+import getAreas from '@salesforce/apex/appProduct.getAreas';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getRecord } from 'lightning/uiRecordApi';
 import AREA from '@salesforce/schema/Application__c.Area__c';
 import SQFT from '@salesforce/schema/Application__c.Area__r.Area_Sq_Feet__c';
 import PREFMEASURE from '@salesforce/schema/Application__c.Area__r.Pref_U_of_M__c';
-
 import addProducts from '@salesforce/apex/addApp.addProducts';
+import cloneSingleApp from '@salesforce/apex/cpqProgramClone.cloneSingleApp';
+const fields = [AREA, SQFT, PREFMEASURE];
 
-const fields = [AREA, SQFT, PREFMEASURE]
+
 export default class UpdateTable extends LightningElement {
+    @api recordId;
     updateExposed = false;
-    loaded = false; 
+    loaded = false;
+    showCopyDate = false; 
     subscritption = null; 
     upProdTable = false;
     showButton = true; 
@@ -20,7 +24,8 @@ export default class UpdateTable extends LightningElement {
     selectedProducts = [];
     areaId;
     sqFt; 
-    ornamental 
+    ornamental; 
+    areaOptions=[]
     buttonText = 'Save';
     disableBtn = false; 
     @wire(MessageContext)
@@ -28,8 +33,6 @@ export default class UpdateTable extends LightningElement {
 //subscribe to message channel
     subscribeToMessage(){
         if(!this.subscritption){
-            console.log('listening');
-            
             this.subscritption = subscribe(
                 this.messageContext,
                 Program_Builder,
@@ -47,7 +50,8 @@ export default class UpdateTable extends LightningElement {
         this.upProdTable = message.updateProd; 
         this.addProduct = message.addProd; 
         this.loaded = true;
-        this.buttonText = 'Save'
+        this.buttonText = 'Save';
+        this.areaOptions = message.areaArray; 
     }
 //life cycle hooks
     unsubscribeFromMessageChannel(){
@@ -61,6 +65,7 @@ export default class UpdateTable extends LightningElement {
     disconnectedCallback(){
         this.unsubscribeFromMessageChannel(); 
     }
+   
 //get the areaInfo need for making calculations in the pricing
 @wire(getRecord,{recordId:'$appId', fields: fields})
 wiredareaInfo({error,data}){
@@ -84,8 +89,10 @@ wiredareaInfo({error,data}){
         this.areaId = data.fields.Area__c.value;
         let prefMeasure = data.fields.Area__r.value.fields.Pref_U_of_M__c.value
         this.ornamental = prefMeasure  === '100 Gal' ? true : false;        
+
     }
 }
+    
     addProducts(){
         this.buttonText = 'Done';
         this.showButton = false; 
@@ -95,7 +102,41 @@ wiredareaInfo({error,data}){
             this.template.querySelector('c-update-ornamental-rate-price').addProducts();
         }
     }
+    copyApp(){
+        this.showCopyDate = true; 
+    }
 
+    closeDatePicker(){
+        this.showCopyDate = false; 
+    }
+
+    async copyProgram(x){
+        this.loaded = false; 
+        let dateUpdate = x.detail.date;
+        let areaid = x.detail.area 
+        this.showCopyDate = false; 
+        let mess = await cloneSingleApp({appId: this.appId, copyDate: dateUpdate, aId: areaid});
+        if(mess === 'success'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success', 
+                    message: 'App Copied!', 
+                    variant: 'success'
+                }) 
+            );
+            this.tellTable()
+            this.closeModal()
+        }else if(mess!= 'sucess'){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error deleting record',
+                    message: JSON.stringify(mess),
+                    variant: 'error'
+                })
+            ) 
+        } 
+        this.loaded = true; 
+    }
     handleNext(){
         let txt = this.buttonText; 
        
@@ -140,7 +181,7 @@ wiredareaInfo({error,data}){
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Success',
-                        message: 'Application created '+ this.appName,
+                        message: 'Application updated '+ this.appName,
                         variant: 'success',
                     }),
                 );

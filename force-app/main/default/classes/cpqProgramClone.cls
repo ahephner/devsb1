@@ -107,4 +107,50 @@ public class cpqProgramClone {
      }
        return retMess;
   }
+    
+    @AuraEnabled
+    public static string cloneSingleApp(string appId, Date copyDate, string aId){
+        string messBack; 
+        try{
+            Application__c newApp = new Application__c(); 
+            List<App_Product__c> ListCloneProds = new List<App_Product__c>(); 
+            Application__c ogApp = [SELECT Number_of_Apps__c, Name, Area__c, Child_Application__c, 
+                                    Clone__c, Date__c, Application_K_Total__c, Month__c, Multi_Application__c, 
+                                    Application_N_Total__c, Note__c, Application_P_Total__c, Parent_Application__c, Prev_App_Id__c, 
+                                    Product_List__c, Repeat__c, 
+                                    Total_Units__c, Week__c, Weeks_Apart__c FROM Application__c WHERE Id =: appId limit 1];
+            
+            newApp = ogApp.clone(false, false, false, false); 
+            newApp.Name = newApp.Name + ' c';
+            newApp.Date__c = copyDate; 
+            newApp.Area__c = aId; 
+            insert newApp; 
+            id idForAppProduct = newApp.Id; 
+            
+            //get products
+             List<App_Product__c> prod = new List<App_Product__c>([SELECT Name, Application__c, Cost_per_Acre__c, Cost_per_M__c, 
+                                 							       K__c, LBS_ACRE__c, Margin__c, N__c, Note__c, Note_Other__c, 
+                                 							       OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
+                                           					       Unit_Price__c, Units_Required__c FROM App_Product__c 
+                                                                   where Application__c =: appId]);
+            system.debug('new id '+ idForAppProduct); 
+         for(App_Product__c x: prod){
+             	system.debug('for app '+x);
+                App_Product__c clonedProd = x.clone(false);	
+             	clonedProd.Application__c = idForAppProduct;  
+             	ListCloneProds.add(clonedProd); 
+         }
+         
+         if(ListCloneProds.size()>= 1){
+             insert ListCloneProds;
+             messBack = 'success'; 
+         }
+        }catch(exception e){
+            messBack = string.valueof(e); 
+        }
+        
+        //string messBack = 'appId '+appId + ' Date: '+copyDate; 
+        //string messBack = 'hello from apex'; 
+        return messBack;
+    }
 }
