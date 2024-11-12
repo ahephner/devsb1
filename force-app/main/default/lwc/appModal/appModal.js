@@ -195,6 +195,9 @@ valid(){
         }else if((inputField.type==='text' || inputField.label==='Pref Unit of Measure') &&!inputField.checkValidity()){
             errorMessages.push(`make sure you enter a ${inputField.label}`);
             isValid = false;
+        }else if(inputField.label==='Turf Type'&&!inputField.checkValidity()){
+            errorMessages.push(`make sure you enter a ${inputField.label}`);
+            isValid = false;
         }
     })
     return {isValid, errorMessages}; 

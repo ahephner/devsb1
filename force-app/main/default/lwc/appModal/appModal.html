@@ -32,13 +32,13 @@
                         <!-- Turf Type -->
                         <lightning-combobox
                           name="turftype"
+                          class='validate' 
                           label="Turf Type"
                           value={stand}
                           placeholder="Select Type"
                           options={typeOptions}
                           onchange={setType} 
-                           
-                           
+                          required 
                         ></lightning-combobox>
                     </div>
                                 <div class="slds-col slds-size_1-of-2">
