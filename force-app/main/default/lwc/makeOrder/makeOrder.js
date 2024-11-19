@@ -57,10 +57,10 @@ export default class MakeOrder extends LightningElement {
         this.sliderValue = 75;
         this.msg = 'Saving Product Info';
         let saveProd = await insertProd({oppId: opp, appIds:orders})
-        console.log('back',saveProd)
+        
         this.sliderValue = 100; 
         //let prodsOnly = await readProds({oppId: opp, appIds:orders});
-        console.log(prodsOnly)
+       
         //sandbox
         //this.link = `https://advancedturf--full.lightning.force.com/lightning/r/Opportunity/${opp}/view`;
         //full
