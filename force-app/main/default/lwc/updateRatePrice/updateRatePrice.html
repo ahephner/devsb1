@@ -2,7 +2,12 @@
  
     <template if:true={loaded}>
         <template if:false={updateMulti}>
-
+                    <!--Direct SHIP -->
+                    <lightning-input type="toggle" 
+                                     label="Direct Ship" 
+                                     name="input1" 
+                                     checked={dropShipCheck}
+                                     onchange={handleDropShip}></lightning-input>
             <!-- Add more products -->
         <template if:true={addMore}>
             <div class="slds-col slds-size_1-of-1">

@@ -50,7 +50,8 @@ public class appProduct {
                                       Product__r.hasFertilizer__c, product__r.X1_Gallon_Weight__c, Product__r.Floor_Price__c,Manual_Charge_Size__c,
                                       N__c, P__c, K__c, Application__r.Multi_Application__c, Application__r.prev_app_id__c, Application__r.Parent_Application__c,
                                       Cost_per_M__c, Cost_per_Acre__c,Application__r.Area__r.Program__r.Account__c,Product__r.Website_Label__c,
-                                      Application__r.Program_ID__c, Application__r.Area__r.Required_Gallons__c,altPriceBookName__c, isLowVol__c, Spray_Vol_M__c
+                                      Application__r.Program_ID__c, Application__r.Area__r.Required_Gallons__c,altPriceBookName__c, isLowVol__c, Spray_Vol_M__c,
+                                      Application__r.Direct_Ship__c
                                       from App_Product__c where Application__c =: app];
         
         return prods; 

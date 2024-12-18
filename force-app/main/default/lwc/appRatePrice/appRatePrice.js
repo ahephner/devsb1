@@ -220,13 +220,13 @@ export default class AppRatePrice extends LightningElement {
                 let targetId = e.target.name; 
                 
                 this.delay = setTimeout(()=>{
-                    this.data[index].Unit_Price__c = e.detail.value;
+                    this.data[index].Unit_Price__c = Number(e.detail.value);
                     //this.data[index].Unit_Price__c = Number(this.data[index].Unit_Price__c);
                     //console.log(typeof this.data[index].Unit_Price__c +' unit Type');          
                         
                         if(this.data[index].Unit_Price__c > 0 && this.data[index].Unit_Area__c != '100 Gal'){
                         console.log('unit price')
-                        this.data[index].Margin__c = roundNum((1 - (this.data[index].Product_Cost__c /this.data[index].Unit_Price__c))*100, 2);
+                        this.data[index].Margin__c = roundNum((1 - (this.data[index].Unit_Cost__c /this.data[index].Unit_Price__c))*100, 2);
                         this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2);
                         let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
                         let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
@@ -239,7 +239,7 @@ export default class AppRatePrice extends LightningElement {
                     }else if(this.data[index].Unit_Price__c > 0 && this.data[index].Unit_Area__c === '100 Gal'){
                         let {Rate2__c, Product_Size__c, Spray_Vol_M__c} = this.data[index];
 
-                        this.data[index].Margin__c = roundNum((1 - (this.data[index].Product_Cost__c /this.data[index].Unit_Price__c))*100,2)
+                        this.data[index].Margin__c = roundNum((1 - (this.data[index].Unit_Cost__c /this.data[index].Unit_Price__c))*100,2)
     
                         if(Spray_Vol_M__c>0 && Rate2__c> 0){
                             let finished = lowVolume(Rate2__c, Product_Size__c, Spray_Vol_M__c, this.data[index].Unit_Price__c) 
@@ -286,7 +286,7 @@ export default class AppRatePrice extends LightningElement {
                     this.delay = setTimeout(()=>{
                             this.data[index].Margin__c = Number(m.detail.value);
                             if(1- this.data[index].Margin__c/100 > 0 && this.data[index].Unit_Area__c != '100 Gal'){
-                                this.data[index].Unit_Price__c = roundNum(this.data[index].Product_Cost__c /(1- this.data[index].Margin__c/100), 2)
+                                this.data[index].Unit_Price__c = roundNum(this.data[index].Unit_Cost__c /(1- this.data[index].Margin__c/100), 2)
                                 this.data[index].Total_Price__c = roundNum(this.data[index].Units_Required__c * this.data[index].Unit_Price__c, 2)
                                 let costs = perProduct(this.data[index].Total_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c, this.data[index].Unit_Area__c);
                                 let prodCost = pricePerUnit(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c,this.data[index].Unit_Area__c);
@@ -300,7 +300,7 @@ export default class AppRatePrice extends LightningElement {
                             }else if(1- this.data[index].Margin__c/100 > 0 && this.data[index].Unit_Area__c === '100 Gal'){
                                 let {Rate2__c, Product_Size__c, Spray_Vol_M__c} = this.data[index];
                                 
-                                this.data[index].Unit_Price__c = roundNum(this.data[index].Product_Cost__c /(1- this.data[index].Margin__c/100),2);
+                                this.data[index].Unit_Price__c = roundNum(this.data[index].Unit_Cost__c /(1- this.data[index].Margin__c/100),2);
                                 
                                 if(Spray_Vol_M__c>0 && Rate2__c> 0){
                                     let finished = lowVolume(Rate2__c, Product_Size__c, Spray_Vol_M__c, this.data[index].Unit_Price__c) 
@@ -411,7 +411,7 @@ export default class AppRatePrice extends LightningElement {
                this.loaded = false; 
                let note = this.oppNote.length > 0 ? this.oppNote : '';
                this.dispatchEvent(new CustomEvent('save',{
-                    detail: [this.data, note]
+                    detail: [this.data, note, this.isDropShip]
                }));    
                //this.loaded = true; 
                return true;
@@ -428,25 +428,26 @@ export default class AppRatePrice extends LightningElement {
 
         //handle price warnings
         handleWarning = (targ, flr, price, ind)=>{
-            //console.log( 2, flr, 3, price, 4, targ);
-            
-            if(price>=flr){        
-                this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
-                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
-                this.data[ind].goodPrice = true; 
-               
-            }else if(price<flr){
-                this.template.querySelector(`[data-id="${targ}"]`).style.color ="red";
-                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="red";
-                this.data[ind].goodPrice = false;
+            if(this.isDropShip){
+                return;
+            }else{
+                if(price>=flr){        
+                    this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
+                    this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
+                    this.data[ind].goodPrice = true; 
+                   
+                }else if(price<flr){
+                    this.template.querySelector(`[data-id="${targ}"]`).style.color ="red";
+                    this.template.querySelector(`[data-margin="${targ}"]`).style.color ="red";
+                    this.data[ind].goodPrice = false;
+                }
+                //seems backward but using a disable btn on the productTable. So if it's bad I need to return a true so the button is disabled. 
+                this.goodPricing = checkPricing(this.data) === true ? false : true;
+                
+                    this.dispatchEvent(new CustomEvent('price',{
+                        detail: this.goodPricing
+                    })); 
             }
-            //seems backward but using a disable btn on the productTable. So if it's bad I need to return a true so the button is disabled. 
-            this.goodPricing = checkPricing(this.data) === true ? false : true;
-            
-                this.dispatchEvent(new CustomEvent('price',{
-                    detail: this.goodPricing
-                })); 
-            
         }
 priceBookName
         hiMouse(e){
@@ -454,7 +455,7 @@ priceBookName
             let index = this.data[e.target.dataset.code];
             //console.log(index);
             this.productName = index.Product_Name__c;
-            this.productCost = index.agency ? 'Agency' : index.Product_Cost__c;
+            this.productCost = index.agency ? 'Agency' : index.Unit_Cost__c;
             this.priceBookName = index.altPriceBookName__c;
             this.levelOne = index.levelOne;
             this.levelTwo = index.levelTwo;
@@ -465,5 +466,15 @@ priceBookName
             this.prodN = index.N__c;
             this.prodP = index.P__c;
             this.prodK = index.K__c; 
+        }
+isDropShip = false; 
+        handleDropShip(evt){
+            evt.preventDefault();
+            this.isDropShip = evt.target.checked;
+            if(this.isDropShip && this.goodPricing){
+                this.dispatchEvent(new CustomEvent('price',{
+                    detail: false
+                }));
+            }
         }
 }

@@ -36,6 +36,7 @@ export default class ProductTable extends LightningElement {
     customInsert = false; 
     currentStage = 'appInfo'
     applicationNote; 
+    dropShip;
     accId; 
     //if an application is the first of a multi-insert
     parApp; 
@@ -187,7 +188,7 @@ export default class ProductTable extends LightningElement {
                Units_Required__c: 1,
                Unit_Area__c: pref(this.areaUM, item.Product_Type__c),  
                Unit_Price__c: item.agency ? item.floorPrice : item.UnitPrice,
-               Product_Cost__c: item.unitCost, 
+               Unit_Cost__c: item.unitCost, 
                altPriceBookId__c: item.alt_PB_Id,
                altPriceBookName__c: item.alt_PB_Name,
                altPriceBookEntryId__c: item.alt_PBE_Id,
@@ -220,12 +221,14 @@ export default class ProductTable extends LightningElement {
         //catching values from appRatePrice. It's an array that you can get values using [1]
         this.selectedProducts = prod.detail[0]; 
         this.applicationNote = prod.detail[1]; 
+        this.dropShip = prod.detail[2]; 
         let params = {
             appName: this.appName,
             appArea: this.areaId,
             appDate: this.appDate,
             appNote: this.applicationNote,
-            parentApp: this.parApp
+            parentApp: this.parApp,
+            ds: this.dropShip
         }
         addApplication({wrapper:params})
             .then((resp)=>{

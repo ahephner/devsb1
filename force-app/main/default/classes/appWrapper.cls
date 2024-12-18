@@ -11,4 +11,6 @@ public with sharing class appWrapper {
     public String appNote {get;set;}
     @AuraEnabled
     public boolean parentApp {get; set;}
+    @AuraEnabled
+    public boolean ds {get;set;}
 }

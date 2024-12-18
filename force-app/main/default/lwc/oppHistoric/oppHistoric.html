@@ -46,6 +46,11 @@
 </template>
 <template if:true={nothingFound}>
     <p>{mess}</p>
+    <lightning-button 
+      variant="success"
+      label="Go Back " 
+      onclick={handleToSearch} 
+    ></lightning-button>
 </template>
 </template>
 </template>

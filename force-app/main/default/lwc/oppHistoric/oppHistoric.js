@@ -160,5 +160,9 @@ export default class OppHistoric extends LightningElement{
         this.dispatchEvent(new CustomEvent('close')); 
     }
 
+    handleBack(){
+        
+    }
+
     
 }

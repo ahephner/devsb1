@@ -29,6 +29,7 @@ public with sharing class addApp {
                              ap.Rate2__c = temp.Rate2__c;
                              ap.Note__c = temp.Note__c; 
                              ap.Unit_Area__c = temp.Unit_Area__c;
+                             ap.Unit_Cost__c = temp.Unit_Cost__c; 
                              ap.Unit_Price__c = temp.Unit_Price__c; 
                              ap.Margin__c = temp.Margin__c;
                              ap.Cost_per_M__c = temp.Cost_per_M__c;
@@ -39,6 +40,7 @@ public with sharing class addApp {
                              ap.K__c = temp.K__c;
                              ap.isLowVol__c = temp.isLowVol__c;
                              ap.Spray_Vol_M__c = temp.Spray_Vol_M__c;  
+                             ap.Acres_Treated__c = temp.Acres_Treated__c; 
                              ap.altPriceBookName__c = temp.altPriceBookName__c;
                              ap.altPriceBookId__c = temp.altPriceBookId__c; 
                              ap.altPriceBookEntryId__c = temp.altPriceBookEntryId__c;  
@@ -134,6 +136,7 @@ public with sharing class addApp {
                   li.K__c = x.K__c;
                   li.isLowVol__c = x.isLowVol__c;
                   li.Spray_Vol_M__c = x.Spray_Vol_M__c;
+                  li.Acres_Treated__c = x.Acres_Treated__c; 
                   li.altPriceBookName__c = x.altPriceBookName__c;
                   li.altPriceBookId__c = x.altPriceBookId__c; 
                   li.altPriceBookEntryId__c = x.altPriceBookEntryId__c; 
@@ -161,6 +164,7 @@ public with sharing class addApp {
                   li.Spray_Vol_M__c = x.Spray_Vol_M__c;
                   li.altPriceBookName__c = x.altPriceBookName__c;
                   li.altPriceBookId__c = x.altPriceBookId__c; 
+                  li.Acres_Treated__c = x.Acres_Treated__c; 
                   li.altPriceBookEntryId__c = x.altPriceBookEntryId__c; 
                   li.Note_Other__c = x.Note_Other__c;
                   li.Manual_Charge_Size__c = x.Manual_Charge_Size__c;
