@@ -72,6 +72,8 @@ export default class AppDataTable extends LightningElement {
     customerName; 
     totalPrice = 0.00; 
     rowId; 
+
+    
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
@@ -102,7 +104,7 @@ export default class AppDataTable extends LightningElement {
             //console.log('app table recordID', this.recordId)   
             this.wiredAppList = result; 
             if(result.data){
-                
+                console.log(result.data)
                 this.appList = result.data.map(item=>{
                     let madeOrder = item.Converted__c ? 'slds-icon-custom-custom5 slds-text-color_default': 'slds-text-color_default';
                     return{...item, 'madeOrder': madeOrder}
@@ -112,8 +114,10 @@ export default class AppDataTable extends LightningElement {
                 this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
                 this.error = undefined; 
                 this.totalPrice = onLoadTotalPrice(result.data); 
+                this.lat = result.data[0].Area__r.Program__r.Account__r.BillingLatitude;
+                this.long = result.data[0].Area__r.Program__r.Account__r.BillingLongitude;
                 this.loaded = true;
-                
+                 
             }else if(result.error){
                 this.error = result.error 
                 this.appList = undefined; 

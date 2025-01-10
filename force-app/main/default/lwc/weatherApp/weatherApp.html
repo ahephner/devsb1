@@ -1,0 +1,46 @@
+<template>
+    <lightning-card icon-name="standard:account" variant="base">
+      <div slot="title">
+          Weather Station: {station}
+      </div>
+
+      <div slot="footer">
+    
+      </div>
+      <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_1-of-1">
+          <span class="slds-text-heading_large">Description: {desc}</span>
+        </div>
+        <!-- Card Body  -->
+        <div class="slds-col slds-size_1-of-2 mainBox">
+          <span class="slds-text-heading_large">Today's High: {currentMax}&#x2109;</span>
+
+        </div>
+          <div class="slds-col slds-size_1-of-2 mainBox">
+            <span class="slds-text-heading_large">Today's Low: {currentLow}&#x2109;</span>
+
+          </div>
+          <div class="slds-col slds-size_1-of-2 mainBox">
+            <span class="slds-text-heading_large">Fells Like: {feelLike}&#x2109;</span>
+
+          </div>
+          <div class="slds-col slds-size_1-of-2 mainBox">
+            <span class="slds-text-heading_large">Wind Speed: {windSpeed}MPH</span>
+          </div>
+           
+           
+        
+        <div class="slds-col slds-size_1-of-2 mainBox">
+           
+                <span class="slds-text-heading_large">Humidity: {humidity}%</span>
+                
+                
+                
+              </div>
+              <div class="slds-col slds-size_1-of-2 mainBox">
+                
+                <span class="slds-text-heading_large">Cloud Coverage: {cloud}%</span>
+        </div>
+      </div>
+    </lightning-card>
+</template>

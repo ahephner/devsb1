@@ -212,6 +212,8 @@ export default class ProductTable extends LightningElement {
                Manual_Charge_Size__c: 0,
                url: item.labelURL,
                sprayVolume: this.ornamental ? this.sprayVol: 0,
+               Cost_per_100__c:'',
+               Cost_per_Gallon__c:'', 
                manCharge: item.Name.toLowerCase().includes('manual charge')
             }
         } );

@@ -15,6 +15,7 @@
             </div>
             </template>
         <template if:true={loaded}>
+            <template lwc:if={isAccountOwner}>
             <div class="slds-grid">
                 <div class="slds-col slds-size_2-of-4">
                     <p>Wait did you know you can turn this into an order? Close the screen then hit make order and change the account on the order</p>
@@ -27,6 +28,26 @@
                     </div>
                 </div>
             </div>
+        </template>
+        <template lwc:else>
+            <!-- <div class="slds-col slds-size_2-of-4"> -->
+                <p>Select your account you want to clone this too</p>
+
+            <!-- </div> -->
+             <div class="slds-grid">
+                <div class="slds-col slds-size_2-of-4">
+                    <div class='slds-var-m-top_medium'>
+                        <c-account-look-up onnewaccount={handleAccount}
+                        onclearaccid={handleClear}></c-account-look-up>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_2-of-4 buttons"> 
+                        <lightning-button variant="brand" label="Clone Program" title="titleName" disabled={btnDisabled} onclick={handleClone2}></lightning-button>
+                        <lightning-button variant="destructive" label="Close Screen" title="titleName" onclick={closeScreen}></lightning-button>
+                </div>
+             </div>
+
+        </template>
         </template> 
     </lightning-quick-action-panel>
 </template>

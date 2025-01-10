@@ -169,4 +169,3 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
         
     }
 }
-
