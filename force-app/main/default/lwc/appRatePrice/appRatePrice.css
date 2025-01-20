@@ -33,3 +33,8 @@
 .lowVolume{
     display: -webkit-inline-box
 }
+
+.inLine{
+    display: inline-flex;
+    background-color: lightgray;
+}

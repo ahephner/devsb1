@@ -49,3 +49,8 @@
 .lineUp{
     margin-bottom: 1%;
 }
+
+.inLine{
+    display: inline-flex;
+    background-color: lightgray;
+}

@@ -6,6 +6,9 @@ import cloneProducts from '@salesforce/apex/cpqProgramClone.cloneProducts';
 import isOwner from '@salesforce/apex/cpqProgramClone.isOwner';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import Id from '@salesforce/user/Id';
+import getPriceBooks from '@salesforce/apex/getPriceBooks.getPriceBookIds';
+//this returns either a set of price book id's or array of objects of all the avaliable price books for the account in order of priority. Standard is always there
+import { priorityPricing} from 'c/helperOMS';
 export default class CloneProgram extends NavigationMixin(LightningElement) {
     @api recordId
     loaded = false; 
@@ -34,7 +37,6 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
    async currentOWner(accOwner){
         this.isAccountOwner = this.userId === accOwner ? true: false; 
         this.loaded = true;
-        console.log('is owner ', this.isAccountOwner)
     }
     //check screen size to show table on desktop and cards on mobile
     screenSize = (screen) => {
@@ -56,6 +58,7 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
     }
     @track mapIds = [];
     newURL; 
+    pbIds;
     async handleClone2(){
         this.loaded = false; 
         this.msg = 'Gathering'
@@ -67,9 +70,19 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
             //set values that came back in a wrapper
             this.newURL = this.data.programId;
             let apps = [...this.data.backApps]; 
+            
+            if(!this.isAccountOwner){
+                this.msg = 'Getting Account Price Books'
+                this.sliderValue = 50;
+                let priceBooks = await getPriceBooks({accountId: this.accId});
+                let pbInfo = await priorityPricing(priceBooks);
+                this.pbIds = [...pbInfo.priceBookIdArray]; 
+            }
+            
+            
             this.sliderValue = 75; 
             this.msg = 'Cloning App Products'
-          
+            
             let finalStep = await cloneProducts({JSONSTRING: JSON.stringify(apps)})
             this.sliderValue = 95; 
             this.msg = 'Finishing up. Redirecting Soon'; 

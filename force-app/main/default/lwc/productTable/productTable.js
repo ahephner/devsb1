@@ -40,6 +40,10 @@ export default class ProductTable extends LightningElement {
     accId; 
     //if an application is the first of a multi-insert
     parApp; 
+    //tank size and volume
+    tankSize;
+    totalSprayVol;
+    sprayMeasurement; 
    @track selectedProducts = []; 
 
     @wire(MessageContext)
@@ -223,14 +227,20 @@ export default class ProductTable extends LightningElement {
         //catching values from appRatePrice. It's an array that you can get values using [1]
         this.selectedProducts = prod.detail[0]; 
         this.applicationNote = prod.detail[1]; 
-        this.dropShip = prod.detail[2]; 
+        this.dropShip = prod.detail[2];
+        this.tankSize = prod.detail[3];
+        this.sprayMeasurement = prod.detail[4]; 
+        this.totalSprayVol = prod.detail[5];
         let params = {
             appName: this.appName,
             appArea: this.areaId,
             appDate: this.appDate,
             appNote: this.applicationNote,
             parentApp: this.parApp,
-            ds: this.dropShip
+            ds: this.dropShip,
+            tankSize: this.tankSize,
+            measurement: this.sprayMeasurement,
+            volume: this.totalSprayVol
         }
         addApplication({wrapper:params})
             .then((resp)=>{

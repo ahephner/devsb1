@@ -53,6 +53,9 @@ export default class UpdateRatePrice extends LightningElement {
     noteOps;
     dropShipCheck; 
     isDropShip; 
+    tankSize;
+    sprayMeasure
+    spraySize;
     //Here is notes per app
     //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
     wasNewNote = false; 
@@ -142,7 +145,10 @@ export default class UpdateRatePrice extends LightningElement {
                             this.multiApp = this.prodlist[0].Application__r.Multi_Application__c; 
                             this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;
                             this.dropShipCheck = this.prodlist[0].Application__r.Direct_Ship__c ? true:false;              
-                            this.isDropShip = this.prodlist[0].Application__r.Direct_Ship__c
+                            this.isDropShip = this.prodlist[0].Application__r.Direct_Ship__c;
+                            this.tankSize = this.prodlist[0].Application__r.Tank_Size__c;
+                            this.sprayMeasure = this.prodlist[0].Application__r.Spray_Vol_Meas__c;
+                            this.spraySize = this.prodlist[0].Application__r.Spray_Vol__c;
     //need for doing math later
                 this.areaSizeM= roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c),2);
                 this.areaAcres = roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Acres__c),2);
@@ -777,7 +783,10 @@ get radioOpts(){
             appDate: this.appDate,
             appArea: this.areaId, 
             appNote: this.oppNote,
-            ds: this.isDropShip
+            ds: this.isDropShip,
+            tankSize: this.tankSize,
+            measurement: this.sprayMeasure,
+            volume: this.spraySize
         }
 
         let appUpdate = await updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote});
@@ -821,7 +830,10 @@ get radioOpts(){
             appDate: this.appDate,
             appArea: this.areaId, 
             appNote: this.oppNote,
-            ds: this.isDropShip
+            ds: this.isDropShip,
+            tankSize: this.tankSize,
+            measurement: this.sprayMeasure,
+            volume: this.spraySize
         }
         //console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
         updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
@@ -935,5 +947,27 @@ get radioOpts(){
                 detail: false
             }));
         }
+    }
+
+    get measOptions() {
+        return [
+            { label: 'M', value: 'M' },
+            { label: 'Acre', value: 'Acre' }
+            
+        ];
+    }
+    //value={tankSize} step="0.01" onchange={setTankSize}
+    setVolume(x){
+        this.spraySize = x.detail.value; 
+        console.log('spraySize ', this.spraySize)
+    }
+
+    setUoM(x){
+        this.sprayMeasure = x.detail.value; 
+        console.log('sprayMeasure ', this.sprayMeasure)
+    }
+    setTankSize(x){
+        this.tankSize = x.detail.value; 
+        console.log('tankSize', this.tankSize)
     }
 }

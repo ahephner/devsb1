@@ -7,6 +7,10 @@ public with sharing class addApp {
           app.Date__c = date.valueof(wrapper.appDate); 
           app.Note__c = wrapper.appNote;
           app.Parent_Application__c = wrapper.parentApp;
+          app.Direct_Ship__c = wrapper.ds; 
+          app.Spray_Vol_Meas__c = wrapper.measurement;
+          app.Spray_Vol__c = wrapper.volume;
+          app.Tank_Size__c = wrapper.tankSize;
           insert app; 
           return app; 
       }
@@ -21,7 +25,7 @@ public with sharing class addApp {
                       if(parser.getCurrentToken() == JSONToken.START_OBJECT){
                           App_Product__c ap = new App_Product__c();
                           App_Product__c temp = (App_Product__c)parser.readValueAs(App_Product__c.class);
-                          system.debug('temp ' + temp);
+                          system.debug('temp ' + temp.Unit_Cost__c);
                           if(temp.Application__c != null){
                              //ap.Id = temp.Id;
                              ap.Product__c = temp.Product__c;
@@ -38,6 +42,8 @@ public with sharing class addApp {
                              ap.N__c = temp.N__c;
                              ap.P__c = temp.P__c;
                              ap.K__c = temp.K__c;
+                             ap.Cost_per_100__c = temp.Cost_per_100__c;
+                             ap.Cost_per_Gallon__c = temp.Cost_per_Gallon__c;
                              ap.isLowVol__c = temp.isLowVol__c;
                              ap.Spray_Vol_M__c = temp.Spray_Vol_M__c;  
                              ap.Acres_Treated__c = temp.Acres_Treated__c; 
@@ -64,12 +70,19 @@ public with sharing class addApp {
       //the Area update is not in this iteration
       @AuraEnabled 
       public static Application__c updateApplication(appWrapper wrapper, string id, boolean newNote){
-          Application__c app = [select Name, Area__c, Date__c, Note__c from Application__c where id =: id]; 
+          Application__c app = [select Name, Area__c, Date__c, Note__c, Direct_Ship__c,
+                                Spray_Vol_Meas__c, Spray_Vol__c,Tank_Size__c from Application__c where id =: id]; 
           system.debug('newNote '+newNote);
-          if(app.Name	!= wrapper.appName || app.date__c != wrapper.appDate || newNote){
+          if(app.Name	!= wrapper.appName || app.date__c != wrapper.appDate || newNote || 
+             wrapper.ds!=app.Direct_Ship__c||wrapper.measurement	!= app.Spray_Vol_Meas__c ||
+            wrapper.volume != app.Spray_Vol__c || wrapper.tankSize != app.Tank_Size__c){
               app.Name = wrapper.appName;
               app.Date__c = wrapper.appDate;
-              app.Note__c = wrapper.appNote;   
+              app.Note__c = wrapper.appNote;  
+              app.Direct_Ship__c = wrapper.ds; 
+              app.Spray_Vol_Meas__c = wrapper.measurement;
+              app.Spray_Vol__c = wrapper.volume;
+              app.Tank_Size__c = wrapper.tankSize;
              // app.Area__c = wrapper.appArea; 
           }
           update(app); 
@@ -142,7 +155,8 @@ public with sharing class addApp {
                   li.altPriceBookEntryId__c = x.altPriceBookEntryId__c; 
                   li.Note_Other__c = x.Note_Other__c;
                   li.Manual_Charge_Size__c = x.Manual_Charge_Size__c;
-                  
+                  li.Cost_per_100__c = x.Cost_per_100__c;
+                  li.Cost_per_Gallon__c = x.Cost_per_Gallon__c;
                   //toInsert.add(li);
               }else{
                   system.debug('old product '+x.Id);
@@ -168,6 +182,8 @@ public with sharing class addApp {
                   li.altPriceBookEntryId__c = x.altPriceBookEntryId__c; 
                   li.Note_Other__c = x.Note_Other__c;
                   li.Manual_Charge_Size__c = x.Manual_Charge_Size__c;
+                  li.Cost_per_100__c = x.Cost_per_100__c;
+                  li.Cost_per_Gallon__c = x.Cost_per_Gallon__c;
               }
               toInsert.add(li);
           }

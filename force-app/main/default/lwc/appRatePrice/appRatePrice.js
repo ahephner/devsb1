@@ -411,7 +411,7 @@ export default class AppRatePrice extends LightningElement {
                this.loaded = false; 
                let note = this.oppNote.length > 0 ? this.oppNote : '';
                this.dispatchEvent(new CustomEvent('save',{
-                    detail: [this.data, note, this.isDropShip]
+                    detail: [this.data, note, this.isDropShip, this.tankSize,this.uMValue,this.sprayVol ]
                }));    
                //this.loaded = true; 
                return true;
@@ -476,5 +476,26 @@ isDropShip = false;
                     detail: false
                 }));
             }
+        }
+        sprayVol;
+        uMValue;
+        tankSize;  
+        get options() {
+            return [
+                { label: 'M', value: 'M' },
+                { label: 'Acre', value: 'Acre' }
+                
+            ];
+        }
+        //value={tankSize} step="0.01" onchange={setTankSize}
+        setVolume(x){
+            this.sprayVol = x.detail.value; 
+        }
+    
+        setUoM(x){
+            this.uMValue = x.detail.value; 
+        }
+        setTankSize(x){
+            this.tankSize = x.detail.value; 
         }
 }
