@@ -9,3 +9,13 @@
     margin-top: 39px;
     margin-left: 5px; 
 }
+
+.ops{
+    display: inline-flex;
+    width: 100%;
+}
+
+.ownerButton{
+    margin-top: 23px;
+    margin-left: 5px;
+}

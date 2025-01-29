@@ -16,15 +16,25 @@
             </template>
         <template if:true={loaded}>
             <template lwc:if={isAccountOwner}>
-            <div class="slds-grid">
-                <div class="slds-col slds-size_2-of-4">
-                    <p>Wait did you know you can turn this into an order? Close the screen then hit make order and change the account on the order</p>
+            <div class="slds-grid slds-wrap">
+                <div class="slds-col slds-size_1-of-1">
+                    <p class="slds-text-heading_small">New Feature:</p>
+                    <p>When cloning a program, you can choose to reset pricing per unit based on the account’s 
+                        priority pricing or keep the existing program’s pricing. Selecting 'Yes' in Use Priority Pricing 
+                        updates prices using current priority price books, while 'No' keeps them unchanged. Pricing can be edited after cloning.
+                    </p>
 
                 </div>
-                <div class="slds-col slds-size_2-of-4">
-                    <div class='slds-var-m-top_medium'>
-                        <lightning-button variant="brand" label="Nope Clone" title="titleName" onclick={handleClone2}></lightning-button>
-                        <lightning-button variant="destructive" label="Close Screen" title="titleName" onclick={closeScreen}></lightning-button>
+                <div class="slds-col slds-size_1-of-1">
+                    <div class='slds-var-m-top_medium ops'>
+                        <lightning-combobox
+                        name="Use Priority Pricing"
+                        label="Use Priority Pricing"
+                        value={priorityValue}
+                        placeholder="Select Progress"
+                        options={priorityOptions}
+                        onchange={usePriority} ></lightning-combobox>
+                        <lightning-button variant="brand" label="Clone" class="ownerButton" title="titleName" disabled={btnDisabled} onclick={handleClone2}></lightning-button>
                     </div>
                 </div>
             </div>
@@ -32,6 +42,7 @@
         <template lwc:else>
             <!-- <div class="slds-col slds-size_2-of-4"> -->
                 <p>Select your account you want to clone this too</p>
+                <p><i>Note: When cloning the new price per unit will reflect account based priority pricing just like opportunities</i></p>
 
             <!-- </div> -->
              <div class="slds-grid">

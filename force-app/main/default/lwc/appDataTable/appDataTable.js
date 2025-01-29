@@ -114,8 +114,9 @@ export default class AppDataTable extends LightningElement {
                 this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
                 this.error = undefined; 
                 this.totalPrice = onLoadTotalPrice(result.data); 
-                this.lat = result.data[0].Area__r.Program__r.Account__r.BillingLatitude;
-                this.long = result.data[0].Area__r.Program__r.Account__r.BillingLongitude;
+                //this needs to be it's own thing. 
+                this.lat = result.data[0] ? result.data[0].Area__r.Program__r.Account__r.BillingLatitude: '';
+                this.long = result.data[0]? result.data[0].Area__r.Program__r.Account__r.BillingLongitude: '';
                 this.loaded = true;
                  
             }else if(result.error){

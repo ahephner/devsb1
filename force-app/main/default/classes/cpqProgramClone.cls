@@ -5,8 +5,13 @@ public class cpqProgramClone {
         @AuraEnabled public list<Application__c> backApps; 
     }
     
+@AuraEnabled(cacheable=true)
+    public static string isOwner(string recId){
+        String accountOwner = [select Account__r.OwnerId from program__c where id =: recId limit 1].Account__r.OwnerId; 
+        return accountOwner; 
+    }    
 @AuraEnabled
-    public static returnWrapper cpqProgramCloneStep1(string recId){
+    public static returnWrapper cpqProgramCloneStep1(string recId, boolean newAccount, string accountId){
         
         SavePoint sp = Database.setSavepoint();
          
@@ -21,7 +26,9 @@ public class cpqProgramClone {
 			
             newPro = oldPro.clone(false); 
             newPro.Name += ' Cloned'; 
-
+            if(newAccount==false){
+                newPro.Account__c = accountId; 
+            }
            insert newPro; 
             newProgramId = newPro.Id;
             
@@ -51,6 +58,7 @@ public class cpqProgramClone {
                                  }
     }
     insert apps; 
+
 }
         }catch(exception e){
             Database.rollback(sp);
@@ -107,7 +115,62 @@ public class cpqProgramClone {
      }
        return retMess;
   }
-    
+        @AuraEnabled
+    public static string cloneProductsWithPriceBooks(string JSONSTRING, list<string> priceBookIds){
+         system.debug('data in cloneProductsWithPriceBooks'); 
+         string retMess = 'success'; 
+         Map<String, String> appId = new Map<String, String>(); 
+         List<App_Product__c> ListCloneProds = new List<App_Product__c>(); 
+         JSONParser parser = JSON.createParser(JSONSTRING); 
+                    
+        while(parser.nextToken() != null){
+        	if(parser.getCurrentToken() == JSONToken.START_ARRAY){
+            	while(parser.nextToken() != null){
+                	//system.debug('current name' + parser.getCurrentName() + ' current token' + parser.getCurrentToken());
+                    if(parser.getCurrentToken() == JSONToken.START_OBJECT){
+                    	application__c temp = (application__c)parser.readValueAs(application__c.class);
+                        appId.put(temp.Prev_App_Id__c, temp.Id);
+             
+                        parser.skipChildren();
+                     }
+                }
+           }   
+        } 
+     try{
+         //system.debug('parser '+appId.keySet());
+        List<App_Product__c> prod = new List<App_Product__c>([SELECT Name, Application__c, Cost_per_Acre__c, Cost_per_M__c, 
+                                 							       K__c, LBS_ACRE__c, Margin__c, N__c, Note__c, Note_Other__c, 
+                                 							       OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
+                                           					       Unit_Price__c, Units_Required__c, altPriceBookEntryId__c,
+                                                              	   altPriceBookId__c, altPriceBookName__c, Product__r.Size__c 
+                                                              	   FROM App_Product__c 
+                                                                   where Application__c in: appId.keySet()]);
+                    //system.debug('apps ---');
+                    //system.debug(prod);
+         for(App_Product__c x: prod){
+             App_Product__c clonedProd = x.clone(false);
+             	list<pricebookentry> pbInfo = getPriceBooks.priorityBestPrice(priceBookIds, x.Product__c); 
+             	clonedProd.altPriceBookEntryId__c = pbInfo[0].Id;
+             	clonedProd.altPriceBookId__c = pbInfo[0].Pricebook2Id;
+             	clonedProd.altPriceBookName__c = pbInfo[0].Pricebook2.Name; 
+             	clonedProd.Unit_Price__c = pbInfo[0].UnitPrice;
+             	clonedProd.Margin__c = pbInfo[0].List_Margin__c;
+             	//set cost per acre per thousand
+             	costCals costs = cpqProgramClone.calcAcreCharge(pbInfo[0].UnitPrice,x.Product__r.Size__c, x.Rate2__c,x.Unit_Area__c);
+             	clonedProd.Cost_per_Acre__c = costs.costPerAcre;
+             	clonedProd.Cost_per_M__c = costs.costPerM; 
+             	clonedProd.Application__c = appId.get(x.Application__c); 
+             	ListCloneProds.add(clonedProd); 
+         }
+         
+         if(ListCloneProds.size()> 1){
+             insert ListCloneProds; 
+         }
+     }catch(Exception e){
+        retMess = String.valueOf(e);
+     }
+       return retMess;
+  }
     @AuraEnabled
     public static string cloneSingleApp(string appId, Date copyDate, string aId){
         string messBack; 
@@ -117,13 +180,14 @@ public class cpqProgramClone {
             Application__c ogApp = [SELECT Number_of_Apps__c, Name, Area__c, Child_Application__c, 
                                     Clone__c, Date__c, Application_K_Total__c, Month__c, Multi_Application__c, 
                                     Application_N_Total__c, Note__c, Application_P_Total__c, Parent_Application__c, Prev_App_Id__c, 
-                                    Product_List__c, Repeat__c, 
+                                    Product_List__c, Repeat__c, Converted__c,
                                     Total_Units__c, Week__c, Weeks_Apart__c FROM Application__c WHERE Id =: appId limit 1];
             
             newApp = ogApp.clone(false, false, false, false); 
             newApp.Name = newApp.Name + ' c';
             newApp.Date__c = copyDate; 
             newApp.Area__c = aId; 
+            newApp.Converted__c = false; 
             insert newApp; 
             id idForAppProduct = newApp.Id; 
             
@@ -152,5 +216,33 @@ public class cpqProgramClone {
         //string messBack = 'appId '+appId + ' Date: '+copyDate; 
         //string messBack = 'hello from apex'; 
         return messBack;
+    }
+    
+    public class costCals{
+        public Decimal costPerAcre {get;set;}
+        public Decimal costPerM {get;set;}
+    }
+    private static costCals calcAcreCharge(Decimal productPrice, 
+                                   Decimal unitSize, 
+                                   Decimal prodRate, 
+                                   string unitOfMeasure){
+        costCals costs = new costCals();
+        Decimal acreCharge; 
+        Decimal mCharge;                                
+        Decimal priceOfUnit = productPrice/unitSize;
+                                      // system.debug('UnitSize '+unitSize + ' rate '+prodRate); 
+                                       //system.debug('priceOfUnit '+priceOfUnit + ' math '+priceOfUnit *prodRate);
+                                       if(unitofMeasure.contains('Acre')){
+                                           	   acreCharge = priceOfUnit *prodRate;
+                                           	   mCharge = (prodRate/43.56)*priceOfUnit; 
+                                       	//system.debug('per acre '+acreCharge);
+                                       }else{
+                                           //system.debug('per thousand');
+                                           	   acreCharge = priceOfUnit * (prodRate *43.56);
+                                           	   mCharge = priceOfUnit * prodRate;
+                                       }
+        costs.costPerAcre = acreCharge.setScale(2);
+        costs.costPerM = mCharge.setScale(2);                                
+        return costs; 
     }
 }
