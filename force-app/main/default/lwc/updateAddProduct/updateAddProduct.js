@@ -195,11 +195,11 @@ export default class UpdateAddProduct extends LightningElement {
                 Agency_Product__c: item.Product__r.Agency_Pricing__c,
                 Product_Cost__c: item.Product_Cost__c,
                 Product_Size__c: item.Product__r.Size__c,
-                nVal: item.N__c,
-                pVal: item.P__c,
-                kVal: item.K__c,
-                isFert: item.hasFertilizer__c,
-                galWeight: item.X1_Gallon_Weight__c
+                nVal: item.Product__r.N__c,
+                pVal: item.Product__r.P__c,
+                kVal: item.Product__r.K__c,
+                isFert: item.Product__r.hasFertilizer__c,
+                galWeight: item.Product__r.X1_Gallon_Weight__c
             }));
     
             if (backUpSearchUsed) {

@@ -22,14 +22,28 @@ const actions = [
 //table columns calling actions drop down in last place of the array
 //so drop down is always far right of table
 const columns = [
-    { label: 'Name', fieldName: 'Name' },
-    { label: 'Area', fieldName: 'Area_Name__c', sortable: "true" },
-    { label: 'Date', fieldName: 'Date__c', sortable: "true"},
+    { label: 'Name', fieldName: 'Name',
+        cellAttributes:{
+            class:{fieldName:'madeOrder'}
+        } 
+
+    },
+    { label: 'Area', fieldName: 'Area_Name__c', sortable: "true",
+        cellAttributes:{
+            class:{fieldName:'madeOrder'}
+        }  },
+    { label: 'Date', fieldName: 'Date__c', sortable: "true",
+        cellAttributes:{
+            class:{fieldName:'madeOrder'}
+        } },
     {label: 'Total Price', 
     fieldName:'Total_Price_ap__c', 
     type:'currency',
     sortable:'true',
-    cellAttributes: { alignment: 'left' }},
+    cellAttributes: { alignment: 'left',
+                    class:{fieldName: 'madeOrder'}
+     },
+},
 
     {
         type: 'action',
@@ -58,6 +72,8 @@ export default class AppDataTable extends LightningElement {
     customerName; 
     totalPrice = 0.00; 
     rowId; 
+
+    
     //lifestyle hooks for messageService
     connectedCallback(){
         this.subscribeToMessage();
@@ -88,15 +104,21 @@ export default class AppDataTable extends LightningElement {
             //console.log('app table recordID', this.recordId)   
             this.wiredAppList = result; 
             if(result.data){
-                
-                this.appList = result.data; 
-                this.copy = result.data; 
+                console.log(result.data)
+                this.appList = result.data.map(item=>{
+                    let madeOrder = item.Converted__c ? 'slds-icon-custom-custom5 slds-text-color_default': 'slds-text-color_default';
+                    return{...item, 'madeOrder': madeOrder}
+                }); 
+                this.copy = this.appList; 
                 this.programName = result.data[0] ? result.data[0].Program_Name__c :'' ;
                 this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
                 this.error = undefined; 
                 this.totalPrice = onLoadTotalPrice(result.data); 
+                //this needs to be it's own thing. 
+                this.lat = result.data[0] ? result.data[0].Area__r.Program__r.Account__r.BillingLatitude: '';
+                this.long = result.data[0]? result.data[0].Area__r.Program__r.Account__r.BillingLongitude: '';
                 this.loaded = true;
-                
+                 
             }else if(result.error){
                 this.error = result.error 
                 this.appList = undefined; 
@@ -282,7 +304,7 @@ export default class AppDataTable extends LightningElement {
                 }) 
             );
             refreshApex(this.wiredAppList)
-        }else if(mess!= 'sucess'){
+        }else if(mess!= 'success'){
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Error deleting record',
@@ -390,7 +412,8 @@ export default class AppDataTable extends LightningElement {
  }
 
  closeOrder(){
-    this.showOrder = false; 
+    this.showOrder = false;
+    refreshApex(this.wiredAppList) 
  }
  //handle table sorting sorting
  //Grabbed this from a salesforce example

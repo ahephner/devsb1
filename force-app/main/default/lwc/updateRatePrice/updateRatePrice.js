@@ -51,6 +51,11 @@ export default class UpdateRatePrice extends LightningElement {
     prodAreaCost = 0;
     goodPricing = true;
     noteOps;
+    dropShipCheck; 
+    isDropShip; 
+    tankSize;
+    sprayMeasure
+    spraySize;
     //Here is notes per app
     //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
     wasNewNote = false; 
@@ -138,8 +143,12 @@ export default class UpdateRatePrice extends LightningElement {
                             this.areaUM = this.prodlist[0].Application__r.Area__r.Pref_U_of_M__c; 
                             this.oppNote = this.prodlist[0].Application__r.Note__c;
                             this.multiApp = this.prodlist[0].Application__r.Multi_Application__c; 
-                            this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;             
-                            
+                            this.parentApp = this.prodlist[0].Application__r.Parent_Application__c;
+                            this.dropShipCheck = this.prodlist[0].Application__r.Direct_Ship__c ? true:false;              
+                            this.isDropShip = this.prodlist[0].Application__r.Direct_Ship__c;
+                            this.tankSize = this.prodlist[0].Application__r.Tank_Size__c;
+                            this.sprayMeasure = this.prodlist[0].Application__r.Spray_Vol_Meas__c;
+                            this.spraySize = this.prodlist[0].Application__r.Spray_Vol__c;
     //need for doing math later
                 this.areaSizeM= roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Sq_Feet__c),2);
                 this.areaAcres = roundNum(parseFloat(this.prodlist[0].Application__r.Area__r.Area_Acres__c),2);
@@ -773,7 +782,11 @@ get radioOpts(){
             appName: this.appName,
             appDate: this.appDate,
             appArea: this.areaId, 
-            appNote: this.oppNote
+            appNote: this.oppNote,
+            ds: this.isDropShip,
+            tankSize: this.tankSize,
+            measurement: this.sprayMeasure,
+            volume: this.spraySize
         }
 
         let appUpdate = await updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote});
@@ -816,7 +829,11 @@ get radioOpts(){
             appName: this.appName,
             appDate: this.appDate,
             appArea: this.areaId, 
-            appNote: this.oppNote
+            appNote: this.oppNote,
+            ds: this.isDropShip,
+            tankSize: this.tankSize,
+            measurement: this.sprayMeasure,
+            volume: this.spraySize
         }
         //console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
         updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
@@ -888,34 +905,69 @@ get radioOpts(){
     //handle price warnings
     handleWarning = (targ, lev, flr, price, ind)=>{
         console.log(1,targ, 2,lev , 3,flr , 4,price, 5, ind );
-        
-        if(price > lev){        
-            this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
-            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
-            this.prodlist[ind].goodPrice = true; 
-           
-        }else if(price<lev && price>=flr){
-            this.template.querySelector(`[data-id="${targ}"]`).style.color ="orange";
-            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="orange";
-            this.prodlist[ind].goodPrice = true;
+        if(this.isDropShip){
+            return;
+        }else{
+            if(price > lev){        
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
+                this.prodlist[ind].goodPrice = true; 
+               
+            }else if(price<lev && price>=flr){
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="orange";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="orange";
+                this.prodlist[ind].goodPrice = true;
+                
+            }else if(price===lev && price>=flr){
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
+                this.prodlist[ind].goodPrice = true;
+                
+            }else if(price<flr){
+                this.template.querySelector(`[data-id="${targ}"]`).style.color ="red";
+                this.template.querySelector(`[data-margin="${targ}"]`).style.color ="red";
+                this.prodlist[ind].goodPrice = false;
+            }
+            //seems backward but using a disable btn on the productTable. So if it's bad I need to return a true so the button is disabled. 
+            this.goodPricing = checkPricing(this.prodlist) === true ? false : true;
+    
             
-        }else if(price===lev && price>=flr){
-            this.template.querySelector(`[data-id="${targ}"]`).style.color ="black";
-            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="black";
-            this.prodlist[ind].goodPrice = true;
-            
-        }else if(price<flr){
-            this.template.querySelector(`[data-id="${targ}"]`).style.color ="red";
-            this.template.querySelector(`[data-margin="${targ}"]`).style.color ="red";
-            this.prodlist[ind].goodPrice = false;
+                this.dispatchEvent(new CustomEvent('price',{
+                    detail: this.goodPricing
+                })); 
         }
-        //seems backward but using a disable btn on the productTable. So if it's bad I need to return a true so the button is disabled. 
-        this.goodPricing = checkPricing(this.prodlist) === true ? false : true;
-
         
+    }
+    handleDropShip(evt){
+        evt.preventDefault();
+        this.isDropShip = evt.target.checked;
+        console.log(this.isDropShip)
+        if(this.isDropShip && this.goodPricing){
             this.dispatchEvent(new CustomEvent('price',{
-                detail: this.goodPricing
-            })); 
-        
+                detail: false
+            }));
+        }
+    }
+
+    get measOptions() {
+        return [
+            { label: 'M', value: 'M' },
+            { label: 'Acre', value: 'Acre' }
+            
+        ];
+    }
+    //value={tankSize} step="0.01" onchange={setTankSize}
+    setVolume(x){
+        this.spraySize = x.detail.value; 
+        console.log('spraySize ', this.spraySize)
+    }
+
+    setUoM(x){
+        this.sprayMeasure = x.detail.value; 
+        console.log('sprayMeasure ', this.sprayMeasure)
+    }
+    setTankSize(x){
+        this.tankSize = x.detail.value; 
+        console.log('tankSize', this.tankSize)
     }
 }

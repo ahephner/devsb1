@@ -30,16 +30,19 @@
                        </template>
                        <!-- <p>HI GUYSSSSSS</p> -->
                         <!-- Turf Type -->
+                    <template if:false={ornamentalArea}>
                         <lightning-combobox
-                          name="turftype"
-                          label="Turf Type"
-                          value={stand}
-                          placeholder="Select Type"
-                          options={typeOptions}
-                          onchange={setType} 
-                           
-                           
-                        ></lightning-combobox>
+                        name="turftype"
+                        class='validate' 
+                        label="Turf Type"
+                        value={stand}
+                        placeholder="Select Type"
+                        options={typeOptions}
+                        onchange={setType} 
+                        required 
+                      ></lightning-combobox>
+                    </template>
+                        
                     </div>
                                 <div class="slds-col slds-size_1-of-2">
                                         <lightning-combobox

@@ -205,18 +205,22 @@ const ornAppTotal = (prod) =>{
   let total100 = roundRate((total/100), 2)
   return {total, total100}; 
 }
-
+//65/128=0.508 
+//.508 x 135 =68.58/100 gal
+//Or .6855/gallon
 const ornPerProduct = (prodPrice, prodSize, rate)=>{
+
   let perGal = roundNum(prodPrice/prodSize, 2)
   let per100 = roundNum(perGal*rate, 2);
-
-  return {per100, perGal}; 
+  let newHundred = roundNum((prodPrice/prodSize)*rate,2)
+  let newGal = roundNum(newHundred/100,2)
+  return {per100, perGal, newHundred, newGal}; 
 }
 
 //amount of gallons required to reach tank or spray volume size
 const requiredGals = (size, rate, tankSize) =>{
       let x = roundNum((((tankSize/100)*rate)/size), 2)
-      let sizeCheck = x <1 ? x= 1 : Math.ceil(x); 
+      let sizeCheck = x <1 ? x= 1 : roundNum(x,2); 
       return sizeCheck;  
 } 
 

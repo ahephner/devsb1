@@ -1,6 +1,23 @@
 <template>
     <lightning-card  variant="Narrow"  title="Rates and Pricing" icon-name="utility:adjust_value">
-        <template if:true={loaded}>
+<!--Direct SHIP -->
+        <div class="slds-grid">
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input type="toggle" label="Direct Ship" name="input1" onchange={handleDropShip}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-2 inLine">
+                <p class="slds-m-right_small slds-m-top_large">Filling this in will calc. amount to add to tank </p>
+                <lightning-input type="number" name="input8" label="Spray Tank Size" value={tankSize} step="0.01" onchange={setTankSize}></lightning-input>
+                <lightning-input type="number" name="input7" label="Finished Spray Vol" value={sprayVol} step="0.01" onchange={setVolume}></lightning-input>
+                <lightning-combobox
+                name="UoM"
+                label="Unit Of Measure"
+                value={uMValue}
+                options={options}
+                onchange={setUoM} ></lightning-combobox>
+            </div>
+        </div>
+            <template if:true={loaded}>
             <div class='slds-grid'>
                 <div class='slds-col slds-size_9-of-12'>  
                     <template for:each={data} for:item="sp" for:index="index">
