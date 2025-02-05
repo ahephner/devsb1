@@ -9,7 +9,7 @@
             <lightning-button 
               variant="brand"
               label="Save" 
-              onclick={handleUpdates} 
+              onclick={handleSave} 
             ></lightning-button>
           </div>
           <div>
@@ -22,10 +22,47 @@
             options={productList}
             onchange={filterProd} ></lightning-combobox>
             <!-- Card Body  -->
-                         <!--for edit all -->
-            <div if:true={displayProds} class="firstEl">
-                {firstEl} <p>Here are the averages but you can change this field and it will update all or look at specific applications below</p>
+<!--EDIT ALL -->
+        <template if:true={showHeader}>
+            <div class="firstEl">
+               <div class="slds-grid">
+                <div class="slds-col slds-size_3-of-12 slds-m-top_large">{headName}</div>
+                <div class="slds-col slds-size_1-of-12">
+                    <lightning-input  type="number"  step="0.001" label="Rate"
+                    name='place' value={headRate}  onchange={allRate}></lightning-input>
+                </div>
+                <div class="slds-col slds-size_2-of-12">
+                    <lightning-combobox
+                    name='name'
+                    label="Unit Area"
+                    value={headUOM}
+                    placeholder="Select Measure"
+                    options={unitArea}
+                    onchange={allUnitArea}
+                    required
+                    ></lightning-combobox> 
+                    </div>
+                <div class="slds-col slds-size_2-of-12">
+                    <lightning-input type="number" name="input7" label="Unit Price" 
+                                    value={headUnitPrice} formatter="currency" step="0.01" onchange={handleAllPrice}></lightning-input>
+                </div>
+                <div class="slds-col slds-size_2-of-12">
+                        <lightning-input class='liquid' type="number"  
+                                        label="Margin%" name='sp'
+                                        value={headMargin} onchange={allMargin} step="0.01" read-only={headAgency}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-12">
+                        <lightning-input 
+                          type="number"
+                          label="Floor Price"
+                          value={headFloor} formatter="currency"
+                          readonly
+                        ></lightning-input>
+                    </div>
+               </div> <p>Here are the product <b>averages</b> but you can change this field and it will update all or look at specific applications below</p>
             </div>
+        </template>
+<!--INDIVIDUAL APPLICATION RATES  -->
             <lightning-layout  class="x-large slds-scrollable_y">
             <template if:true={displayProds} for:each={displayProds} for:item="sp" for:index="index">
                 <div key={sp.code} class="c-container">
@@ -53,13 +90,21 @@
                                 ></lightning-combobox> 
                                 </div>
                             <div class="slds-col slds-size_2-of-12">
-                                <lightning-input type="number" name="input7" label="Unit Price" 
-                                                value={sp.price} formatter="currency" step="0.01"></lightning-input>
+                                <lightning-input type="number" name={sp.Id} label="Unit Price" 
+                                                value={sp.Unit_Price__c} formatter="currency" step="0.01" onchange={handleUnitPrice}></lightning-input>
                             </div>
                             <div class="slds-col slds-size_2-of-12">
                                     <lightning-input class='liquid' type="number"  
                                                     label="Margin%" name={sp.Id} 
-                                                    value={sp.margin} onchange={newMargin} step="0.01" read-only={sp.allowEdit}></lightning-input>
+                                                    value={sp.Margin__c} onchange={newMargin} step="0.01" read-only={sp.allowEdit}></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-12">
+                                    <lightning-input 
+                                      type="number"
+                                      label="Total Price"
+                                      value={sp.Total_Price__c} formatter="currency"
+                                      readonly
+                                    ></lightning-input>
                                 </div>
                         </div>
                     </lightning-layout-item>
