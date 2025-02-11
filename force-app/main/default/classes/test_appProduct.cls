@@ -163,7 +163,7 @@ private class test_appProduct {
     	fallApp.add(a4);       
     	insert fallApp;
         Test.startTest(); 
-        	list<application__c> appList = appProduct.getApps(prog.Id);         	
+        	list<application__c> appList = appProduct.getApps(prog.Id);  
        Test.stopTest();
         	list<application__c> al = [select id from application__c where area__c=: area.id]; 
         system.debug(al);	
@@ -182,6 +182,7 @@ private class test_appProduct {
         Test.startTest(); 
         	list<App_Product__c> prodList = appProduct.appProducts(application.Id);        
         	list<App_Product__c> filter = appProduct.dataTableBuildFilter(prog.Id);
+        	list<App_Product__c> all = appProduct.allAppProducts(prog.Id);
         Test.stopTest();
         	list<App_Product__c> nl = [select id from App_Product__c where application__c =: application.id]; 
         	system.assertEquals(2, nl.size());

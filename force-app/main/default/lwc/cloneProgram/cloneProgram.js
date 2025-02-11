@@ -108,7 +108,7 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
                 this.msg = 'Getting Account Price Books'
                 this.sliderValue = 50;
                 this.simpleClone = false; 
-                this.pbIds = this.getBooks(this.accountId); 
+                this.pbIds = await this.getBooks(this.accountId); 
             }
             
             

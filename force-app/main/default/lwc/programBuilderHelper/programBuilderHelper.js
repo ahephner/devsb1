@@ -126,6 +126,10 @@ const roundNum = (value, dec)=>{
       return x;
 }
 
+const getAverage = (data)=>{
+   return data.reduce((sum, num)=> sum+num,0)/data.lenth
+
+}
 
 //cost per single product. Returns per M and per Acre
 const areaCostCal = (perUnit, rate, unitOfMeasure)=>{
@@ -264,7 +268,8 @@ export{hold,
       unitsRequired, 
       roundRate, 
       onLoadTotalPrice, 
-      roundNum, 
+      roundNum,
+      getAverage, 
       pricePerUnit,
       perProduct,
       ornPerProduct, 
