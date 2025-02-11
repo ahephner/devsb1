@@ -29,12 +29,16 @@
     
 }
 
+.lowVolume{
+    display: -webkit-inline-box
+}
+
 .firstEl{
     text-align: center;
     background-color: #f4f6f9c0;
     /* padding: 1rem; */
     border: 1px solid #00050e;  
-    height: 80px;
+    height: 135px;
 }
 .nameDate{
     display: inline-grid;

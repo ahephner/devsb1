@@ -1,8 +1,10 @@
 import { LightningElement, api, track } from 'lwc';
 import {roundNum, unitsRequired, totalUsed, pricePerUnit, lowVolume, lvUnits,calcDryFert, calcLiqFert, areaTreated} from 'c/programBuilderHelper';
+import {checkPricing} from 'c/helper';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateProducts from '@salesforce/apex/addApp.updateProducts'
 import allAppProducts from '@salesforce/apex/appProduct.allAppProducts';
+import SearchContact from 'c/searchContactAddress'
 const DELAY = 300;
 export default class ProductIntelligence extends LightningElement {
     products = [];
@@ -16,6 +18,8 @@ export default class ProductIntelligence extends LightningElement {
     updateAll = false; 
     areaSizeM;
     areaAcres; 
+    aboveFloorPrice;
+    allAboveFloorPrice;
     connectedCallback(){
         this.loaded = false
         this.firstLoad(); 
@@ -34,7 +38,7 @@ export default class ProductIntelligence extends LightningElement {
     async firstLoad(){
         let prodIds = new Set();
         let loadProd = await allAppProducts({rec: this.recordId });
-        console.log(3, loadProd)
+      
         this.products = loadProd.map(item=>{
             let name = item.Product_Name__c;
             let code = item.Product_Code__c;
@@ -45,16 +49,20 @@ export default class ProductIntelligence extends LightningElement {
             let day = item.Application__r.Date__c.slice(8,11);
             let month = item.Application__r.Date__c.slice(5,7)
             let year = item.Application__r.Date__c.slice(0,4)
+            let floor = item.Product__r.Floor_Price__c
+            let unitAreaStyles = item.isLowVol__c ? 'slds-col slds-size_2-of-12 lowVolume' : 'slds-col slds-size_2-of-12';
+            let goodPrice = item.Unit_Price__c >= item.Product__r.Floor_Price__c? false:true;  
             //designate updates
             let flag = false;
             //let date = this.reverseString()
             let allowEdit = item.Product__r.Agency_Pricing__c;
             let appNameDate = `${item.Application__r.Name} - ${month}/${day}/${year}`
-            return {...item, name, code, price, appNameDate, areaName, margin, rate, allowEdit, flag}
+            return {...item, name, code, price, appNameDate, areaName, margin, rate, allowEdit, flag, floor, goodPrice, unitAreaStyles}
         })
         this.areaSizeM = roundNum(parseFloat(this.products[0].Application__r.Area__r.Area_Sq_Feet__c),2);
         this.areaAcres = roundNum(parseFloat(this.products[0].Application__r.Area__r.Area_Acres__c),2);
         let filters = this.buildProdFilter(this.products);
+        this.aboveFloorPrice = checkPricing(this.products)
         this.loaded = true; 
     }
 
@@ -66,7 +74,7 @@ export default class ProductIntelligence extends LightningElement {
             let name = data[i].Product_Name__c;
             let id = data[i].Product__c;
             
-            let obj = {label:name, value:id}
+            let obj = {label:name, value:id, Id:id}
             initArray.findIndex(x=>x.label === obj.label) === -1 ? initArray.push(obj) : '';
             this.allProds.push(obj)
         }
@@ -84,8 +92,16 @@ export default class ProductIntelligence extends LightningElement {
     headCost; 
     headProductSize;
     headFloor; 
+    headAllUnits; 
+    headAvgAcre; 
+    headUnitStyle; 
+    headLowVol
+    headLowMix
     getUnitAverage(data, field){
          return roundNum(data.reduce((num,sum)=> sum[field] +num, 0)/ data.length,2)
+    }
+    getCount(data, field){
+        return roundNum(data.reduce((num, sum)=> sum[field] +num,0),2)
     }
     setHeaders(data, allData){
         this.headName= data.Product_Name__c;
@@ -93,22 +109,51 @@ export default class ProductIntelligence extends LightningElement {
         this.headUOM= data.Unit_Area__c;
         this.headCost = data.Product_Cost__c; 
         this.headMargin= data.Margin__c ? this.getUnitAverage(allData, "Margin__c") : 0;
+        this.headAllUnits = this.getCount(allData,'Units_Required__c')
         this.headUnitPrice= this.getUnitAverage(allData, "Unit_Price__c")
+        this.headAvgAcre = this.getUnitAverage(allData, 'Cost_per_Acre__c')
         this.headAgency = data.Product__r.Agency_Pricing__c; 
         this.headProductSize = data.Product_Size__c; 
         this.headFloor = data.Product__r.Agency_Pricing__c ? 'Agency' : data.Product__r.Floor_Price__c; 
+        this.headUnitStyle = data.isLowVol__c ? 'slds-col slds-size_2-of-12 lowVolume' : 'slds-col slds-size_2-of-12';
+        this.headLowVol = data.isLowVol__c
+        this.headLowMix = data.Spray_Vol_M__c; 
     }
+
     filterProd(x){
         x.preventDefault();
            let prodFilter = x.target.options.find(opt => opt.value === x.detail.value);
            this.prodFilterValue = prodFilter.value; 
-           this.loaded = false; 
+           if(this.prodFilterValue === 'search'){
+            this.openSearch()
+           }else{
+            this.loaded = false; 
           
-           this.displayProds = this.products.filter(x=> x.Product__c === this.prodFilterValue).sort((a,b)=>a.Application__r.Date__c.localeCompare(b.Application__r.Date__c))
-           //need a function to destructure first value and get averages
-           this.setHeaders(this.displayProds[0], this.displayProds)
-           this.showHeader = true; 
-           this.loaded = true; 
+            this.displayProds = this.products.filter(x=> x.Product__c === this.prodFilterValue).sort((a,b)=>a.Application__r.Date__c.localeCompare(b.Application__r.Date__c))
+            //need a function to destructure first value and get averages
+            this.setHeaders(this.displayProds[0], this.displayProds)
+            this.showHeader = true; 
+            this.loaded = true; 
+           }
+
+        }
+
+        async openSearch(){
+            const show = await SearchContact.open({
+                size: 'medium',
+                description: 'address',
+                content: this.productList.slice(2)
+            }).then((res)=>{
+                
+                this.prodFilterValue = res;
+                this.loaded = false; 
+          
+                this.displayProds = this.products.filter(x=> x.Product__c === this.prodFilterValue).sort((a,b)=>a.Application__r.Date__c.localeCompare(b.Application__r.Date__c))
+                //need a function to destructure first value and get averages
+                this.setHeaders(this.displayProds[0], this.displayProds)
+                this.showHeader = true; 
+                this.loaded = true;  
+            })
         }
     //track saves
     allRate(e){
@@ -117,6 +162,8 @@ export default class ProductIntelligence extends LightningElement {
     }
     allUnitArea(e){
         this.headUOM = e.detail.value;
+        this.headLowVol = e.detail.value === '100 Gal'? true: false; 
+        this.headUnitStyle = e.detail.value === '100 Gal' ? 'slds-col slds-size_2-of-12 lowVolume' : 'slds-col slds-size_2-of-12';
         this.updateAll = true;
     }
 
@@ -124,6 +171,7 @@ export default class ProductIntelligence extends LightningElement {
         this.headUnitPrice = Number(e.detail.value);
         window.clearTimeout(this.delay);
         this.delay = setTimeout(()=>{
+            this.allAboveFloorPrice = this.headUnitPrice>=this.headFloor ? false:true; 
             this.headMargin = roundNum((1 - (this.headCost /this.headUnitPrice))*100, 2);
         },DELAY)
         this.updateAll = true; 
@@ -133,10 +181,14 @@ export default class ProductIntelligence extends LightningElement {
         window.clearTimeout(this.delay);
         this.delay = setTimeout(()=>{
             this.headUnitPrice = roundNum(this.headCost /(1- this.headMargin/100), 2)
+            this.allAboveFloorPrice = this.headUnitPrice>=this.headFloor ? false:true; 
         },DELAY)
         this.updateAll = true; 
     }
+    handleHeadLowVol(e){
+        this.headLowMix = Number(e.detail.value)
 
+    }
     handleSave(){
         this.loaded = false; 
         if(this.updateAll){
@@ -178,7 +230,8 @@ export default class ProductIntelligence extends LightningElement {
     }
 //track cancels
     async handleUpdateAll(){
-        if(this.updateAll){
+
+            this.loaded = false; 
             let reqUnits = unitsRequired(this.headUOM, this.headRate,this.areaSizeM, this.headProductSize )
             let prodCost  = pricePerUnit(this.headUnitPrice, this.headProductSize, this.headRate,this.headUOM);
             //let totalUse = totalUsed(this.headUOM, this.areaSizeM, this.headRate)
@@ -193,7 +246,7 @@ export default class ProductIntelligence extends LightningElement {
                         this.displayProds[i].Cost_per_Acre__c = prodCost.perAcre;
                     }else if(this.displayProds[i].Unit_Area__c === '100 Gal'){
                     //calculate low volume like steal green
-                        let finished = lowVolume(this.headRate, this.headProductSize, this.displayProds[i].Application__r.Spray_Vol__c, this.headUnitPrice)
+                        let finished = lowVolume(this.headRate, this.headProductSize, this.headLowMix, this.headUnitPrice)
                         this.displayProds[i].Cost_per_M__c = finished.singleThousand;
                         this.displayProds[i].Cost_per_Acre__c = finished.singleAcre;
                         this.displayProds[i].Acres_Treated__c = finished.acresTreated;
@@ -218,6 +271,7 @@ export default class ProductIntelligence extends LightningElement {
                             variant: 'success'
                         })
                     );
+
                 }else{
                     this.dispatchEvent(
                         new ShowToastEvent({
@@ -229,8 +283,7 @@ export default class ProductIntelligence extends LightningElement {
 
                 }
                //let x = await this.firstLoad();
-           
-        }
+                this.loaded = true; 
     }
 
     newRate(e){
@@ -286,7 +339,41 @@ export default class ProductIntelligence extends LightningElement {
         },500)
        //this.displayProds = [...this.displayProds]
     }
+    handleLowVol(e){
+        let index = this.displayProds.findIndex(prod => prod.Id === e.target.name);
+        
+        if(this.displayProds[index].Rate2__c === undefined || this.displayProds[index].Rate2__c<=0){
+            return;
+        }else{
+            window.clearTimeout(this.delay);
+            
+            this.delay = setTimeout(()=>{
+                
+             let sprayVolum = Number(e.detail.value); 
+             let {Rate2__c, Product_Size__c, Unit_Price__c} = this.displayProds[index];
+             let finished = lowVolume(Rate2__c, Product_Size__c, sprayVolum, Unit_Price__c) 
+             
+             //updateValues
+             this.displayProds[index].Units_Required__c = lvUnits(this.areaSizeM, sprayVolum, Product_Size__c, Rate2__c);
+             this.displayProds[index].Total_Price__c = roundNum(this.displayProds[index].Units_Required__c * this.displayProds[index].Unit_Price__c, 2);
+             
+             this.displayProds[index].Spray_Vol_M__c = sprayVolum; 
+             this.displayProds[index].Cost_per_M__c = finished.singleThousand;
+             this.displayProds[index].Cost_per_Acre__c = finished.singleAcre;
+             this.displayProds[index].Acres_Treated__c = finished.acresTreated;
+             this.displayProds[index].flag = true; 
+             this.prodCostM = finished.singleThousand;
+             this.prodCostA = finished.singleAcre;
+             this.treatedAcreage = finished.acresTreated
+             //this.prodAreaCost = this.areaAcres * this.costPerAcre;
+             this.treatedAcreage = finished.acresTreated
+             this.appTotalPrice = appTotal(this.displayProds); 
+             this.totalCostPerM = roundNum(Object.values(this.displayProds).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
 
+            },500)
+
+        }
+       }
     handleUnitArea(e){
         let index = this.displayProds.findIndex(x=>x.Id === e.target.name);
         
@@ -294,7 +381,7 @@ export default class ProductIntelligence extends LightningElement {
         this.displayProds[index].Unit_Area__c = e.detail.value;
         //show low volume or not
         this.displayProds[index].isLowVol__c = e.detail.value!= '100 Gal'? false: true;;
-        //this.displayProds[index].unitAreaStyles = e.detail.value!= '100 Gal' ?'slds-col slds-size_2-of-12': 'slds-col slds-size_2-of-12 lowVolume'
+        this.displayProds[index].unitAreaStyles = e.detail.value!= '100 Gal' ?'slds-col slds-size_2-of-12': 'slds-col slds-size_2-of-12 lowVolume'
         
         if(this.displayProds[index].Rate2__c > 0 && e.detail.value!= '100 Gal'){
          this.displayProds[index].Units_Required__c = unitsRequired(this.displayProds[index].Unit_Area__c, this.displayProds[index].Rate2__c, this.areaSizeM, this.displayProds[index].Product_Size__c );
@@ -339,8 +426,6 @@ export default class ProductIntelligence extends LightningElement {
         this.delay = setTimeout(()=>{
             
             this.displayProds[index].Unit_Price__c = Number(e.detail.value);
-            //console.log(typeof this.displayProds[index].Unit_Price__c +' unit Type');          
-                
                 if(this.displayProds[index].Unit_Price__c > 0 && this.displayProds[index].Unit_Area__c != '100 Gal'){
                 this.displayProds[index].Margin__c = roundNum((1 - (this.displayProds[index].Product_Cost__c /this.displayProds[index].Unit_Price__c))*100,2)
                 
@@ -381,7 +466,11 @@ export default class ProductIntelligence extends LightningElement {
                 
  
             }
-            //this.handleWarning(targetId,lOne, floor, unitPrice, index)
+                //check floor violation
+                this.handleWarning(index); 
+                this.displayProds[index].goodPrice = this.displayProds[index].Unit_Price__c >= this.displayProds[index].Product__r.Floor_Price__c? true : false;
+                this.aboveFloorPrice = checkPricing(this.displayProds) === false? true:false;  
+            
             }, 1000)
     }
 
@@ -394,7 +483,8 @@ export default class ProductIntelligence extends LightningElement {
                 this.displayProds[index].Margin__c = Number(e.detail.value);
                 if(1- this.displayProds[index].Margin__c/100 > 0 && this.displayProds[index].Unit_Area__c != '100 Gal'){
                     this.displayProds[index].Unit_Price__c = roundNum(this.displayProds[index].Product_Cost__c /(1- this.displayProds[index].Margin__c/100),2);
-                    console.log(1, this.displayProds[index].Unit_Price__c);
+                    //check floor violation
+                    this.aboveFloorPrice = this.displayProds[index].Unit_Price__c >= this.displayProds[index].Product__r.Floor_Price__c? false:true  
                     this.displayProds[index].Total_Price__c = roundNum(this.displayProds[index].Units_Required__c * this.displayProds[index].Unit_Price__c, 2);
 
                     let prodCost = pricePerUnit(this.displayProds[index].Unit_Price__c, this.displayProds[index].Product_Size__c, this.displayProds[index].Rate2__c,this.displayProds[index].Unit_Area__c);
@@ -431,7 +521,37 @@ export default class ProductIntelligence extends LightningElement {
                     
                     
                 }
-                //this.handleWarning(targetId, lOne, floor, unitPrice, index)
+                    //check floor violation
+                            
+                   this.handleWarning(index); 
+                    this.displayProds[index].goodPrice = this.displayProds[index].Unit_Price__c >= this.displayProds[index].Product__r.Floor_Price__c ? true : false;
+                    this.aboveFloorPrice = checkPricing(this.displayProds) === false? true:false;
     },1000)
+    }
+
+    handleWarning(i){
+        let price = this.displayProds[i].Unit_Price__c
+        let flr = this.displayProds[i].Product__r.Floor_Price__c
+
+        if(price>=flr){
+            this.template.querySelector(`[data-margin="${this.displayProds[i].Id}"]`).style.color ="black";
+            this.template.querySelector(`[data-id="${this.displayProds[i].Id}"]`).style.color ="black";
+        }else{
+            this.template.querySelector(`[data-margin="${this.displayProds[i].Id}"]`).style.color ="red";
+            this.template.querySelector(`[data-id="${this.displayProds[i].Id}"]`).style.color ="red";
+        }
+    }
+
+    fixFloor(){
+        let floor = this.displayProds[0].Product__r.Floor_Price__c;
+        let margin = roundNum((1 - (this.displayProds[0].Product_Cost__c /this.displayProds[0].Product__r.Floor_Price__c))*100,2);
+        for(let i=0; i< this.displayProds.length; i++){
+            this.displayProds[i].Unit_Price__c = floor; 
+            this.displayProds[i].Margin__c = margin;
+            this.displayProds[i].goodPrice = true;
+            this.template.querySelector(`[data-margin="${this.displayProds[i].Id}"]`).style.color ="black";
+            this.template.querySelector(`[data-id="${this.displayProds[i].Id}"]`).style.color ="black";
+        }
+        this.aboveFloorPrice = false; 
     }
 }
