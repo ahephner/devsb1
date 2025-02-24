@@ -2,3 +2,40 @@
     border: solid 1px black; 
     display: flex; 
 }
+
+.quickInfo{
+    
+    display: grid;
+    margin-top: 8%;
+    font-size: medium;
+    margin-left: 5%; 
+}
+.card{
+    height:300px;
+    width: 257px;
+    border: solid 1px black; 
+}
+.outBox{
+    display: inline-flex;
+    width: -webkit-fill-available;
+}
+
+.numbers{
+    margin-top: 25%;
+    font-size:large;
+    line-height: 1.25;
+}
+
+.text{
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.lineUp{
+    display: grid;
+}
+.line{
+    border-top: solid 1px black;
+}
+.warning{
+    --slds-c-tooltip-color-background: #CC0000;
+}
