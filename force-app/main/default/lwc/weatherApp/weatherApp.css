@@ -10,10 +10,16 @@
     font-size: medium;
     margin-left: 5%; 
 }
+.trackInfo{
+    font-size: x-small;
+    margin-left: 6px;
+    margin-top: 6px;
+}
 .card{
-    height:300px;
+    height:max-content;
     width: 257px;
     border: solid 1px black; 
+    position: relative;
 }
 .outBox{
     display: inline-flex;
@@ -21,7 +27,8 @@
 }
 
 .numbers{
-    margin-top: 25%;
+    margin-top: 10%;
+    margin-bottom: 5%;
     font-size:large;
     line-height: 1.25;
 }
@@ -37,5 +44,73 @@
     border-top: solid 1px black;
 }
 .warning{
+    margin-left:47%;
     --slds-c-tooltip-color-background: #CC0000;
+}
+
+.blanket{
+    z-index: 2;
+    cursor: pointer;
+}
+.top{
+    display: flex;
+}
+
+.exampleHolder{
+    height: 300px;
+    display: inline-block;
+}
+
+/* Warning CSS */
+.firstPestEarly{
+    color:black;
+    background-color: #ffff00;
+    border-top: solid .4px black;
+    border-bottom: solid .4px black;
+    padding-left: 30px;
+}
+
+.secondPestEarly{
+    color:black;
+    background-color: #ffff00de;
+    border-top: solid .4px black;
+    border-bottom: solid .4px black;
+    padding-left: 30px;
+}
+
+.firstPestTarget{
+    color:black;
+    font-weight: 500;
+    background-color: #47D130;
+    border-top: solid .4px black;
+    border-bottom: solid .4px black;
+    padding-left: 30px;
+}
+
+.secondPestTarget{
+    color:black;
+    font-weight: 500;
+    background-color: #47D130;
+    border-top: solid .4px black;
+    border-bottom: solid .4px black;
+    padding-left: 30px;
+}
+.firstPestLate{
+    color:white;
+    font-weight: 500;
+    background-color: #CC0000;
+    border-top: solid .4px black;
+    border-bottom: solid .4px black;
+    padding-left: 30px;
+}
+.secondPestLate{
+    color:white;
+    font-weight: 500;
+    background-color: #CC0000;
+    border-top: solid .4px black;
+    border-bottom: solid .4px black;
+    padding-left: 30px;
+}
+.hide{
+    visibility: hidden;
 }

@@ -258,6 +258,24 @@ const lvUnits = (areaSize, sprayVol, prodSize, prodRate)=>{
   return prodsNeed; 
   //final = above divided by prodSize
 }
+
+const between = (value, min, max)=> value>= min && value<=max
+
+const triggerPest = (value, rules)=>{
+  let initText = 'notFound';
+  let initCSS = 'hide'
+  for(let i=0; i<rules.length; i++){
+    if(between(value, rules[i].min, rules[i].max)){
+      initText = rules[i].res
+      initCSS = rules[i].class
+      break
+    }
+  }
+  return {
+    text:initText,
+    css: initCSS
+  }
+}
 export{hold, 
       appTotal, 
       alreadyAdded, 
@@ -280,5 +298,6 @@ export{hold,
       finishedGals,
       totalUsed,
       lowVolume,
-      lvUnits
+      lvUnits,
+      triggerPest
     }

@@ -1,7 +1,8 @@
 <template>
     <lightning-card icon-name="standard:account" variant="base">
       <div slot="title">
-        Current Weather @: {station}
+        Current Weather @: {station} GDD based on {typeofGDD} change that in forecast section
+        
       </div>
 
       <div slot="footer">
@@ -9,7 +10,7 @@
       </div>
       <div class="slds-grid slds-wrap">
         <div class="slds-col slds-size_1-of-1">
-          <span class="slds-text-heading_large">Description: {desc}</span>
+          <span class="slds-text-heading_medium">Description: {desc}</span>
         </div>
         <!-- Card Body  -->
         <div class="slds-col slds-size_1-of-2 mainBox">
@@ -44,52 +45,86 @@
       </div>
     </lightning-card>
     <lightning-card label="Forecast">
-      <div slot="title">
-       10 Day Forecast
+      <div slot="title" class="top">
+       10 Day Forecast 
+       <lightning-input data-id="toggle" type="toggle" class="slds-m-left_small"
+                        label={btnLabel} checked={baseType} onchange={changeBase}
+                        message-toggle-active="" message-toggle-inactive=""></lightning-input>
+       <p class="trackInfo">Pest Tracking <a href="https://gddtracker.msu.edu/about" target="_blank">Here</a></p>
     </div>
     <div class="outBox">
       <div class="slds-scrollable_x">
-        <div class="slds-grid">
-        <template for:each={futureWeather} for:item="x" for:index="index">
-          <div
-            class="card slds-col slds-size_2-of-3" 
-            key={x.datetime}
-            >
-            <div>
-              {x.day}
-              <template if:true={x.warningDay}>
-                <lightning-helptext content={x.warningDayText} variant="error" class="slds-m-left_x-large warning"></lightning-helptext>
-              </template>
-            </div>
-            <div class="numbers slds-align_absolute-center lineUp">
-             <span class="text">High {x.tempmax}&#x2109;</span> <span class="line"></span> <span class='text'>Low {x.tempmin}&#x2109;</span> 
-            </div>
-            <div class="quickInfo">
-              <span>{x.conditions}</span>
-              <span>Degree Days {x.degreedays}</span>
-              <span>Acc. Degree Days {x.accdegreedays}</span>
-              <span>Precipitation: {x.precipprob}%</span>
-              <span>Humidity: {x.humidity} %</span>
-              <span>Soil Temp 3": {x.soiltemp01}&#x2109;</span>
-            </div> 
-            <!-- <div class="slds-grid slds-wrap">
-              <div class="slds-col slds-size_1-of-8">
-                {x.datetime}
-              </div>
-              <div class="slds-col slds-size_5-of-8">
-                {x.tempmax}/{x.tempmin}
-              </div>
-              <div class="slds-col slds-size_2-of-8">
-                <div class="quickInfo"> 2025-02-11
+        <template lwc:if={loaded}>
+          <div class="slds-grid">
+            <template for:each={futureWeather} for:item="x" for:index="index">
+              <div
+                class="card slds-col slds-size_2-of-3" 
+                key={x.datetime}
+                id={x.datetime} onclick={openDay}
+                >
+                <div class='blanket' >
+                  {x.day}
+                <div>
+                  <template if:true={x.warningDay}>
+                    <lightning-helptext content={x.warningDayText} variant="error" class="warning"></lightning-helptext>
+                  </template>
+                </div>
+                <div class="pestOutside">
+                  <!-- <template if:true={x.poaInfo}>
+                    <div class={x.poaCSS}>{x.poa}</div>
+                  </template>
+                  <template if:true={x.broadInfo}>
+                    <div class={x.broadCSS}>Broadleaf Timing: Early</div>
+                  </template>
+                  <template if:true={x.crabPreInfo}>
+                    <div class={x.crabPCSS}>Crab Preemerge Timing: Early</div>
+                  </template>
+                  <template if:true={x.crabGerInfo}>
+                    <div class={x.crabGerCSS}>Crabgrass Germination: Early</div> 
+                  </template> -->
+                  <div class={x.poaCSS}>{x.poa}</div>
+                  <div class={x.broadCSS}>{x.broadLeaf}</div>
+                  <div class={x.crabPreCSS}>{x.crabPre}</div> 
+                  <div class={x.crabGerCSS}>{x.crabGerm}</div>
+                </div>
+                
+                <div class="numbers slds-align_absolute-center lineUp">
+                 <span class="text">High {x.tempmax}&#x2109;</span> <span class="line"></span> <span class='text'>Low {x.tempmin}&#x2109;</span> 
+                </div>
+                <div class="quickInfo">
+                  <span>{x.conditions}</span>
+                  <span>Degree Days {x.degreedays}</span>
+                  <span>Acc. Degree Days {x.accdegreedays}</span>
                   <span>Precipitation: {x.precipprob}%</span>
                   <span>Humidity: {x.humidity} %</span>
-                  <span>Wind: {x.windspeed} mph</span>
+                  <span>Soil Temp 3": {x.soiltemp01}&#x2109;</span>
                 </div> 
+                <!-- <div class="slds-grid slds-wrap">
+                  <div class="slds-col slds-size_1-of-8">
+                    {x.datetime}
+                  </div>
+                  <div class="slds-col slds-size_5-of-8">
+                    {x.tempmax}/{x.tempmin}
+                  </div>
+                  <div class="slds-col slds-size_2-of-8">
+                    <div class="quickInfo"> 2025-02-11
+                      <span>Precipitation: {x.precipprob}%</span>
+                      <span>Humidity: {x.humidity} %</span>
+                      <span>Wind: {x.windspeed} mph</span>
+                    </div> 
+                  </div>
+                </div> -->
               </div>
-            </div> -->
+              </div>
+            </template>
           </div>
         </template>
-      </div>
+        <template lwc:else>
+          <div class="exampleHolder">
+            <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+        </div>
+        </template>
+
       </div>
     </div>
       
