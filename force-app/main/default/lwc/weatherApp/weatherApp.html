@@ -50,7 +50,8 @@
        <lightning-input data-id="toggle" type="toggle" class="slds-m-left_small"
                         label={btnLabel} checked={baseType} onchange={changeBase}
                         message-toggle-active="" message-toggle-inactive=""></lightning-input>
-       <p class="trackInfo">Pest Tracking <a href="https://gddtracker.msu.edu/about" target="_blank">Here</a></p>
+       <p class="trackInfo">Pest Tracking <a href="https://gddtracker.msu.edu/about" target="_blank">Here</a> </p>
+       <p class="trackInfo" >Click here to change location </p><lightning-icon icon-name='action:edit' class="slds-m-left_x-small slds-m-bottom_x-small blanket" alternative-text='edit' size='xx-small' title='edit' onclick={updateLocation}></lightning-icon>
     </div>
     <div class="outBox">
       <div class="slds-scrollable_x">
@@ -59,17 +60,17 @@
             <template for:each={futureWeather} for:item="x" for:index="index">
               <div
                 class="card slds-col slds-size_2-of-3" 
-                key={x.datetime}
-                id={x.datetime} onclick={openDay}
+                key={x.id}
+                data-id={x.id} onclick={openDay}
                 >
-                <div class='blanket' >
+                <div class='blanket' data-id={x.id}>
                   {x.day}
                 <div>
                   <template if:true={x.warningDay}>
-                    <lightning-helptext content={x.warningDayText} variant="error" class="warning"></lightning-helptext>
+                    <lightning-helptext content={x.warningDayText} variant="error" class="warning" id={x.id}></lightning-helptext>
                   </template>
                 </div>
-                <div class="pestOutside">
+                <div class="pestOutside" data-id={x.id}>
                   <!-- <template if:true={x.poaInfo}>
                     <div class={x.poaCSS}>{x.poa}</div>
                   </template>
@@ -88,16 +89,16 @@
                   <div class={x.crabGerCSS}>{x.crabGerm}</div>
                 </div>
                 
-                <div class="numbers slds-align_absolute-center lineUp">
-                 <span class="text">High {x.tempmax}&#x2109;</span> <span class="line"></span> <span class='text'>Low {x.tempmin}&#x2109;</span> 
+                <div class="numbers slds-align_absolute-center lineUp" data-id={x.id}>
+                 <span class="text" data-id={x.id}>High {x.tempmax}&#x2109;</span> <span class="line"></span> <span class='text' data-id={x.id}>Low {x.tempmin}&#x2109;</span> 
                 </div>
-                <div class="quickInfo">
-                  <span>{x.conditions}</span>
-                  <span>Degree Days {x.degreedays}</span>
-                  <span>Acc. Degree Days {x.accdegreedays}</span>
-                  <span>Precipitation: {x.precipprob}%</span>
-                  <span>Humidity: {x.humidity} %</span>
-                  <span>Soil Temp 3": {x.soiltemp01}&#x2109;</span>
+                <div class="quickInfo" data-id={x.id}>
+                  <span data-id={x.id}>{x.conditions}</span>
+                  <span data-id={x.id}>Degree Days {x.degreedays}</span>
+                  <span data-id={x.id}>Acc. Degree Days {x.accdegreedays}</span>
+                  <span data-id={x.id}>Precipitation: {x.precipprob}%</span>
+                  <span data-id={x.id}>Humidity: {x.humidity} %</span>
+                  <span data-id={x.id}>Soil Temp 3": {x.soiltemp01}&#x2109;</span>
                 </div> 
                 <!-- <div class="slds-grid slds-wrap">
                   <div class="slds-col slds-size_1-of-8">

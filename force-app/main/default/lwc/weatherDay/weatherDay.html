@@ -1,0 +1,63 @@
+<!-- this should be incapsulated in its own component, see https://developer.salesforce.com/docs/component-library/bundle/lightning-modal/documentation -->
+    <template>
+      <lightning-modal-header label={month}></lightning-modal-header>
+      <lightning-modal-body>
+    
+        <div class="slds-grid">
+          <div class="slds-col slds-size_1-of-4">
+              <div class="current">
+                <div class="curTemp">
+                  {dayInfo.temp}&#x2109;
+                </div>
+                <div>
+                  <p class="slds-margin-top_x-small feels">
+                    Feels like {dayInfo.feelslike}&#x2109;
+                  </p>
+                </div>
+                <div class="slds-text-title slds-margin-top_x-small">
+                  <span class="letters">L:</span><span class="dayNumbers">{dayInfo.tempmin}&#x2109;</span><span class="letters">H:</span><span class="dayNumbers">{dayInfo.tempmax}&#x2109;</span>
+                </div>
+                <br/>
+                <div class="slds-text-title slds-margin-top_x-small">
+                  <span class="letters">Humidity</span><span class="dayNumbers">{dayInfo.humidity}%</span>
+                </div>
+                <div class="slds-text-title slds-margin-top_x-small">
+                  <img src={rainPercent} alt="rainChance" style="width:3%"></img><span class="dayNumbers">{dayInfo.precipprob}%</span>
+                </div>
+              </div>
+              <!-- Image -->
+                    <div class="slds-col slds-size_1-of-4">
+                      <img src={currentIcon} alt="Avatar" style="width:14%">
+                    </div> 
+            </div>
+          <div class="slds-col slds-size_2-of-4">
+            <p>Hourly</p>
+          <div class="slds-scrollable_x outBox">
+            <template for:each={hour} for:item="x" for:index="index">
+              <div key={x.index}>
+                <div class="hourCard">
+                  <div class="tempContainer">
+                    <h4><b>{x.temp}&#x2109;</b></h4>
+                    <img src={x.icon} alt="Avatar" style="width:100%">
+                    <p>{x.displayTime}</p>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+        <div class="boxTwo">
+          <h1>History Tracking box to go here</h1>
+        </div>
+
+      </lightning-modal-body>
+      <lightning-modal-footer>
+        <lightning-button 
+          variant="destructive"
+          label="Close" 
+          onclick={handleClose} 
+        ></lightning-button>
+      </lightning-modal-footer>
+    </template>

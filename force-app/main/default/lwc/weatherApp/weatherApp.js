@@ -2,6 +2,8 @@ import { LightningElement, api } from 'lwc';
 import getWeatherCords from '@salesforce/apex/appProduct.getWeatherInfo';
 import {triggerPest} from 'c/programBuilderHelper'
 
+import NEWADDRESS from 'c/updateLocation';
+import DAY from 'c/weatherDay'; 
 const crabPre32 = [
   {min:171,max:250, res:'Crab Preemerge Timing: Early', class:'secondPestEarly', found:true},
   {min:251,max:500, res:'Crab Preemerge Timing: Optimum', class:'secondPestTarget', found:true},
@@ -28,7 +30,8 @@ const crabGermination50 = [
 export default class WeatherApp extends LightningElement {
     @api recordId; 
     lat;
-    long; 
+    long;
+    zip; 
     station;
     temp;
     accDDays;
@@ -59,8 +62,11 @@ level;
    async firstLoad(){
       //get billing zip code
       let zips = await getWeatherCords({recordId: this.recordId})
-      this.lat = zips[0].Account__r.BillingLatitude;
-      this.long = zips[0].Account__r.BillingLongitude;
+      //future lat = zips[0].Preferred_Lat_Long__c.latitude
+      //future long = zips[0].Preferred_Lat_Long__c.longitude
+      this.zip = zips[0]?.Preferred_Zip_Code__c ?? ''
+      this.lat = zips[0].Preferred_Lat_Long__c ? zips[0].Preferred_Lat_Long__c.latitude:  zips[0].Account__r.BillingLatitude;
+      this.long = zips[0].Preferred_Lat_Long__c ? zips[0].Preferred_Lat_Long__c.longitude: zips[0].Account__r.BillingLongitude;
       this.accountId = zips[0].Account__c;
 
       this.getWeather(this.typeofGDD)
@@ -109,7 +115,8 @@ level;
                           //Number(json.alerts[0].ends.slice(8,10))
                         }
                         let tenDay = [...json.days.splice(0,10)]
-                        this.futureWeather = tenDay.map(item=>{
+                        this.futureWeather = tenDay.map((item, index)=>{
+                          let id = index
                           let day = Number(item.datetime.slice(8,11))
                           let dayWarning = Date.parse(item.datetime)
                           
@@ -150,6 +157,7 @@ level;
 
                           }
                           return {...item, 
+                                  id,
                                   day, 
                                   warningDay, 
                                   warningDayText, 
@@ -188,8 +196,33 @@ level;
       this.loaded = false; 
       this.getWeather(this.typeofGDD)
     }
-    openDay(event){
-      console.log(event.target.id)
+
+//Open day data
+    async openDay(event){
+      let dayData = this.futureWeather.find(x=> x.id === Number(event.target.dataset.id))
+      console.log(dayData);
+      const result = await DAY.open({
+        size: 'large',
+        dayInfo: dayData,
+        lattitude: this.lat,
+        longitude: this.long,
+        key: this.badAPIExample
+      }).then((x)=>{
+        console.log(x)
+      })
+      
+    }
+    async updateLocation(){
+      let newAdd = await NEWADDRESS.open({
+        size:'small',
+        initLatitude: this.lat,
+        initLongitude: this.long,
+        initZipCode: this.zip
+      }).then((x)=>{
+        this.zip = x.zipCode;
+        this.lat = x.lattitude;
+        this.long = x.longitude; 
+      })
     }
     calcSnowAmount(level){
      let back = level>=2.5 ? 'Heavy': 

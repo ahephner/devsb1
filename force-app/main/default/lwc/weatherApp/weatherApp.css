@@ -16,7 +16,7 @@
     margin-top: 6px;
 }
 .card{
-    height:max-content;
+    overflow-y: hidden;
     width: 257px;
     border: solid 1px black; 
     position: relative;
@@ -49,7 +49,7 @@
 }
 
 .blanket{
-    z-index: 2;
+    
     cursor: pointer;
 }
 .top{

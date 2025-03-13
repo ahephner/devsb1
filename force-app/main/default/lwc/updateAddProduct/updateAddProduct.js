@@ -24,7 +24,7 @@ const REGEX_COMMA = /(,)/g;
 const REGEX_24D = /2,4-D|2 4-d|2, 4-D/gi;
 const REGEX_WAREHOUSE = /wh\s*\d\d\d/gi;
 const REGEX_WHITESPACE = /\s/g;
-
+const REGEX_DASH = /-/g;
 const columnsList = [
     {type: 'button', 
      initialWidth: 75,typeAttributes:{
@@ -138,8 +138,8 @@ export default class UpdateAddProduct extends LightningElement {
     async advancedSearch() {
         this.whSearch = this.template.querySelector('[data-value="searchInput"]').value.trim().toLowerCase().replace(REGEX_WHITESPACE, "").match(REGEX_WAREHOUSE);
         this.stock = this.template.querySelector('[data-value="searchInput"]').value.trim().toLowerCase().match(REGEX_STOCK_RES);
-        this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value.toLowerCase().replace(REGEX_24D, '2 4-D')
-            .replace(REGEX_COMMA, ' and ').replace(REGEX_SOSL_RESERVED, '?').replace(REGEX_STOCK_RES, '').replace(REGEX_WAREHOUSE, '').trim();
+        this.searchTerm = this.template.querySelector('[data-value="searchInput"]').value.toLowerCase().replace(REGEX_24D, '2 4-D').replace(REGEX_SOSL_RESERVED, '?')
+        .replace(REGEX_COMMA, ' and ').replace(REGEX_STOCK_RES, '').replace(REGEX_WAREHOUSE, '').trim();
     
         if (this.searchTerm.length < 2) {
             // LIGHTNING ALERT HERE
