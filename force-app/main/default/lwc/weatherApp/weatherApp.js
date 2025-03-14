@@ -1,6 +1,13 @@
 import { LightningElement, api } from 'lwc';
-import getWeatherCords from '@salesforce/apex/appProduct.getWeatherInfo';
+import { ShowToastEvent } from "lightning/platformShowToastEvent";
+import getWeatherCords from '@salesforce/apex/appWeather.getWeatherInfo';
+import getAddress from '@salesforce/apex/appWeather.getAddressInfo';
+
 import {triggerPest} from 'c/programBuilderHelper'
+
+import { updateRecord } from 'lightning/uiRecordApi';
+import REC_ID from '@salesforce/schema/Program__c.Id'
+
 
 import NEWADDRESS from 'c/updateLocation';
 import DAY from 'c/weatherDay'; 
@@ -219,9 +226,63 @@ level;
         initLongitude: this.long,
         initZipCode: this.zip
       }).then((x)=>{
-        this.zip = x.zipCode;
-        this.lat = x.lattitude;
-        this.long = x.longitude; 
+        if(x === undefined){
+          return;
+        }else if(x.updateHow === 'cords'){
+          this.zip = x.zipCode;
+          this.lat = x.lattitude;
+          this.long = x.longitude; 
+          this.updateZipLatLong();
+        }else{
+          this.getApexLocation(x.address)
+        }
+
+      }).catch((error)=>{
+        let err =  JSON.stringify(error);
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Error",
+            message: err,
+            variant: "error",
+          }),
+        );
+      })
+    }
+
+   async getApexLocation(x){
+          let raw = await getAddress({streetAddress: x})
+          console.log(raw)
+          this.lat = raw.data.position.lat
+          this.long = raw.data.position.lng;
+          this.updateZipLatLong(); 
+   }
+   async updateZipLatLong(){
+      const fields = {};
+      fields[REC_ID.fieldApiName] = this.recordId
+      fields['Preferred_Lat_Long__Longitude__s'] = this.long
+      fields['Preferred_Lat_Long__Latitude__s'] = this.lat
+     
+      const recordInput = {fields}
+      updateRecord(recordInput)
+      .then(() => {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Success",
+            message: "Address updated",
+            variant: "success",
+          }),
+        );
+        this.getWeather(this.typeofGDD)
+       
+      }).catch((error)=>{
+        let err =  JSON.stringify(error);
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Error",
+            message: err,
+            variant: "error",
+          }),
+        );
       })
     }
     calcSnowAmount(level){

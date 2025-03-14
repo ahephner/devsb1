@@ -22,15 +22,55 @@
         <!-- Card Body  -->
         <!-- <lightning-input class='shape' type="number" name="input1" label="New lattitude" onchange={updateField} ></lightning-input>
         <lightning-input class='shape' type="number" name="input2" label="New longitude" ></lightning-input> -->
-        <lightning-input-location label="Default coordinates" latitude={initLatitude} longitude={initLongitude}></lightning-input-location> 
-        <lightning-button 
-          variant="base"
-          label="Use Current Location" 
-          onclick={getLocation} 
-        ></lightning-button>
-        <p>Or</p>
-        <lightning-input class='shape' type="number" value={initZipCode} name="input3" label="Zip Code" maxlength="5" ></lightning-input>
+        <lightning-modal-body>
+          <div class="cord">
+            <lightning-input data-id="toggle" type="toggle" class="slds-m-left_small"
+            label={btnText} checked={baseType} onchange={changeInput}
+            message-toggle-active="" message-toggle-inactive=""></lightning-input>
+          </div>
+
+          <template if:true={useCords}>
+          <div class="sld-grid cord">
+              <div class="slds-col slds-size_2-of-3">
+                <lightning-input-location label="Default coordinates" latitude={initLatitude} longitude={initLongitude}></lightning-input-location> 
+              </div>
+              <div class="slds-col slds-size_1-of-3">
+                <div class="btnStyle">
+                  <lightning-button 
+                  variant="base"
+                  label="Use Current Location" 
+                  onclick={getLocation} 
+                  ></lightning-button>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template if:false={useCords}>
+            <div class="slds-grid">
+              <lightning-input-address
+              address-label="Address"
+              street-label="Street"
+              city-label="City"
+              province-label="State"
+              postal-code-label="Zip Code"
+              country-label="Country"
+              street={street}
+              city={city}
+              province={state}
+              postal-code={zip}
+              province-options={getProvinceOptions}
+              country-disabled
+              country="U.S.A"
+              required
+              onchange={handleChange}
+              ></lightning-input-address>
+  
+            </div>
+          </template>
+        </lightning-modal-body>
         
       </div>
     </lightning-card>
 </template>
+
