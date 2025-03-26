@@ -56,8 +56,12 @@ export default class ProductIntelligence extends LightningElement {
             let flag = false;
             //let date = this.reverseString()
             let allowEdit = item.Product__r.Agency_Pricing__c;
+            let isFert = item.Product__r.hasFertilizer__c ? true: false; 
+            let nVal = item.Product__r.N__c;
+            let pVal = item.Product__r.P__c;
+            let kVal = item.Product__r.K__c;
             let appNameDate = `${item.Application__r.Name} - ${month}/${day}/${year}`
-            return {...item, name, code, price, appNameDate, areaName, margin, rate, allowEdit, flag, floor, goodPrice, unitAreaStyles}
+            return {...item, name, code, price, appNameDate, areaName, margin, rate, allowEdit, flag, isFert,nVal, pVal, kVal, floor, goodPrice, unitAreaStyles}
         })
         this.areaSizeM = roundNum(parseFloat(this.products[0].Application__r.Area__r.Area_Sq_Feet__c),2);
         this.areaAcres = roundNum(parseFloat(this.products[0].Application__r.Area__r.Area_Acres__c),2);
@@ -242,7 +246,7 @@ export default class ProductIntelligence extends LightningElement {
                     this.displayProds[i].Unit_Area__c = this.headUOM;
                     this.displayProds[i].Units_Required__c = reqUnits;
                     if(this.displayProds[i].Unit_Area__c != '100 Gal'){
-                        this.displayProds[i].Cost_Per_M__c = prodCost.perThousand;
+                        this.displayProds[i].Cost_per_M__c = prodCost.perThousand;
                         this.displayProds[i].Cost_per_Acre__c = prodCost.perAcre;
                     }else if(this.displayProds[i].Unit_Area__c === '100 Gal'){
                     //calculate low volume like steal green
@@ -254,7 +258,7 @@ export default class ProductIntelligence extends LightningElement {
                     }
                     //calculate fertilizers
                     if(this.displayProds[i].isFert){
-                        let fert = this.displayProds[index].Product_Type__c === 'Dry' ? calcDryFert(this.headRate, this.displayProds[i]) : calcLiqFert(this.headRate, this.displayProds[i]);
+                        let fert = this.displayProds[i].Product__r.Product_Type__c === 'Dry' ? calcDryFert(this.headRate, this.displayProds[i]) : calcLiqFert(this.headRate, this.displayProds[i]);
                         this.displayProds[i].N__c = fert.n;
                         this.displayProds[i].P__c = fert.p;
                         this.displayProds[i].K__c = fert.k;
@@ -308,7 +312,7 @@ export default class ProductIntelligence extends LightningElement {
                 
                 //console.log(1,this.displayProds[index].Unit_Area__c,2, this.displayProds[index].Rate2__c, 3,this.areaSizeM,4, this.displayProds[index].Product_Size__c)
                 if(this.displayProds[index].isFert){
-                    let fert = this.displayProds[index].Product_Type__c === 'Dry' ? calcDryFert(this.displayProds[index].Rate2__c, this.displayProds[index]) : calcLiqFert(this.displayProds[index].Rate2__c, this.displayProds[index]);
+                    let fert = this.displayProds[index].Product__r.Product_Type__c === 'Dry' ? calcDryFert(this.displayProds[index].Rate2__c, this.displayProds[index]) : calcLiqFert(this.displayProds[index].Rate2__c, this.displayProds[index]);
                     this.displayProds[index].N__c = fert.n;
                     this.displayProds[index].P__c = fert.p;
                     this.displayProds[index].K__c = fert.k;
@@ -398,7 +402,7 @@ export default class ProductIntelligence extends LightningElement {
 
         //handle updating fertilizer amounts
          if(this.displayProds[index].isFert){
-            let fert = this.displayProds[index].Product_Type__c === 'Dry' ? calcDryFert(this.displayProds[index].Rate2__c, this.displayProds[index]) : calcLiqFert(this.displayProds[index].Rate2__c, this.displayProds[index]);
+            let fert = this.displayProds[index].Product__r.Product_Type__c === 'Dry' ? calcDryFert(this.displayProds[index].Rate2__c, this.displayProds[index]) : calcLiqFert(this.displayProds[index].Rate2__c, this.displayProds[index]);
             this.displayProds[index].N__c = fert.n;
             this.displayProds[index].P__c = fert.p;
             this.displayProds[index].K__c = fert.k;

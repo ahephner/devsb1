@@ -1,0 +1,61 @@
+.current{
+    /* display: table; */
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    margin-left: 15px;
+    /* border: 1px solid red; */
+
+}
+.curTemp{
+    font-size: 34px;
+    font-weight: 700;
+}
+.feels{
+    font-family: sans-serif;
+    font-size: medium;
+}
+.letters{
+    font-size: medium;
+    font-weight: 600;
+}
+.dayNumbers{
+    font-size: medium;
+    margin-left: 2px;
+    font-weight: 400;
+    margin-left: 2px;
+    margin-right: 5px;
+}
+
+.boxTwo{
+    border:1px solid black;
+}
+
+.hourCard {
+    box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
+    transition: 0.3s;
+    height: max-content;
+    border-radius: 5px;
+    width: max-content;
+  }
+  
+  .hourCard:hover {
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  }
+  
+  img {
+    border-radius: 5px 5px 0 0;
+  }
+  
+  .tempContainer {
+    padding: 2px 16px;
+    
+  }
+  .outBox{
+    display: inline-flex;
+    width: 93%
+}
+
+.lineUp{
+  display: inline-flex;
+}

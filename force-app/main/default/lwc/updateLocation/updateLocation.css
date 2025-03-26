@@ -1,0 +1,12 @@
+.shape{
+    width: 75%;
+    margin-left: 5px; 
+}
+
+.cord{
+    display: flex;
+}
+
+.btnStyle{
+    margin-top: 15%;
+}

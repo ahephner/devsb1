@@ -22,7 +22,6 @@ public class appProduct {
        //return appPDF; 
    //}
 
-    
     @AuraEnabled(Cacheable=true)
     public static list<Application__c> getApps(ID recordId){
       
@@ -162,5 +161,16 @@ public class appProduct {
                                       from App_Product__c where Application__r.Area__r.Program__c =: rec];
         
         return prods; 
+    }
+    @AuraEnabled
+    public static Map<String, Object> getAddressInfo(string streetAddress){
+        Map<string,object> options = new Map<String,Object> {
+            'version' => '1', // Required. Version of the API endpoint. Must be '1'.
+            'address' => streetAddress
+        };
+            
+		Map<String, Object> response = maps.API.Geocode(options);
+        
+        return response; 
     }
 }
