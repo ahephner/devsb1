@@ -4,7 +4,7 @@
       <lightning-modal-body>
     
         <div class="slds-grid">
-          <div class="slds-col slds-size_1-of-4">
+          <div class="slds-col slds-size_1-of-4 lineUp">
               <div class="current">
                 <div class="curTemp">
                   {dayInfo.temp}&#x2109;
@@ -22,12 +22,12 @@
                   <span class="letters">Humidity</span><span class="dayNumbers">{dayInfo.humidity}%</span>
                 </div>
                 <div class="slds-text-title slds-margin-top_x-small">
-                  <img src={rainPercent} alt="rainChance" style="width:3%"></img><span class="dayNumbers">{dayInfo.precipprob}%</span>
+                  <img src={rainPercent} alt="rainChance" style="width:20%"></img><span class="dayNumbers">{dayInfo.precipprob}%</span>
                 </div>
               </div>
               <!-- Image -->
-                    <div class="slds-col slds-size_1-of-4">
-                      <img src={currentIcon} alt="Avatar" style="width:14%">
+                    <div>
+                      <img src={currentIcon} alt="Avatar" style="width:83%">
                     </div> 
             </div>
           <div class="slds-col slds-size_2-of-4">
@@ -48,9 +48,9 @@
         </div>
       </div>
 
-        <div class="boxTwo">
+        <!-- <div class="boxTwo">
           <h1>History Tracking box to go here</h1>
-        </div>
+        </div> -->
 
       </lightning-modal-body>
       <lightning-modal-footer>

@@ -1,7 +1,7 @@
 import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getWeatherCords from '@salesforce/apex/appWeather.getWeatherInfo';
-import getAddress from '@salesforce/apex/appWeather.getAddressInfo';
+import getAddress from '@salesforce/apex/appProduct.getAddressInfo';
 
 import {triggerPest} from 'c/programBuilderHelper'
 

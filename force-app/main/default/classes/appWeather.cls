@@ -1,4 +1,4 @@
-public class appWeather {
+public without sharing class appWeather {
 
 	@AuraEnabled(Cacheable=true)
     public static list<Program__c> getWeatherInfo(Id recordId){
@@ -7,13 +7,5 @@ public class appWeather {
         return getInfo; 
     }
     
-    @AuraEnabled
-    public static Map<String, Object> getAddressInfo(string streetAddress){
-        Map<string,object> options = new Map<String,Object> {
-            'version' => '1', // Required. Version of the API endpoint. Must be '1'.
-            'address' => streetAddress
-        };
-		Map<String, Object> response = maps.API.Geocode(options);
-        return response; 
-    }
+    
 }

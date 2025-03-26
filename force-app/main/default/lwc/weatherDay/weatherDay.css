@@ -4,7 +4,7 @@
     align-content: center;
     align-items: center;
     margin-left: 15px;
-    border: 1px solid red;
+    /* border: 1px solid red; */
 
 }
 .curTemp{
@@ -54,4 +54,8 @@
   .outBox{
     display: inline-flex;
     width: 93%
+}
+
+.lineUp{
+  display: inline-flex;
 }

@@ -32,6 +32,7 @@ export default class UpdateLocation extends LightningModal {
                 const { latitude, longitude } = position.coords;
                 this.initLatitude = latitude; 
                 this.initLongitude = longitude;
+                this.messBack ='cords'; 
             },
             (error) => {
                 switch (error.code) {
@@ -52,7 +53,7 @@ export default class UpdateLocation extends LightningModal {
             }
         );
     }
-    messBack; 
+    messBack ='cords'; 
     //Toggle Button
     changeInput(evt){
         
