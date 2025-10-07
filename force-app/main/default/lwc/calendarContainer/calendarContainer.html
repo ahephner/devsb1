@@ -1,0 +1,23 @@
+<template>
+    <div class="head">
+        <div class="buttons">
+            <lightning-button 
+            variant="success"
+            label="Add Event" 
+            onclick={handleNewEvent} 
+            ></lightning-button>
+        </div>
+    </div>
+    <template if:true={applicationsSet}>
+        <c-calendar
+            applications={applications}
+            onupdatedate={handleUpdateDate}
+            onseeapp={showApp}
+            onweatherday={showDayWeather}
+            ontoggle={handleToggle}
+            >
+            
+        </c-calendar>
+
+    </template>
+</template>

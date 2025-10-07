@@ -6,8 +6,8 @@ public class cpqProgramClone {
     }
     
 @AuraEnabled(cacheable=true)
-    public static string isOwner(string recId){
-        String accountOwner = [select Account__r.OwnerId from program__c where id =: recId limit 1].Account__r.OwnerId; 
+    public static list<Program__c> isOwner(string recId){
+        list<Program__c> accountOwner = [select Account__r.OwnerId, Account__c from program__c where id =: recId limit 1]; 
         return accountOwner; 
     }    
 @AuraEnabled
@@ -97,7 +97,7 @@ public class cpqProgramClone {
         List<App_Product__c> prod = new List<App_Product__c>([SELECT Name, Application__c, Cost_per_Acre__c, Cost_per_M__c, 
                                  							       K__c, LBS_ACRE__c, Margin__c, N__c, Note__c, Note_Other__c, 
                                  							       OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
-                                           					       Unit_Price__c, Units_Required__c FROM App_Product__c 
+                                           					       Unit_Price__c, Units_Required__c, Total_Price_LWC__c FROM App_Product__c 
                                                                    where Application__c in: appId.keySet()]);
                     //system.debug('apps ---');
                     //system.debug(prod);
@@ -117,7 +117,7 @@ public class cpqProgramClone {
   }
         @AuraEnabled
     public static string cloneProductsWithPriceBooks(string JSONSTRING, list<string> priceBookIds){
-         system.debug('data in cloneProductsWithPriceBooks'); 
+        
          string retMess = 'success'; 
          Map<String, String> appId = new Map<String, String>(); 
          List<App_Product__c> ListCloneProds = new List<App_Product__c>(); 
@@ -142,23 +142,36 @@ public class cpqProgramClone {
                                  							       K__c, LBS_ACRE__c, Margin__c, N__c, Note__c, Note_Other__c, 
                                  							       OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
                                            					       Unit_Price__c, Units_Required__c, altPriceBookEntryId__c,
-                                                              	   altPriceBookId__c, altPriceBookName__c, Product__r.Size__c 
+                                                              	   altPriceBookId__c, altPriceBookName__c, Product__r.Size__c, Total_Price_LWC__c 
                                                               	   FROM App_Product__c 
                                                                    where Application__c in: appId.keySet()]);
-                    //system.debug('apps ---');
-                    //system.debug(prod);
+                    //need to get unique product id's to prevent too many soql's when getting pricing. 
+         Set<string> uniqueProdIds = new Set<string>(); 
+         for(App_Product__c x: prod){
+             uniqueProdIds.add(x.Product__c); 
+         }
+         list<string> toList = new list<string>(uniqueProdIds); 
+        //need to get a map with the price book price using the unique product id's
+        //getPriceboook  
+        Map<String, Map<String, pricebookentry>> priceList = getPriceBooks.mapPriorityBestPrice(priceBookIds, toList);
+         system.debug('here ->>>');
+         system.debug(priceList);
          for(App_Product__c x: prod){
              App_Product__c clonedProd = x.clone(false);
-             	list<pricebookentry> pbInfo = getPriceBooks.priorityBestPrice(priceBookIds, x.Product__c); 
-             	clonedProd.altPriceBookEntryId__c = pbInfo[0].Id;
-             	clonedProd.altPriceBookId__c = pbInfo[0].Pricebook2Id;
-             	clonedProd.altPriceBookName__c = pbInfo[0].Pricebook2.Name; 
-             	clonedProd.Unit_Price__c = pbInfo[0].UnitPrice;
-             	clonedProd.Margin__c = pbInfo[0].List_Margin__c;
+  				Map<String, PricebookEntry> singlePrice = pricelist.get(x.Product__c); 			             	
+             	PriceBookEntry pricing = singlePrice.get(x.Product__c);    
+              
+                clonedProd.altPriceBookEntryId__c = pricing.Id;
+             	clonedProd.altPriceBookId__c = pricing.Pricebook2Id;
+             	clonedProd.altPriceBookName__c = pricing.Pricebook2.Name; 
+             	clonedProd.Unit_Price__c = pricing.UnitPrice;
+             	clonedProd.Margin__c = pricing.List_Margin__c;
+             	clonedProd.Unit_Cost__c = pricing.Product_Cost__c; 
              	//set cost per acre per thousand
-             	costCals costs = cpqProgramClone.calcAcreCharge(pbInfo[0].UnitPrice,x.Product__r.Size__c, x.Rate2__c,x.Unit_Area__c);
+             	costCals costs = cpqProgramClone.calcAcreCharge(pricing.UnitPrice,x.Product__r.Size__c, x.Rate2__c,x.Unit_Area__c);
              	clonedProd.Cost_per_Acre__c = costs.costPerAcre;
              	clonedProd.Cost_per_M__c = costs.costPerM; 
+             	clonedProd.Total_Price_LWC__c = pricing.UnitPrice * clonedProd.Units_Required__c;  
              	clonedProd.Application__c = appId.get(x.Application__c); 
              	ListCloneProds.add(clonedProd); 
          }
@@ -168,6 +181,7 @@ public class cpqProgramClone {
          }
      }catch(Exception e){
         retMess = String.valueOf(e);
+         system.debug(retMess); 
      }
        return retMess;
   }

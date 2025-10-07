@@ -1,0 +1,18 @@
+<template>
+    <lightning-card title="Application Calendar" icon-name="custom:custom19">
+        <div class="slds-var-m-around_medium">
+            <div class="calendar" lwc:dom="manual"></div>
+            <!-- <template if:true={appList} for:each={appList} for:item="con" for:index="index">
+               <li key={con.Date__c}>
+                    {con.Name} - {con.Date__c}
+               </li>
+            </template> -->
+            <template lwc:if={error}>
+                <c-error-panel
+                    errors={error}
+                    friendly-message="Failed to display FullCalendar"
+                ></c-error-panel>
+            </template>
+        </div>
+    </lightning-card>
+</template>

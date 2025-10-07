@@ -25,7 +25,7 @@
                     </p>
 
                 </div>
-                <div class="slds-col slds-size_1-of-1">
+                <div class="slds-col slds-size_1-of-2">
                     <div class='slds-var-m-top_medium ops'>
                         <lightning-combobox
                         name="Use Priority Pricing"
@@ -34,9 +34,13 @@
                         placeholder="Select Progress"
                         options={priorityOptions}
                         onchange={usePriority} ></lightning-combobox>
-                        <lightning-button variant="brand" label="Clone" class="ownerButton" title="titleName" disabled={btnDisabled} onclick={handleClone2}></lightning-button>
                     </div>
                 </div>
+                <div class='slds-col slds-size_1-of-2 slds-var-m-top_medium'>
+                    <c-account-look-up onnewaccount={handleAccount}
+                    onclearaccid={handleClear}></c-account-look-up>
+                    <lightning-button variant="brand" label="Clone" class="ownerButton" title="titleName" disabled={btnDisabled} onclick={handleClone2}></lightning-button>
+                    </div>
             </div>
         </template>
         <template lwc:else>

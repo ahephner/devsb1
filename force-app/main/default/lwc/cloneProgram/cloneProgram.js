@@ -18,8 +18,8 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
     msg; 
     sliderValue;
     userId = Id;
-    //for cloning 
-    isAccountOwner;
+    //for cloning !!!We are forcing everyone to pick an account now to clone 
+    isAccountOwner = false;
     btnDisabled = true;
     priorityValue; 
     accountId;
@@ -27,7 +27,7 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
     simpleClone = true; 
     connectedCallback(){
         this.formSize = this.screenSize(FORM_FACTOR); 
-            //this.currentOWner(); 
+        this.currentOWner(); 
     }
     @wire(isOwner,{recId: '$recordId'})
         wiredUser(res){
@@ -35,7 +35,7 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
                 let ownerId = res.data[0].Account__r.OwnerId;
                 //if user is owner and they want to use their pricebooks on clone get the account id here to go get price books later
                 this.ownerAccId = res.data[0].Account__c; 
-                this.currentOWner(ownerId);
+                //this.currentOWner(ownerId);
             }else if(res.error){
                 console.error(res.error)
             }
@@ -60,8 +60,9 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
             }
     //check if the account owner is current user otherwise show add account clone
    async currentOWner(accOwner){
-        this.isAccountOwner = this.userId === accOwner ? true: false; 
-        this.loaded = true;
+       //this.isAccountOwner = this.userId === accOwner ? true: false; 
+       this.isAccountOwner = false; 
+       this.loaded = true;
     }
     //check screen size to show table on desktop and cards on mobile
     screenSize = (screen) => {

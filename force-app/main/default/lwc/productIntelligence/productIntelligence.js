@@ -60,8 +60,9 @@ export default class ProductIntelligence extends LightningElement {
             let nVal = item.Product__r.N__c;
             let pVal = item.Product__r.P__c;
             let kVal = item.Product__r.K__c;
+            let galLb = item.Product__r.X1_Gallon_Weight__c;
             let appNameDate = `${item.Application__r.Name} - ${month}/${day}/${year}`
-            return {...item, name, code, price, appNameDate, areaName, margin, rate, allowEdit, flag, isFert,nVal, pVal, kVal, floor, goodPrice, unitAreaStyles}
+            return {...item, name, code, price, appNameDate, areaName, margin, rate, allowEdit, flag, isFert,nVal, pVal, kVal, floor, goodPrice, unitAreaStyles, galLb}
         })
         this.areaSizeM = roundNum(parseFloat(this.products[0].Application__r.Area__r.Area_Sq_Feet__c),2);
         this.areaAcres = roundNum(parseFloat(this.products[0].Application__r.Area__r.Area_Acres__c),2);
@@ -263,6 +264,10 @@ export default class ProductIntelligence extends LightningElement {
                         this.displayProds[i].P__c = fert.p;
                         this.displayProds[i].K__c = fert.k;
 
+                    }else{
+                        this.displayProds[i].N__c = 0;
+                        this.displayProds[i].P__c = 0;
+                        this.displayProds[i].K__c = 0;
                     }
             }
 
@@ -317,6 +322,10 @@ export default class ProductIntelligence extends LightningElement {
                     this.displayProds[index].P__c = fert.p;
                     this.displayProds[index].K__c = fert.k;
 
+                }else{
+                    this.displayProds[index].N__c = 0;
+                    this.displayProds[index].P__c = 0;
+                    this.displayProds[index].K__c = 0;
                 }
             }else if(this.displayProds[index].Unit_Area__c ==='100 Gal'){
                 this.displayProds[index].isLowVol__c = true; 
@@ -406,6 +415,10 @@ export default class ProductIntelligence extends LightningElement {
             this.displayProds[index].N__c = fert.n;
             this.displayProds[index].P__c = fert.p;
             this.displayProds[index].K__c = fert.k;
+        }else{
+            this.displayProds[index].N__c = 0;
+            this.displayProds[index].P__c = 0;
+            this.displayProds[index].K__c = 0;
         }
         }else if(e.detail.value ==='100 Gal'){
             let {Rate2__c, Product_Size__c, Unit_Price__c, Spray_Vol_M__c, Cost_per_Acre__c} = this.displayProds[index];

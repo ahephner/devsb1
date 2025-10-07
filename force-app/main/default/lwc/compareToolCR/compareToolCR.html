@@ -1,0 +1,47 @@
+<template>
+    <lightning-card title="Program Product Editor">
+        <div class="slds-p-around_medium">
+            <h1>
+                "Use Products from Program then compare them with Product2ID" side note once clicked product make visual false and add product to table
+            </h1>
+            <template if:true={recordId}>
+                <lightning-combobox
+                    name='box'
+                    lwc:ref="prodBox"
+                    class='areaBox'
+                    label="Filter by Product"
+                    value={showValue}
+                    options={productList}
+                    onchange={filterProd} 
+                    ></lightning-combobox>
+            </template>
+            <!-- Pinned products table -->
+            <template if:true={tableProduct}>
+                <lightning-datatable
+                    key-field="id"
+                    data={tableProduct}
+                    columns={columns}
+                    hide-checkbox-column>
+                </lightning-datatable>
+            </template>
+            <template if:true= {searchProd}>
+                <lightning-button label="Compare" onclick={handleAddToCompare}></lightning-button>
+             <!-- Product2 Lookup selector -->
+                <c-product2-look-up onnewproduct={handleProductSelect}></c-product2-look-up>
+            </template>
+            
+            <!-- Comparison            
+            <template if:true={compareProducts}>
+                <div class="slds-m-top_medium slds-box">
+                    <h4>Comparison:</h4>
+                    <template for:each={compareProducts} for:item="product">
+                        <div key={product.id}>
+                            <span>{product.name} - ${product.price}</span>
+                        </div>
+                    </template>
+                </div>
+            </template> -->
+
+        </div>
+    </lightning-card>
+</template>

@@ -21,7 +21,14 @@ public class appProduct {
        //system.debug(appPDF);
        //return appPDF; 
    //}
-
+	@AuraEnabled
+    public static list<Application__c> getAppForCalendar(id recId){
+                list<application__c> apps = [Select Name, Id, Date__c, Area_Name__c, Total_Price_ap__c, Customer_Name__c, Program_Name__c, Area__c,
+                                     Converted__c,
+                                     area__r.program__r.account__r.BillingLatitude,area__r.program__r.account__r.BillingLongitude from Application__c where Program_ID__c =: recId order by date__c asc];
+        //system.debug(apps);
+        return apps;
+    }
     @AuraEnabled(Cacheable=true)
     public static list<Application__c> getApps(ID recordId){
       

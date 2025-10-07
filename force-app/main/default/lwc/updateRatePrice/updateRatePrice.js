@@ -231,7 +231,11 @@ export default class UpdateRatePrice extends LightningElement {
                         this.appTotalP = roundNum(totalFert.P__c, 4);
                         this.appTotalK = roundNum(totalFert.K__c, 4);
 
-                    }
+                    }else{
+                        this.prodlist[index].N__c = 0;
+                        this.prodlist[index].P__c = 0;
+                        this.prodlist[index].K__c = 0;
+                   }
                 }else if(this.prodlist[index].Unit_Area__c ==='100 Gal'){
                     this.prodlist[index].isLowVol__c = true; 
                     this.prodlist[index].unitAreaStyles = 'slds-col slds-size_2-of-12 lowVolume'
@@ -432,7 +436,7 @@ export default class UpdateRatePrice extends LightningElement {
                     this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
                 }
                 let lOne = this.prodlist[index].Level_1_UserView__c;
-                let floor = this.prodlist[index].Floor_Price__c;
+                let floor = this.prodlist[index].Product__r.Floor_Price__c;
                 let unitPrice = this.prodlist[index].Unit_Price__c;
                 this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
                 this.handleWarning(targetId,lOne, floor, unitPrice, index)
@@ -502,7 +506,7 @@ export default class UpdateRatePrice extends LightningElement {
                             //this.totalCostPerM = roundNum(this.appTotalPrice/(this.areaSizeM/1000),2); 
                             this.totalCostPerM = roundNum(Object.values(this.prodlist).reduce((t,{Cost_per_M__c})=>t+Cost_per_M__c,0),2)
                             let lOne = this.prodlist[index].Level_1_UserView__c;
-                            let floor = this.prodlist[index].Floor_Price__c;
+                            let floor = this.prodlist[index].Product__r.Floor_Price__c;
                             let unitPrice = this.prodlist[index].Unit_Price__c;
                             this.productIds.includes(this.prodlist[index].Product__c) ? '': this.productIds.push(this.prodlist[index].Product__c);
                             this.handleWarning(targetId, lOne, floor, unitPrice, index)

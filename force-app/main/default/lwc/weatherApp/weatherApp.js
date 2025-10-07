@@ -75,7 +75,7 @@ level;
       this.lat = zips[0].Preferred_Lat_Long__c ? zips[0].Preferred_Lat_Long__c.latitude:  zips[0].Account__r.BillingLatitude;
       this.long = zips[0].Preferred_Lat_Long__c ? zips[0].Preferred_Lat_Long__c.longitude: zips[0].Account__r.BillingLongitude;
       this.accountId = zips[0].Account__c;
-
+      
       this.getWeather(this.typeofGDD)
     }
     async getWeather(base){
