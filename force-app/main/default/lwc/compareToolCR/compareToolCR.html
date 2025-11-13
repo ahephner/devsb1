@@ -24,10 +24,12 @@
                     hide-checkbox-column>
                 </lightning-datatable>
             </template>
-            <template if:true= {searchProd}>
+            <template if:true={searchProd}>
                 <lightning-button label="Compare" onclick={handleAddToCompare}></lightning-button>
              <!-- Product2 Lookup selector -->
-                <c-product2-look-up onnewproduct={handleProductSelect}></c-product2-look-up>
+            </template>
+            <template if:true={demo}>
+                <c-product2-look-up onnewproduct={handleProductSelect}></c-product2-look-up>                
             </template>
             
             <!-- Comparison            

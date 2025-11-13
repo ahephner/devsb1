@@ -58,13 +58,34 @@ const calcDryFert = (numRate,item) =>{
   return {n,p,k}; 
 }
 
+const compareToolDryFert = (numRate,item, unitArea) =>{   
+  let x = item; 
+  let n = x.N__c > 0 ? x.N__c/100 : 0;
+  let p = x.K__c > 0 ? x.P__c/100 : 0; 
+  let k = x.K__c > 0 ? x.K__c/100 : 0; 
+  n = handleRate(n, numRate, unitArea);
+  p = handleRate(p, numRate, unitArea);
+  k = handleRate(k, numRate, unitArea);
+  return {n,p,k}; 
+}
 const handleRate = (percent, rate, rateType) =>{
     let value = rateType.includes('Acre') ? (rate / 43.56)* percent : rate * percent;
     value = roundRate(value, 4)
     return value;
 } 
 
+const compareToolLiqFert = (numRate,item) =>{
+  let x = item
+  let n = x.N__c > 0 ? x.N__c/100 : 0;
+  let p = x.P__c > 0 ? x.P__c/100 : 0;
+  let k = x.K__c > 0 ? x.K__c/100 : 0;
 
+  n = handleLRate(n, x.X1_Gallon_Weight__c, numRate);
+  p = handleLRate(p, x.X1_Gallon_Weight__c, numRate);
+  k = handleLRate(k, x.X1_Gallon_Weight__c, numRate);
+
+  return {n,p,k}
+}
 
 const calcLiqFert = (numRate,item) =>{
   let x = item
@@ -330,7 +351,9 @@ export{hold,
       alreadyAdded, 
       pref, 
       calcDryFert, 
-      calcLiqFert, 
+      calcLiqFert,
+      compareToolLiqFert,
+      compareToolDryFert, 
       sumFert,
       unitsRequired, 
       roundRate, 

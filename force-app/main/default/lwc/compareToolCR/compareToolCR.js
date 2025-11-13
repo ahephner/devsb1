@@ -8,6 +8,7 @@ import basicInfo from '@salesforce/apex/appProduct.basicInfo';
 export default class CompareToolCR extends LightningElement {
     @track pinnedProducts = [];       // Product to be pinned
     @track tableProduct = [];      // Table Product
+    columns = [];
     @api recordId;
     showValue;
     
@@ -18,7 +19,15 @@ export default class CompareToolCR extends LightningElement {
     // Columns for Table only showing Name and Price till we get data on the table
     columns = [
         { label: 'Label', fieldName: 'label' },
-        { label: 'Value', fieldName: 'value', type: 'currency'}
+        { label: 'Report Rate', fieldName: 'rate2'},
+        { label: 'Unit Measure', fieldName: 'unitMeasure' },
+        { label: 'Value', fieldName: 'value', type: 'currency'},
+        { label: 'N', fieldName: 'nVal', type: 'number' },
+        { label: 'P', fieldName: 'pVal', type: 'number' },
+        { label: 'K', fieldName: 'kVal', type: 'number' },
+        { label: 'Cost Per M', fieldName: 'costPerM', type: 'currency' },
+        { label: 'Cost Per Acre', fieldName: 'costPerAcre', type: 'currency' },
+        { label: 'Total Used', fieldName: 'totalUsed', type: 'number' }
     ];
     
     connectedCallback() {
@@ -45,8 +54,16 @@ export default class CompareToolCR extends LightningElement {
                 this.pinnedProducts = result.map(item => {
                     let id = item.Id;
                     let label = item.Product_Name__c;
+                    let rate2 = item.Rate2__c;
+                    let unitMeasure = item.Unit_Area__c;
                     let value = item.Unit_Price__c;
-                    return { id, label, value };
+                    let nVal = item.Product__r.N__c;
+                    let pVal = item.Product__r.P__c;
+                    let kVal = item.Product__r.K__c;
+                    let costPerM = item.Cost_per_M__c;
+                    let costPerAcre = item.Cost_per_Acre__c;
+                    let totalUsed = item.Total_Used_f__c;
+                    return { id, label, rate2, unitMeasure, value, nVal, pVal, kVal, costPerM, costPerAcre, totalUsed};
                 });
                 //unique could have 3 quicksilvers but only need to display 1
                 console.log(this.pinnedProducts[0].label);
@@ -57,9 +74,8 @@ export default class CompareToolCR extends LightningElement {
                 console.error('Error fetching program products', error);
             });
         console.log("This is the End")    
-
     }
-
+    
     filterProd(event) {
         console.log('Filter Product:', event.target.options);
         console.log(event.target.value);
@@ -69,18 +85,28 @@ export default class CompareToolCR extends LightningElement {
             this.tableProduct = [];
             return;
         }
-
-        // Only display the selected product
+        // Only display the selected product  
         const selectedProduct = this.pinnedProducts.find(p => p.id === selectedId);
         this.tableProduct = selectedProduct ? [selectedProduct] : [];
         this.searchProd = true;
+        this.showComboBox = false;
     }
+
+    demo = false; 
+    // This is the event when the user clicks Compare
+    handleAddToCompare(event) {
+        // Updates the interface and empties table product
+        this.searchProd = false;
+        this.showCombobox = false;
+        this.tableProduct;
+        this.demo = true;
+        
+        // const recID = event.currentTarget.dataset.id;
+        // const product = this.tableProduct.find(p => p.id === recID);
+        // if (!product) return;
+
+        // this.compareProducts = [...this.compareProducts, product];
+
     
-    //This is the event when the user clicks Compare
-    // handleAddToCompare(event){
-    //     const recID = event.currentTarget.dataset.id;
-    //     const product = this.pinnedProducts.find(p => p.id === recID);
-    //     if (!product) return;
-    //     this.compareProducts = [...this.compareProducts, product];
-    //}
+    }
 }

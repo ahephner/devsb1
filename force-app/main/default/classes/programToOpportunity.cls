@@ -9,7 +9,7 @@ public with sharing class programToOpportunity {
        //prod record type: 0122M000001ElAYQA0
        //sandbox record type: 01275000000CgcYAAS
         Opportunity opp = new Opportunity(Name=program.Name, AccountId = Program.Account__c, CloseDate= cd, StageName='Working', 
-                                          pricebook2id='01s410000077vSKAAY', recordtypeid='01275000000CgcYAAS');
+                                          pricebook2id='01s410000077vSKAAY', recordtypeid='0122M000001ElAYQA0');
         
         insert opp; 
 
@@ -77,5 +77,20 @@ public with sharing class programToOpportunity {
 
         return mess; 
     }
-
+	@auraEnabled
+    public static string markApps(list<string> appId){
+        string messBack;
+        list<Application__c> toUpdate = new list<Application__c>();
+        try{
+            for(Application__c x:[select id, Converted__c from Application__c where id in: appId]){
+                x.Converted__c = true; 
+                toUpdate.add(x);
+            } 
+            update toUpdate; 
+            messBack = 'success'; 
+        }catch(exception e){
+            messBack = string.valueOf(e);
+        }
+        return messBack;
+    }
 }

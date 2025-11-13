@@ -1,6 +1,7 @@
 import { priorityPricing} from 'c/helperOMS';
  import getPriceBooks from '@salesforce/apex/getPriceBooks.getPriceBookIds';
 import basicInfo from '@salesforce/apex/appProduct.basicInfo';
+import priorityPrice from '@salesforce/apex/getPriceBooks.priorityBestPrice'; 
 pbIds; 
 accId; 
 connectedCallBack(){
@@ -14,4 +15,9 @@ async init(){
     let priceBooks = await getPriceBooks({accountId: this.accId});
     let pbInfo = await priorityPricing(priceBooks);
     this.pbIds = [...pbInfo.priceBookIdArray]; 
+}
+
+async clickProduct(prodId){
+        let priceInfo = await priorityPrice({priceBookIds: this.pbIds, productId: prodId})
+        
 }

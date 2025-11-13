@@ -1,0 +1,35 @@
+.grid-table {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-rows: minmax(40px, auto);
+  grid-template-rows: repeat(10, auto);
+  grid-auto-columns: 160px;
+  overflow-x: auto;
+  font-family: sans-serif;
+}
+
+.cell {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  background: white;
+  text-align: center;
+}
+
+.cell.header {
+  background-color: #f3f3f3;
+  font-weight: bold;
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.grid-container {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.tableBtn{
+    display: inline-flex;
+}
