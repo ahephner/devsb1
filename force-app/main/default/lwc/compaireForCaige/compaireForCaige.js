@@ -1,10 +1,11 @@
 import { LightningElement, api, track } from 'lwc';
 //import priorityPrice from '@salesforce/apex/getPriceBooks.priorityBestPrice';
 import allAppProducts from '@salesforce/apex/appProduct.allAppProducts';
+import prodIdToData from '@salesforce/apex/dataFromProductIdCR.prodIdToData';
 import { priorityPricing} from 'c/helperOMS';
  import getPriceBooks from '@salesforce/apex/getPriceBooks.getPriceBookIds';
 import basicInfo from '@salesforce/apex/appProduct.basicInfo';
-
+import SearchContact from 'c/searchContactAddress'
 import { appTotal, alreadyAdded, pref,compareToolDryFert, compareToolLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated, sumFert, totalUsed,lowVolume, lvUnits } from 'c/programBuilderHelper';
 import {checkPricing, sumByKey} from 'c/helper'
 export default class CompaireForCaige extends LightningElement {
@@ -65,7 +66,8 @@ export default class CompaireForCaige extends LightningElement {
                     let costPerM = item.Cost_per_M__c;
                     let costPerAcre = item.Cost_per_Acre__c;
                     let totalUsed = item.Total_Used_f__c;
-                    let firstItem = index >= 1 ? false: true; 
+                    let firstItem = index >= 1 ? false: true;
+                    
                     return {...item, id, label, rate2, isFert, unitMeasure, price, N__c, P__c, K__c, costPerM, costPerAcre, totalUsed,firstItem};
                 });
                 //unique could have 3 quicksilvers but only need to display 1
@@ -76,8 +78,9 @@ export default class CompaireForCaige extends LightningElement {
             .catch(error => {
                 console.error('Error fetching program products', error);
             });
-        console.log("This is the End")    
+            
     }
+
     
         buildProdFilter(data){
         console.log(data)
@@ -104,13 +107,33 @@ export default class CompaireForCaige extends LightningElement {
             return;
         }
         // Only display the selected product  
-        const selectedProduct = this.pinnedProducts.find(p => p.Product__c === selectedId);
-        this.tableProduct = selectedProduct ? [selectedProduct] : [];
-        this.showCompareBtn = true;
-        this.showComboBox = false;
-        this.number = 0; 
+        if(selectedId ==='Pick Product'){
+            this.openSearch()
+        }else{
+            const selectedProduct = this.pinnedProducts.find(p => p.Product__c === selectedId);
+            this.tableProduct = selectedProduct ? [selectedProduct] : [];
+            this.showCompareBtn = true;
+            this.showComboBox = false;
+            this.number = 0; 
+        }
     }
-
+    async openSearch(){
+        const show = await SearchContact.open({
+                size: 'medium',
+                description: 'address',
+                content: this.productList.slice(2)
+            }).then((res)=>{
+                console.log(10,res)
+                // this.prodFilterValue = res;
+                // this.loaded = false; 
+          
+                // this.displayProds = this.products.filter(x=> x.Product__c === this.prodFilterValue).sort((a,b)=>a.Application__r.Date__c.localeCompare(b.Application__r.Date__c))
+                // //need a function to destructure first value and get averages
+                // this.setHeaders(this.displayProds[0], this.displayProds)
+                // this.showHeader = true; 
+                // this.loaded = true;  
+            })
+    }
     
     btnName = 'first'
     // This is the event when the user clicks Compare
@@ -140,11 +163,71 @@ export default class CompaireForCaige extends LightningElement {
     maxPick = false; 
     number = 0
     handleProductSelect(evt){
-       let prodId = evt.detail //this is product2 id
-        //apex call here to get the product info
-        
-        //handleMove
-        this.handleNextView(this.number, 'forward'); 
+const prodId = evt.detail;
+
+        if (!prodId) return;
+
+        prodIdToData({ id: prodId })
+            .then(results => {
+                if (!results || results.length === 0) return;
+
+                const productData = results.map(x=>{
+                    let id = x.Id
+                    let Product__c = x.Id
+                    let label = x.Name
+                    let rate2 = 0
+                    let unitMeasure = x.Product_Type__c === 'Dry'? 'LB/M':'OZ/Acre';
+                    let price = x.Floor_Price__c
+                    let Unit_Price__c = x.Floor_Price__c
+                    let isFert = x.hasFertilizer__c;
+                    let N__c =  !x.hasFertilizer__c ? 'N/A': x.N__c;
+                    let P__c = !x.hasFertilizer__c ? 'N/A': x.P__c;
+                    let K__c = !x.hasFertilizer__c ? 'N/A': x.K__c;
+                    let costPerM = 0.00
+                    let costPerAcre = 0.00
+                    let totalUsed = 0.00
+                    let Product_Size__c = x.Size__c; 
+                    let Unit_Area__c = x.Product_Type__c === 'Dry'? 'LB/M':'OZ/Acre';
+                    let Product__r = {N__c: x.N__c, P__c: x.P__c, K__c: x.K__c, X1_Gallon_Weight__c: x.X1_Gallon_Weight__c} 
+                    let firstItem =false; 
+                    return {...x, id, Product__c, label, rate2, unitMeasure, price, Unit_Price__c, isFert, N__c, P__c, K__c, costPerM, costPerAcre, totalUsed, Product_Size__c, Unit_Area__c, Product__r, firstItem}
+                });
+
+                this.tableProduct = [...this.tableProduct,...productData ]
+            // push object to tableProduct
+                //this.tableProduct = [...this.tableProduct, {
+                     //id: productData.Id,
+                     //Product__c: productData.Id,
+                     //label: productData.Name,
+                     //rate2: 0,
+                     //unitMeasure:'OZ/M', //productData.Unit_Area__c,
+                     //price: productData.Floor_Price__c,
+                    //  isFert: productData.hasFertilizer__c,
+                    //  N__c: !productData.hasFertilizer__c ? 'N/A': productData.N__c,
+                    //  P__c: !productData.hasFertilizer__c ? 'N/A': productData.P__c,
+                    //  K__c: !productData.hasFertilizer__c ? 'N/A': productData.K__c,
+                     //costPerM: 0.00,//productData.Cost_per_M__c,
+                     //costPerAcre: 0.00,//roductData.Cost_per_Acre__c,
+                     //totalUsed: 0.00,
+                     //Unit_Area__c: productData.Product_Type__c === 'Dry'? 'LB/M':'OZ/Acre'
+                     //firstItem: index >= 1 ? false: true 
+                    //return {...item, id, label, rate2, isFert, unitMeasure, price, N__c, P__c, K__c, costPerM, costPerAcre, totalUsed,firstItem}; //productData.Total_Used_f__c
+                //}];
+                // Hide Product2 dropdown
+                this.demo = false;
+                
+                // Show Compare button again if user can pick more
+                if (this.number <= 3) {
+                    this.searchProd = true;
+                    this.handleNextView(this.number, 'forward');
+                } else {
+                    this.searchProd = false;
+                    this.maxPick = true;
+                }
+
+                console.log('Product added to table:', productData);
+            })
+            .catch(error => console.error(error));
     }
 //need to work on reset like pick a new proudct this needs to go back to zero 
     handleNextView(num, type){
@@ -153,26 +236,22 @@ export default class CompaireForCaige extends LightningElement {
         switch (true) {
             case (num === 0 && type === 'forward'):
                 this.number ++
-                let placeOne = {id: '3', label: 'Place One'}
-                ///here we would add product to table
-                this.tableProduct = [...this.tableProduct, placeOne]
                 this.searchProd = false;
                 this.showCompareBtn = true; 
                 break;
             case (num === 1 && type === 'forward'):
                 this.number ++
-                let placeTwo = {id: '4', label: 'Place Two'}
-                ///here we would add product to table
-                this.tableProduct = [...this.tableProduct, placeTwo]
                 this.searchProd = false;
                 this.showCompareBtn = true;
                 break;
+            case (num === 2 && type === 'forward'):
+                this.number ++
+                this.searchProd = false;
+                this.showCompareBtn = false;
+                this.maxPick = true
+                break;
             case (num === 3 && type === 'forward'):
                 this.searchProd = false;
-                let placeThree = {id: '5', label: 'Place Three'}
-                ///here we would add product to table
-                this.tableProduct = [...this.tableProduct, placeThree]
-                this.maxPick = true
                 break
             default:
                 break;

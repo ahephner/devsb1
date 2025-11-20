@@ -8,7 +8,7 @@
                 <lightning-combobox
                     name='box'
                     lwc:ref="prodBox"
-                    class='areaBox'
+                    class='areaBox slds-m-bottom_small'
                     label="Filter by Product"
                     value={showValue}
                     options={productList}
@@ -56,6 +56,7 @@
         type="number"
         formatter="currency" 
         step="0.01"
+        disabled={x.Agency_Pricing__c}
         value={x.price}
         onchange={handlePrice}
         name={x.Product__c}></lightning-input>
@@ -66,11 +67,11 @@
     <div key={x.id} class="cell">${x.Cost_per_M__c}</div>
     <div key={x.id} class="cell">${x.Cost_per_Acre__c}</div>
     <template lwc:if={x.firstItem}>
-        <div key={x.id} class="cell"><lightning-input type="toggle"  name={x.Product__c} onchange={handleReplacement}></lightning-input></div>
-
+        <div class='cell' key={x.id}></div>
+        
     </template>
     <template lwc:else>
-        <div class='cell' key={x.id}></div>
+        <div key={x.id} class="cell"><lightning-input type="toggle"  name={x.Product__c} onchange={handleReplacement}></lightning-input></div>
     </template>
     
     
@@ -92,6 +93,7 @@
       <lightning-button 
       label="Compare" 
       name={btnName} 
+      class="slds-m-left_x-small slds-m-top_x-small"
       onclick={handleAddToCompare} 
       variant="success"></lightning-button>
     </template>
