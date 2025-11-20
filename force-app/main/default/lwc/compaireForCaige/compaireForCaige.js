@@ -66,12 +66,12 @@ export default class CompaireForCaige extends LightningElement {
                     let costPerM = item.Cost_per_M__c;
                     let costPerAcre = item.Cost_per_Acre__c;
                     let totalUsed = item.Total_Used_f__c;
-                    let firstItem = index >= 1 ? false: true;
+                    let firstItem = true;
                     
                     return {...item, id, label, rate2, isFert, unitMeasure, price, N__c, P__c, K__c, costPerM, costPerAcre, totalUsed,firstItem};
                 });
                 //unique could have 3 quicksilvers but only need to display 1
-                
+                this.accId = this.pinnedProducts[0].Application__r.Area__r.Program__r.Account__c; 
                 this.buildProdFilter(this.pinnedProducts)
                 this.showValue = '';
             })
@@ -124,14 +124,11 @@ export default class CompaireForCaige extends LightningElement {
                 content: this.productList.slice(2)
             }).then((res)=>{
                 console.log(10,res)
-                // this.prodFilterValue = res;
-                // this.loaded = false; 
-          
-                // this.displayProds = this.products.filter(x=> x.Product__c === this.prodFilterValue).sort((a,b)=>a.Application__r.Date__c.localeCompare(b.Application__r.Date__c))
-                // //need a function to destructure first value and get averages
-                // this.setHeaders(this.displayProds[0], this.displayProds)
-                // this.showHeader = true; 
-                // this.loaded = true;  
+            const selectedProduct = this.pinnedProducts.find(p => p.Product__c === res);
+            this.tableProduct = selectedProduct ? [selectedProduct] : [];
+            this.showCompareBtn = true;
+            this.showComboBox = false;
+            this.number = 0; 
             })
     }
     
