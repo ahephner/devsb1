@@ -1,14 +1,11 @@
 <template>
     <div class="head">
         <div class="buttons">
-            <lightning-button 
-            variant="success"
-            label="Add Event" 
-            onclick={handleNewEvent} 
-            ></lightning-button>
+             <c-program-btn-group></c-program-btn-group> 
+             
         </div>
     </div>
-    <template if:true={applicationsSet}>
+    <!-- <template if:true={applicationsSet}>
         <c-calendar
             applications={applications}
             onupdatedate={handleUpdateDate}
@@ -19,5 +16,5 @@
             
         </c-calendar>
 
-    </template>
+    </template> -->
 </template>

@@ -4,10 +4,11 @@ import allAppProducts from '@salesforce/apex/appProduct.allAppProducts';
 import prodIdToData from '@salesforce/apex/dataFromProductIdCR.prodIdToData';
 import { priorityPricing} from 'c/helperOMS';
  import getPriceBooks from '@salesforce/apex/getPriceBooks.getPriceBookIds';
-import basicInfo from '@salesforce/apex/appProduct.basicInfo';
+//import basicInfo from '@salesforce/apex/appProduct.basicInfo';
 import SearchContact from 'c/searchContactAddress'
 import { appTotal, alreadyAdded, pref,compareToolDryFert, compareToolLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated, sumFert, totalUsed,lowVolume, lvUnits } from 'c/programBuilderHelper';
 import {checkPricing, sumByKey} from 'c/helper'
+
 export default class CompaireForCaige extends LightningElement {
     
     @track pinnedProducts = [];       // Product to be pinned
@@ -18,6 +19,7 @@ export default class CompaireForCaige extends LightningElement {
     
 //price book ids
     pbIds; 
+    priceBooks;
 //acccount id get basicInfo will set this. call after product load
     accId;
     // Columns for Table only showing Name and Price till we get data on the table
@@ -74,6 +76,15 @@ export default class CompaireForCaige extends LightningElement {
                 this.accId = this.pinnedProducts[0].Application__r.Area__r.Program__r.Account__c; 
                 this.buildProdFilter(this.pinnedProducts)
                 this.showValue = '';
+            }).then(()=>{
+                let priceBooks
+                if(this.accId){
+                     priceBooks = getPriceBooks({accountId: this.accId})
+                }
+                return priceBooks
+            }).then((res)=>{ 
+                    this.pbIds = [...priorityPricing(res).priceBookIdArray];
+                    console.log(this.pbIds)
             })
             .catch(error => {
                 console.error('Error fetching program products', error);
@@ -160,22 +171,25 @@ export default class CompaireForCaige extends LightningElement {
     maxPick = false; 
     number = 0
     handleProductSelect(evt){
-const prodId = evt.detail;
+        const prodId = evt.detail;
 
         if (!prodId) return;
 
-        prodIdToData({ id: prodId })
+        prodIdToData({ pIds: this.pbIds, id: prodId })
             .then(results => {
+                //console.log(results)
                 if (!results || results.length === 0) return;
-
-                const productData = results.map(x=>{
+                let pricing =  results.bestPrice;
+                let product = [results.selectedProduct]
+                const productData = product.map(x=>{
                     let id = x.Id
                     let Product__c = x.Id
                     let label = x.Name
                     let rate2 = 0
                     let unitMeasure = x.Product_Type__c === 'Dry'? 'LB/M':'OZ/Acre';
                     let price = x.Floor_Price__c
-                    let Unit_Price__c = x.Floor_Price__c
+                    let Unit_Price__c = pricing?.UnitPrice ?? x.Floor_Price__c;
+                    let Margin__c =  pricing?.List_Margin__c ?? 0
                     let isFert = x.hasFertilizer__c;
                     let N__c =  !x.hasFertilizer__c ? 'N/A': x.N__c;
                     let P__c = !x.hasFertilizer__c ? 'N/A': x.P__c;
@@ -187,7 +201,7 @@ const prodId = evt.detail;
                     let Unit_Area__c = x.Product_Type__c === 'Dry'? 'LB/M':'OZ/Acre';
                     let Product__r = {N__c: x.N__c, P__c: x.P__c, K__c: x.K__c, X1_Gallon_Weight__c: x.X1_Gallon_Weight__c} 
                     let firstItem =false; 
-                    return {...x, id, Product__c, label, rate2, unitMeasure, price, Unit_Price__c, isFert, N__c, P__c, K__c, costPerM, costPerAcre, totalUsed, Product_Size__c, Unit_Area__c, Product__r, firstItem}
+                    return {...x, id, Product__c, label, rate2, unitMeasure, price, Unit_Price__c, Margin__c, isFert, N__c, P__c, K__c, costPerM, costPerAcre, totalUsed, Product_Size__c, Unit_Area__c, Product__r, firstItem}
                 });
 
                 this.tableProduct = [...this.tableProduct,...productData ]
