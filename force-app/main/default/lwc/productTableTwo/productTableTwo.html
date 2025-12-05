@@ -1,0 +1,74 @@
+<template>
+    <template if:true={exposed}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" 
+        aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container">
+              <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                  <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                  <span class="slds-assistive-text slds-button__icon slds-button__icon_large slds-button_icon-inverse">Close</span>
+                </button>
+                <h5 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Product Table 2</h5>
+                <p>Area : {areaSelected}</p> 
+              </header>
+<!--this is the search info for products. Needs moved to appProductList comp-->
+              <div class="slds-modal__content slds-p-around_medium  prodBody" id="modal-content-id-1">
+
+<!--here is the name date screen-->
+                <template if:true={dateName}>
+                  <c-app-name-date 
+                                   recid={programId}
+                                   oncancel={closeModal}
+                                   onnamedate={setNameDate}></c-app-name-date>
+                </template>
+    <!--Here is the child app that controls the products displayed-->
+              <!-- <c-app-product-list></c-app-product-list> -->
+              <template if:true={productList}>
+                  <c-app-select-prod pricebookids={pbIds}
+                                     appdate={appDate}
+                                     custid={accId}
+                                     onclose={closeModal}
+                                     onmove={gatherProducts}></c-app-select-prod>
+              </template>    
+
+              <template if:true={productRates}>
+                <template lwc:if={ornamental}>
+                  <c-orn-app-rate-price selection={selectedProducts}
+                  area-size={areaSQft}
+                  onprice={badPrice}
+                  onsave={save}
+                  oncancel={closeModal}></c-orn-app-rate-price>
+
+                </template>
+                <template lwc:else>
+                  <c-app-rate-price selection={selectedProducts}
+                  area-size={areaSQft}
+                  onprice={badPrice}
+                  onsave={save}
+                  oncancel={closeModal}></c-app-rate-price>
+                </template>
+              </template>
+              <template if:true={disableBtn}>
+                <div class='slds-align_absolute-center'>
+                    <p>One or more items is below floor. Look for the price in <span style='color:red'>red</span></p>     
+                </div>
+            </template>
+            </div>
+            
+              <footer class="slds-modal__footer ">
+                <div class="btnGroup">
+                  <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+                  <button class="slds-button slds-button_brand" disabled={disableBtn} onclick={move}>Next</button>
+                </div>
+              </footer>
+            </div>
+          </section>
+          <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!-- <lightning-card  variant="Narrow"  title="Products" icon-name="standard:account">
+        <lightning-input type="text" variant="standard" name="search" 
+        label="Product" placeholder="type here..."
+        onchange={searchProd}
+        value={searchKey}></lightning-input>
+    </lightning-card> -->
+</template>

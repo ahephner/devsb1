@@ -1,0 +1,92 @@
+<template>
+
+        
+
+            
+    <lightning-modal-header label="Add an Area"></lightning-modal-header>
+        <lightning-modal-body>
+            <div class="slds-grid">
+                        <!-- Area Name -->
+                        <lightning-input class='validate' type="text" 
+                        label="Area Name" onchange={newName} required></lightning-input>
+                        <!-- Finish Spray -->
+                       <template lwc:if={ornamentalArea}>
+                           <lightning-input class='validate' type='number' label="Finished Spray Gallons"  
+                           value={finishSpray} onchange={setFinishSpray} required></lightning-input>
+                       </template>
+                       <!--SQ FT-->
+                       <template lwc:else>
+                            <lightning-input class='validate' type='number' label="Area Sq Feet (M)"  
+                             value={feet} onchange={newFeet} required></lightning-input>
+                       </template>
+                       <!-- <p>HI GUYSSSSSS</p> -->
+                        <!-- Turf Type -->
+                    <template if:false={ornamentalArea}>
+                        <lightning-combobox
+                        name="turftype"
+                        class='validate' 
+                        label="Turf Type"
+                        value={stand}
+                        placeholder="Select Type"
+                        options={typeOptions}
+                        onchange={setType} 
+                        required 
+                      ></lightning-combobox>
+                    </template>
+                        
+                    </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                        <lightning-combobox
+                                        class="validate"
+                                        name='UofM'
+                                        label='Pref Unit of Measure'
+                                        value={prefUM}
+                                        options={setSize}
+                                        onchange={newUM}
+                                        required
+                                        ></lightning-combobox>
+                                        <!-- Acre -->
+                        <template lwc:if={ornamentalArea}>
+                            <!-- <lightning-input class='validate' type='number' 
+                                    label="Tank Size" value={tankSize} onchange={setTankSize} required></lightning-input> -->
+                                <p class="slds-m-top_x-large slds-m-bottom_x-small">Amount of Gallons Required to treat area</p>
+                        </template>
+                        <template lwc:else>
+                            <lightning-input class='validate' type='number' 
+                            label="Area Acres" value={areaAcres} onchange={newAcre} required step="0.01"></lightning-input>
+                        </template>
+                                    <lightning-combobox
+                                    name='category'
+                                    label='Type'
+                                    placeholder='--None--'
+                                    value={note}
+                                    options={setNotes}
+                                    onchange={newType}
+                                   ></lightning-combobox>
+                                   <!-- <lightning-input data-id="toggle" type="toggle" 
+                                   label={btnLabel} checked={ornamentalArea} onchange={changeAreaType}
+                                   message-toggle-active="" message-toggle-inactive=""></lightning-input> -->
+                                   <!-- error  messages -->
+                                   <template if:false={isValid}>
+                                       <div class="slds-grid">
+                                           <div class="slds-col slds-size_1-of-1 messages">
+                                               <template for:each={errMsgs} for:item="err" for:index="index">
+                                                   <ul key={err}>
+                                                       <li class="errMsg">{err}</li>
+                                                   </ul>
+                                               </template>
+                                           </div>
+                                       </div>
+                                   </template>
+                                </div>
+                           
+                            <lightning-modal-footer>
+                                <lightning-button label="Cancel" variant="neutral" onclick={closeModal}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
+                                <lightning-button label="Save" variant="brand" onclick={saveArea}></lightning-button>
+                           </lightning-modal-footer>
+
+                        </div>
+                    </lightning-modal-body>
+
+
+        </template>

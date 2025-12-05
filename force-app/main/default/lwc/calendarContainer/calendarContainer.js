@@ -23,11 +23,11 @@ export default class CalendarContainer extends LightningElement{
     cleanWeather; 
     weather
     @api recordId;
+    
     badAPIExample = 'SC9NP46DF9TQT57GAHLWSDALA'
     
     subscription= null;
     connectedCallback(){
-        
         this.start(); 
     }
     //subscribe for refresh

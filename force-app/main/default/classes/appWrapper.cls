@@ -13,4 +13,12 @@ public with sharing class appWrapper {
     public boolean parentApp {get; set;}
     @AuraEnabled
     public boolean ds {get;set;}
+    @AuraEnabled
+    public decimal tankSize {get;set;}
+    @AuraEnabled
+    public string measurement {get;set;}
+    @AuraEnabled
+    public decimal volume {get;set;}
+    @AuraEnabled 
+    public String appType {get;set;}
 }

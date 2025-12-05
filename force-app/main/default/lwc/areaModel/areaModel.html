@@ -1,0 +1,21 @@
+<template>
+    <lightning-modal-header label="Edit Area Sizes"></lightning-modal-header>
+    <lightning-modal-body> 
+        <template lwc:if={loading}>
+            <div class="exampleHolder">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+        <template lwc:else>
+            <p><i>Note changing multiple area sizes at once please review product amounts updated</i></p>
+
+            <template for:each={areas} for:item="x">
+                <p key={x.Id}>{x.Name}</p>
+            </template>
+        </template>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button variant="destructive" label="Cancel" title="Destructive action" onclick={cancel} class="slds-m-left_x-small"></lightning-button>
+        <lightning-button variant="success" label="Save" title="Successful action" onclick={handleSave} class="slds-m-left_x-small"></lightning-button>
+    </lightning-modal-footer>
+</template>

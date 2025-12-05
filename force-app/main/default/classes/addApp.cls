@@ -11,6 +11,7 @@ public with sharing class addApp {
         app.Spray_Vol_Meas__c = wrapper.measurement;
         app.Spray_Vol__c = wrapper.volume;
         app.Tank_Size__c = wrapper.tankSize;
+        app.Type__c = wrapper.appType; 
         insert app; 
         return app; 
     }

@@ -6,10 +6,19 @@ public class appProduct {
        for(area__c x:[select id, name from area__c where program__c = :recordId]){
            aw.add(new areaWrapper(x.name, x.id));
        }
-      system.debug('aw ' +aw);
+      aw.add(new areaWrapper('New', 'New')); 
        return aw; 
    }
-    
+    //get areas for quick edit
+    @AuraEnabled
+    public static list<Area__c> areaModel(string recordId){
+        try {
+            list<Area__c> areas = [select Id, Name, Area_Acres__c , Area_Sq_Feet__c from Area__c where Program__c = :recordId];
+            return areas; 
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
     //this is for the pdf wizard to grab the current applications to allow user to select
     //don't mind areaWrapper name I should have named that class something more generic. areaWrapper will support anything that requires a label value return pair 
  //    @AuraEnabled(Cacheable=true)
@@ -24,7 +33,7 @@ public class appProduct {
 	@AuraEnabled
     public static list<Application__c> getAppForCalendar(id recId){
                 list<application__c> apps = [Select Name, Id, Date__c, Area_Name__c, Total_Price_ap__c, Customer_Name__c, Program_Name__c, Area__c,
-                                     Converted__c,
+                                     Converted__c, area__r.program__r.account__c, 
                                      area__r.program__r.account__r.BillingLatitude,area__r.program__r.account__r.BillingLongitude from Application__c where Program_ID__c =: recId order by date__c asc];
         //system.debug(apps);
         return apps;

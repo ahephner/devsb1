@@ -11,7 +11,7 @@ const FIELDS = [ACC_REC];
 export default class AddProductButton extends LightningElement {
     @api recordId; 
     area
-    titleText = 'Area Selected ';;
+    titleText = 'Area Selected ';
    selectedLabel
     @wire(MessageContext)
         messageContext; 

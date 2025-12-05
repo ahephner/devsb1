@@ -1,11 +1,13 @@
 <template>
     <div class="head">
         <div class="buttons">
-             <c-program-btn-group></c-program-btn-group> 
+             <c-program-btn-group
+                recid={recordId}>
+            </c-program-btn-group> 
              
         </div>
     </div>
-    <!-- <template if:true={applicationsSet}>
+    <template lwc:if={applicationsSet}>
         <c-calendar
             applications={applications}
             onupdatedate={handleUpdateDate}
@@ -16,5 +18,10 @@
             
         </c-calendar>
 
-    </template> -->
+    </template> 
+    <template lwc:else>
+    <div class="exampleHolder">
+        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+    </div>
+    </template>
 </template>
