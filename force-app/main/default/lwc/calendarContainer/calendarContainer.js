@@ -28,7 +28,7 @@ export default class CalendarContainer extends LightningElement{
     
     subscription= null;
     connectedCallback(){
-        this.start(); 
+        //this.start(); 
     }
     //subscribe for refresh
     @wire(MessageContext)

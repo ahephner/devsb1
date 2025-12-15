@@ -35,7 +35,7 @@ export default class NewAreaModel extends LightningModal{
     @api recId; 
 
     changeAreaType(){
-    console.log(11,this.recId)
+    //console.log(11,this.recId)
         if(this.prefUM === '100 Gal'){ 
             this.ornamentalArea = true; 
             

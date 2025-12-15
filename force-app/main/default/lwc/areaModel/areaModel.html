@@ -8,14 +8,114 @@
         </template>
         <template lwc:else>
             <p><i>Note changing multiple area sizes at once please review product amounts updated</i></p>
+            <label for="myDropdown">Choose an option:</label>
+                <select id="myDropdown" class="slds-select" name="myOption" onchange={selectChange}>
+                    <template for:each={areas} for:item="x">
+                       
+                        <option key={x.Id} value={x.Id}>{x.Name}</option>
+                    </template>
+                    <option value="New">New</option>
 
-            <template for:each={areas} for:item="x">
-                <p key={x.Id}>{x.Name}</p>
-            </template>
+                </select>
+                <div lwc:if={newArea}>
+                                <div class="slds-grid">
+                        <!-- Area Name -->
+                <div class="slds-col slds-size_1-of-2">
+                        <lightning-input class='validate' type="text" 
+                        label="Area Name" onchange={newName} required></lightning-input>
+                        <!-- Finish Spray -->
+                       <template lwc:if={ornamentalArea}>
+                           <lightning-input class='validate' type='number' label="Finished Spray Gallons"  
+                           value={finishSpray} onchange={setFinishSpray} required></lightning-input>
+                       </template>
+                       <!--SQ FT-->
+                       <template lwc:else>
+                            <lightning-input class='validate' type='number' label="Area Sq Feet (M)"  
+                             value={feet} onchange={newFeet} required></lightning-input>
+                       </template>
+                       <!-- <p>HI GUYSSSSSS</p> -->
+                        <!-- Turf Type -->
+                    <template if:false={ornamentalArea}>
+                        <lightning-combobox
+                        name="turftype"
+                        class='validate' 
+                        label="Turf Type"
+                        value={stand}
+                        placeholder="Select Type"
+                        options={typeOptions}
+                        onchange={setType} 
+                        required 
+                      ></lightning-combobox>
+                    </template>
+                   </div>     
+                    
+                                <div class="slds-col slds-size_1-of-2 slds-m-left_x-small">
+                                        <lightning-combobox
+                                        class="validate"
+                                        name='UofM'
+                                        label='Pref Unit of Measure'
+                                        value={prefUM}
+                                        options={setSize}
+                                        onchange={newUM}
+                                        required
+                                        ></lightning-combobox>
+                                        <!-- Acre -->
+                        <template lwc:if={ornamentalArea}>
+                            <!-- <lightning-input class='validate' type='number' 
+                                    label="Tank Size" value={tankSize} onchange={setTankSize} required></lightning-input> -->
+                                <p class="slds-m-top_x-large slds-m-bottom_x-small">Amount of Gallons Required to treat area</p>
+                        </template>
+                        <template lwc:else>
+                            <lightning-input class='validate' type='number' 
+                            label="Area Acres" value={areaAcres} onchange={newAcre} required step="0.01"></lightning-input>
+                        </template>
+                                    <lightning-combobox
+                                    name='category'
+                                    label='Type'
+                                    placeholder='--None--'
+                                    value={note}
+                                    options={setNotes}
+                                    onchange={newType}
+                                   ></lightning-combobox>
+                                   <!-- <lightning-input data-id="toggle" type="toggle" 
+                                   label={btnLabel} checked={ornamentalArea} onchange={changeAreaType}
+                                   message-toggle-active="" message-toggle-inactive=""></lightning-input> -->
+                                   <!-- error  messages -->
+                                   <template if:false={isValid}>
+                                       <div class="slds-grid">
+                                           <div class="slds-col slds-size_1-of-1 messages">
+                                               <template for:each={errMsgs} for:item="err" for:index="index">
+                                                   <ul key={err}>
+                                                       <li class="errMsg">{err}</li>
+                                                   </ul>
+                                               </template>
+                                           </div>
+                                       </div>
+                                   </template>
+                                </div>
+                           </div>
+                </div>
+                <div lwc:else>
+                    <div class="slds-grid">
+                        <span class="slds-col slds-size_1-of-3 slds-m-left_small">
+                            <lightning-input type="number" name="thousands" label="sq FT" value={sqFt} step="0.01" onchange={handleThousands}></lightning-input>
+                        </span>
+                        <span class="slds-col slds-size_1-of-3 slds-m-left_small">
+                            <lightning-input type="number" name="Acres" label="Acreage" value={acreSize} step="0.01" onchange={handleAcre}></lightning-input>
+                        </span>
+                    </div>
+                </div>
         </template>
     </lightning-modal-body>
     <lightning-modal-footer>
-        <lightning-button variant="destructive" label="Cancel" title="Destructive action" onclick={cancel} class="slds-m-left_x-small"></lightning-button>
-        <lightning-button variant="success" label="Save" title="Successful action" onclick={handleSave} class="slds-m-left_x-small"></lightning-button>
+        <div class="lineUP">
+            <lightning-button variant="destructive" label="Cancel" title="Destructive action" onclick={cancel} class="slds-m-left_x-small"></lightning-button>
+            <div lwc:if={newArea}>
+                <lightning-button variant="success" label="Save" title="Successful action" onclick={saveArea} class="slds-m-left_x-small"></lightning-button>
+            </div>
+            <div lwc:else>
+                <lightning-button variant="success" label="Save" title="Successful action" onclick={handleSave} class="slds-m-left_x-small"></lightning-button>
+            </div>
+        </div>
     </lightning-modal-footer>
 </template>

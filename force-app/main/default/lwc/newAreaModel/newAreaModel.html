@@ -7,6 +7,7 @@
         <lightning-modal-body>
             <div class="slds-grid">
                         <!-- Area Name -->
+                <div class="slds-col slds-size_1-of-2">
                         <lightning-input class='validate' type="text" 
                         label="Area Name" onchange={newName} required></lightning-input>
                         <!-- Finish Spray -->
@@ -33,9 +34,9 @@
                         required 
                       ></lightning-combobox>
                     </template>
-                        
-                    </div>
-                                <div class="slds-col slds-size_1-of-2">
+                   </div>     
+                    
+                                <div class="slds-col slds-size_1-of-2 slds-m-left_x-small">
                                         <lightning-combobox
                                         class="validate"
                                         name='UofM'
@@ -79,13 +80,13 @@
                                        </div>
                                    </template>
                                 </div>
-                           
+                           </div>
                             <lightning-modal-footer>
                                 <lightning-button label="Cancel" variant="neutral" onclick={closeModal}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
                                 <lightning-button label="Save" variant="brand" onclick={saveArea}></lightning-button>
                            </lightning-modal-footer>
 
-                        </div>
+                        
                     </lightning-modal-body>
 
 

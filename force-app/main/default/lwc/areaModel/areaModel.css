@@ -4,3 +4,7 @@
     width: 80px;
     height: 80px;
 }
+
+.lineUP{
+    display: inline-flex;
+}
