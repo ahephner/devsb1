@@ -1,0 +1,74 @@
+<template>
+  <lightning-card title="Weed Pressure (GDD)" icon-name="utility:warning">
+    <div class="wrap">
+      <template if:false={loaded}>
+        <div class="loading">Loading weather + GDD…</div>
+      </template>
+
+      <template if:true={loaded}>
+
+        <!-- GDD numbers -->
+        <div class="gddGrid">
+          <div class="stat">
+            <div class="statLabel">Last Year GDD32</div>
+            <div class="statValue">{cur32Display}</div>
+          </div>
+
+          <div class="stat">
+            <div class="statLabel">Last Year GDD50</div>
+            <div class="statValue">{cur50Display}</div>
+          </div>
+
+          <div class="stat">
+            <div class="statLabel">+30 Days GDD32</div>
+            <div class="statValue">{future32Display}</div>
+          </div>
+
+          <div class="stat">
+            <div class="statLabel">+30 Days GDD50</div>
+            <div class="statValue">{future50Display}</div>
+          </div>
+        </div>
+
+        <!-- Warnings -->
+        <div class="sectionTitle">Upcoming / Active Weed Pressure From Previous Year</div>
+
+        <template if:true={hasWarnings}>
+          <div class="cards">
+            <template for:each={weedWarnings} for:item="w">
+              <div key={w.key} class={w.className}>
+                <div class="card">
+                  <div class="cardTop">
+                    <div class="cardTitle">{w.label}</div>
+                    <div class="pill">
+                      Base {w.base} • {w.status}
+                    </div>
+                  </div>
+
+                  <div class="cardMessage">{w.message}</div>
+
+                  <div class="meta">
+                    <div>Window: {w.min} – {w.max}</div>
+                    <template if:true={w.startsIn}>
+                      <div>Starts in: {w.startsIn} GDD</div>
+                    </template>
+                    <template if:false={w.startsIn}>
+                      <div>In window now</div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <template if:false={hasWarnings}>
+          <div class="empty">
+            No active or upcoming weed timing windows detected for this period.
+          </div>
+        </template>
+
+      </template>
+    </div>
+  </lightning-card>
+</template>

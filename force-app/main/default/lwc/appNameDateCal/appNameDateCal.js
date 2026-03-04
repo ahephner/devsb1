@@ -1,8 +1,14 @@
-import { LightningElement,track,api } from 'lwc';
+import { LightningElement,track,api, wire} from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-export default class AppNameDate extends LightningElement {
+import getAreas from '@salesforce/apex/appProduct.getAreas';
+//import getAreas from '@salesforce/apex/appProduct.areaModel'
+import NewAreaModel from 'c/newAreaModel'
+export default class AppNameDateCal extends LightningElement {
+    @api recid; 
     hiddenNumberBox = false;
     interval ='once';
+    areaPick;
+    type='Application'
     numbApps = 1; 
     //name date vars
     //SET TO BLANK BEFORE DEPLOYING
@@ -14,9 +20,38 @@ export default class AppNameDate extends LightningElement {
     custSpreadBetweenApps; 
     custDaysApart
     showPreview = false; 
+    areaUOM; 
     preview;
     nxt;
     total;
+    secondDate = false; 
+    endDate;
+    
+    
+    // @wire(getAreas, {recordId: '$recid'})
+    //    areaList(res){
+    //     if(res.data){
+    //         for(let i = 0; i< res.data.lenght; i++){
+    //             let back = {label: res.data[i].Name,
+    //                         value: res.data[i].Id
+    //             }
+    //             this.areaOptions.push(back)
+    //         }
+    //     }else{
+    //         console.warn(res.error)
+    //     }
+    //     let newVal = {label:'New', value:'New'}
+    //     this.areaOptions.push(newVal)
+    //    }
+    copyList; 
+     @wire(getAreas, {recordId: '$recid'})
+        areaList
+    //get area options
+    get areaOptions(){
+        //console.log('areaList '+JSON.stringify(this.areaList.data));
+        this.copyList = this.areaList.data
+        return  this.areaList.data
+    }
     //dates;
     @track dateRange = [];  
     get numOptions(){
@@ -27,24 +62,62 @@ export default class AppNameDate extends LightningElement {
             {label: 'Custom', value:'custom'},
         ]
     }
-//name date setting here
+    get typeOps(){
+        return [
+            {label:'Application', value:'Application'},
+            {label:'Cultural Practice', value:'Cultural Practice'},
+            {label:'Event', value:'Event'}
+        ]
+    }
 
+//name date setting here
     setName(e){
         this.appName = e.detail.value; 
-        
     }
 
     setDate(e){
         this.appDate = e.detail.value;  
-        console.log(typeof this.appDate);
-        console.log(this.appDate);
-        
-        
+    }
+    setDate2(e){
+        this.endDate = e.detail.value; 
     }
     handleNewNumbApps(e){
         this.numbApps = e.detail.value; 
     }
-
+    handleTypeChange(event){
+        //ok for Cultural Practice still need an area
+        //for Event need a second finish date. 
+        this.type = event.detail.value; 
+        if(this.type === 'Event'){
+            this.secondDate = true;
+        }else{
+            this.secondDate = false; 
+        }
+    } 
+   async handleAreaChange(event){
+        let pick = event.detail.value; 
+        if(pick === 'New'){
+            const mod = await NewAreaModel.open({
+                recId: this.recid
+            }).then((res)=>{
+                console.log(res); 
+                this.areaList.data = [res, ...this.areaList.data];
+                this.copyList = this.areaList.data; 
+                this.areaPick = res.value; 
+            })
+        }else{
+            this.areaPick = event.detail.value; 
+            
+        }
+        this.areaUOM = this.copyList.find(x=>x.value === this.areaPick)?.areaType
+        this.dispatchEvent(new CustomEvent('areatype',{
+            detail:{
+                    areatype: this.areaUOM,                        
+                }
+                    })
+                );
+        
+    }  
     handleNumchange(event){
         this.interval = event.detail.value; 
         console.log(this.interval)
@@ -98,7 +171,7 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
     for (let i = 1; i<= totalApp; i++){
          d.setDate(d.getDate() + this.nxt)
          let day = new Date(d); 
-         console.log('day '+d);
+         //console.log('day '+d);
          
          this.dateRange=[
             ...this.dateRange,{
@@ -132,10 +205,10 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
     }
     @api
     next(){
-        if(this.appName === undefined || this.appName === '' || this.appDate === undefined || this.appDate === ''){
+        if(this.appName === undefined || this.appName === '' || this.appDate === undefined || this.appDate === '' || this.areaPick === undefined || this.areaPick === ''){
                 this.dispatchEvent(new ShowToastEvent({
-                    title: 'Enter Name and Date',
-                    message: 'Make sure you have a name and date',
+                    title: 'Enter Name, Date and select and Area',
+                    message: 'Enter Name, Date and select and Area',
                     variant: 'error'
                 }));
                 return false; 
@@ -154,6 +227,9 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
                  date: this.appDate,
                  spread: spread,
                  numb: this.custNumberApps,
+                 appType: this.type,
+                 areaId: this.areaPick,
+                 //areaUOM: this.areaUOM
                 }
              }));
         }else{
@@ -162,7 +238,10 @@ buildPreview = (firstDate, repeats, timeBetween, totalApp)=>{
                         name: this.appName,
                         date: this.appDate,
                         spread: this.interval,
-                        numb: this.numbApps
+                        numb: this.numbApps,
+                        appType: this.type,
+                        areaId: this.areaPick,
+                       //areaUOM: this.areaUOM
                     }
                 }));
         }

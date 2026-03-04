@@ -92,6 +92,23 @@ public with sharing class addApp {
         return app; 
         
     }
+    
+    //the Area update is not in this iteration
+    @AuraEnabled 
+    public static Application__c updateOrnApplication(appWrapper wrapper, string id, boolean newNote){
+        Application__c app = [select Name, Area__c, Date__c, Note__c from Application__c where id =: id]; 
+        system.debug('newNote '+newNote);
+        if(app.Name	!= wrapper.appName || app.date__c != wrapper.appDate || newNote){
+            app.Name = wrapper.appName;
+            app.Date__c = wrapper.appDate;
+            app.Note__c = wrapper.appNote;  
+           // app.Area__c = wrapper.appArea; 
+        }
+        update(app); 
+        system.debug('app '+app);
+        return app; 
+        
+    }
 //@AuraEnabled
     //   public static List<Application_Product__c> updateProducts(string products){
     //        List<Application_Product__c> prodList = new List<Application_Product__c>(); 
@@ -132,6 +149,81 @@ public with sharing class addApp {
        
         List<App_Product__c> toInsert = new List<App_Product__c>();
         
+        for(App_Product__c x : products){
+            App_Product__c li = new App_Product__c();
+            if(String.isBlank(x.Id)){
+                li.Product__c = x.Product__c;
+                li.Rate2__c = x.Rate2__c;
+                li.Application__c = x.Application__c;
+                li.Units_Required__c = x.Units_Required__c;
+                li.Unit_Area__c = x.Unit_Area__c;
+                li.Unit_Price__c = x.Unit_Price__c;
+                li.Margin__c = x.Margin__c;
+                li.Unit_Cost__c = x.Product_Cost__c;
+                li.Cost_per_Acre__c = x.Cost_per_Acre__c;
+                li.Cost_per_M__c = x.Cost_per_M__c;
+                li.Note__c = x.Note__c;
+                li.N__c = x.N__c;
+                li.P__c = x.P__c;
+                li.K__c = x.K__c;
+                li.isLowVol__c = x.isLowVol__c;
+                li.Spray_Vol_M__c = x.Spray_Vol_M__c;
+                li.Acres_Treated__c = x.Acres_Treated__c; 
+                li.altPriceBookName__c = x.altPriceBookName__c;
+                li.altPriceBookId__c = x.altPriceBookId__c; 
+                li.altPriceBookEntryId__c = x.altPriceBookEntryId__c; 
+                li.Note_Other__c = x.Note_Other__c;
+                li.Manual_Charge_Size__c = x.Manual_Charge_Size__c;
+                li.Cost_per_100__c = x.Cost_per_100__c;
+                li.Cost_per_Gallon__c = x.Cost_per_Gallon__c;
+                li.Total_Price_LWC__c = x.Total_Price__c;
+                //toInsert.add(li);
+            }else{
+                system.debug('old product '+x.Id);
+                li.Id = x.Id; 
+                //li.Application__c = x.Application__c;
+                li.Rate2__c = x.Rate2__c;
+                li.Unit_Area__c = x.Unit_Area__c;
+                li.Units_Required__c = x.Units_Required__c;
+                li.Unit_Price__c = x.Unit_Price__c;
+                li.Margin__c = x.Margin__c;
+                li.Unit_Cost__c = x.Product_Cost__c;
+                li.Cost_per_Acre__c = x.Cost_per_Acre__c;
+                li.Cost_per_M__c = x.Cost_per_M__c;
+                li.Note__c = x.Note__c;
+                li.N__c = x.N__c;
+                li.P__c = x.P__c;
+                li.K__c = x.K__c;
+                li.isLowVol__c = x.isLowVol__c;
+                li.Spray_Vol_M__c = x.Spray_Vol_M__c;
+                li.altPriceBookName__c = x.altPriceBookName__c;
+                li.altPriceBookId__c = x.altPriceBookId__c; 
+                li.Acres_Treated__c = x.Acres_Treated__c; 
+                li.altPriceBookEntryId__c = x.altPriceBookEntryId__c; 
+                li.Note_Other__c = x.Note_Other__c;
+                li.Manual_Charge_Size__c = x.Manual_Charge_Size__c;
+                li.Cost_per_100__c = x.Cost_per_100__c;
+                li.Cost_per_Gallon__c = x.Cost_per_Gallon__c;
+                li.Total_Price_LWC__c = x.Total_Price__c;
+            }
+            system.debug(x);
+            toInsert.add(li);
+        }
+        string mess; 
+        try{
+            Database.UpsertResult[] res = Database.upsert(toInsert);
+            mess = 'success';
+        }catch(exception x){
+            mess = string.valueOf(x);
+        }
+        
+        return mess; 
+    }
+@AuraEnabled
+    public static string updateOrnProducts(List<App_Product__c> products){
+       
+        List<App_Product__c> toInsert = new List<App_Product__c>();
+        system.debug(products); 
         for(App_Product__c x : products){
             App_Product__c li = new App_Product__c();
             if(String.isBlank(x.Id)){

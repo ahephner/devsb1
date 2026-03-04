@@ -5,10 +5,9 @@
 // You can also execute the entire file by running the command:
 //     SFDX: Execute Anonymous Apex with Editor Contents
 
-string tempvar = 'Enter_your_name_here';
-System.debug('Hello World!');
-System.debug('My name is ' + tempvar);
-
-list<app_product__c> appsToReplace =[select id, product, unitprice, n, p, k from app_product__c where id in : appIds];
+string UOM = 'thousands';
+decimal areaSize = 1500.0; 
+decimal acreSize= UOM == 'acre' ? areaSize : (areaSize * 43.56); 
+system.debug(acreSize); 
 
 

@@ -20,6 +20,8 @@ export default class Calendar extends LightningElement{
    appList
     calendarJSInitialized = false; 
     error; 
+    appName; 
+    refreshDate; 
 
     //  @wire(getApps, {recordId: '$recordId'})
     //         wiredList(result){
@@ -94,8 +96,11 @@ export default class Calendar extends LightningElement{
                 left: 'prev,next today filterWeather',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
-              },
+            },
+            //initialDate: this.refreshDate ? this.refreshDate : '2026-01-01',
             editable: true,
+            aspectRatio: .5,
+            contentHeight: 500,
             events: this.applications,
             eventClick: (info) => {
                 console.log(info.event._def)
@@ -103,11 +108,18 @@ export default class Calendar extends LightningElement{
             },
             eventDrop: (data) => {
                 // console.log(data.event.start.toISOString().substring(0,10))
-                // console.log(data.event.id)
+                this.appName = data.event.title;
                 let date = data.event.start.toISOString().substring(0,10)
                 let id = data.event.id
                 
                 this.passBack(date,id, 'changeDate' )
+            },
+            datesSet: function(dateInfo) {
+                //var currentMonth = dateInfo.start.getMonth() + 1;
+                this.refreshDate = calendar.getDate().toISOString()//.splice(0,10);
+                
+                console.log("New view range:",  this.refreshDate);
+
             }
 
         });
@@ -119,7 +131,8 @@ export default class Calendar extends LightningElement{
             case 'changeDate':
                 let back = {
                     Id: Id,
-                    Date__c: inputOne
+                    Date__c: inputOne, 
+                    name: this.appName
                 }
                 this.dispatchEvent(new CustomEvent('updatedate', {
                     detail: back
@@ -147,4 +160,3 @@ export default class Calendar extends LightningElement{
 
     }
 }
-

@@ -35,4 +35,13 @@ export default class ProgramBtnGroup extends LightningElement {
             //no response here all handled by flow and model
         })
     }
+
+    updateLocation(){
+         this.dispatchEvent(new CustomEvent('location',{
+            detail:{
+                    newLocation: true,                        
+                }
+                    })
+                );
+    }
 }

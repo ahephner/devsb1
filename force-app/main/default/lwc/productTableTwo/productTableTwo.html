@@ -16,10 +16,11 @@
 
 <!--here is the name date screen-->
                 <template if:true={dateName}>
-                  <c-app-name-date 
+                  <c-app-name-date-cal
                                    recid={programId}
                                    oncancel={closeModal}
-                                   onnamedate={setNameDate}></c-app-name-date>
+                                   onnamedate={evalNameDate}
+                                   onareatype={handleAreaType}></c-app-name-date-cal>
                 </template>
     <!--Here is the child app that controls the products displayed-->
               <!-- <c-app-product-list></c-app-product-list> -->

@@ -3,17 +3,19 @@ public class appProduct {
  @AuraEnabled(Cacheable=true)
    public static list<areaWrapper> getAreas(ID recordId){
        list<areaWrapper> aw = new list<areaWrapper>();
-       for(area__c x:[select id, name from area__c where program__c = :recordId]){
-           aw.add(new areaWrapper(x.name, x.id));
+       for(area__c x:[select id, name, Pref_U_of_M__c from area__c where program__c = :recordId]){
+           aw.add(new areaWrapper(x.name, x.id, x.Pref_U_of_M__c));
        }
-      aw.add(new areaWrapper('New', 'New')); 
+      aw.add(new areaWrapper('New', 'New', 'New'));
+       system.debug(aw); 
        return aw; 
    }
     //get areas for quick edit
     @AuraEnabled
     public static list<Area__c> areaModel(string recordId){
         try {
-            list<Area__c> areas = [select Id, Name, Area_Acres__c , Area_Sq_Feet__c from Area__c where Program__c = :recordId];
+             
+            list<Area__c> areas = [select Id, Name, Area_Acres__c , Area_Sq_Feet__c, Pref_U_of_M__c from Area__c where Program__c = :recordId];
             return areas; 
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
@@ -33,7 +35,7 @@ public class appProduct {
 	@AuraEnabled
     public static list<Application__c> getAppForCalendar(id recId){
                 list<application__c> apps = [Select Name, Id, Date__c, Area_Name__c, Total_Price_ap__c, Customer_Name__c, Program_Name__c, Area__c,
-                                     Converted__c, area__r.program__r.account__c, 
+                                     Converted__c, area__r.program__r.account__c, Type__c,
                                      area__r.program__r.account__r.BillingLatitude,area__r.program__r.account__r.BillingLongitude from Application__c where Program_ID__c =: recId order by date__c asc];
         //system.debug(apps);
         return apps;
@@ -42,7 +44,7 @@ public class appProduct {
     public static list<Application__c> getApps(ID recordId){
       
         list<application__c> apps = [Select Name, Id, Date__c, Area_Name__c, Total_Price_ap__c, Customer_Name__c, Program_Name__c, Area__c,
-                                     Converted__c,
+                                     Converted__c,Type__c,
                                      area__r.program__r.account__r.BillingLatitude,area__r.program__r.account__r.BillingLongitude from Application__c where Program_ID__c =: recordId order by date__c asc];
         //system.debug(apps);
         return apps;

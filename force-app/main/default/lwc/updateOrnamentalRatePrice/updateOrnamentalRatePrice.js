@@ -3,8 +3,8 @@ import appProducts from '@salesforce/apex/appProduct.appProducts';
 import getPricing from '@salesforce/apex/appProduct.pricing';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import updateApplication from '@salesforce/apex/addApp.updateApplication';
-import updateProducts from '@salesforce/apex/addApp.updateProducts';
+import updateOrnApplication from '@salesforce/apex/addApp.updateOrnApplication';
+import updateOrnProducts from '@salesforce/apex/addApp.updateOrnProducts';
 import { getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
 import PRODUCT_OBJ from '@salesforce/schema/App_Product__c';
 import NOTE from '@salesforce/schema/App_Product__c.Note__c';
@@ -55,6 +55,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
     prodCost100;
     reqGallons; 
     appPer100 = 0; 
+    accountId; 
     //Here is notes per app
     //The wasNewNote note is a boolean that will indicate to apex cont to update note field or not
     wasNewNote = false; 
@@ -62,7 +63,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
 
     connectedCallback(){
         this.loadProducts();
-        //console.log('calling') 
+        console.log(10, this.appId) 
     }
     //for the combo box 
     get unitArea(){
@@ -118,6 +119,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
             this.prodlist = await merge(nonPrice, pricing);
             //console.log(JSON.stringify(this.prodlist))
             //get your app and area info for the pop up screen
+                this.accountId = this.prodlist[0].Application__r.Area__r.Program__r.Account__c
                 this.appName = this.prodlist[0].Application__r.Name;            
                 this.appDate = this.prodlist[0].Application__r.Date__c;             
                 this.updateAppId = this.prodlist[0].Application__c;            
@@ -213,7 +215,7 @@ export default class UpdateOrnamentalRatePrice extends LightningElement {
             this.prodlist[index].Unit_Area__c = e.detail.value;
             
             if(this.prodlist[index].Rate2__c > 0){
-                let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
+                let costs = ornPerProduct(this.prodlist[index].Unit_Price__c, this.prodlist[index].Product_Size__c, this.prodlist[index].Rate2__c);
                 this.prodCostG = costs.perGal;
                 this.prodCost100 = costs.per100;
                
@@ -486,10 +488,11 @@ byeMouse(e){
             appNote: this.oppNote
         }
         //console.log('parmas ', params, 'this.appId ',this.appId, ' ap note ', this.wasNewNote);
-        updateApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
+        updateOrnApplication({wrapper: params, id:this.appId, newNote:this.wasNewNote})
             .then(()=>{
                console.log(JSON.stringify(this.prodlist))
-                updateProducts({products:this.prodlist})
+                let x = updateOrnProducts({products:this.prodlist})
+                console.log(x); 
             }).then((mess)=>{
                 //console.log('mess '+mess)
                 this.prodlist = [];
@@ -502,8 +505,9 @@ byeMouse(e){
                 )
                 //tell parent to request appDataTable refresh
                 this.dispatchEvent(new CustomEvent('update'))
-            }).then(()=>{
+                .then(()=>{
                 this.cancel();
+            })
             }).catch((error)=>{
                 //console.log(JSON.stringify(error))
                 this.dispatchEvent(

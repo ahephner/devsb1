@@ -365,7 +365,9 @@ export default class UpdateRatePrice extends LightningElement {
                 }
             }
         }
+            handleSpotSpray(evt){
 
+            }
 
 
         

@@ -1,5 +1,5 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import searchProduct from '@salesforce/apex/appProduct.searchProduct2';
+//import searchProduct from '@salesforce/apex/appProduct.searchProduct2';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import PROD_OBJECT from '@salesforce/schema/Product__c';
@@ -63,6 +63,7 @@ export default class UpdateAddProduct extends LightningElement {
     connectedCallback() {
         //fire function to get price books 
        console.log(11, this.apdate)
+       console.log(12, this.accid)
         this.loaded = true; 
     }
     @wire(getPriceBooks,{accountId: '$accid'})

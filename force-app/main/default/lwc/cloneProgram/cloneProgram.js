@@ -27,7 +27,7 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
     simpleClone = true; 
     connectedCallback(){
         this.formSize = this.screenSize(FORM_FACTOR); 
-        this.currentOWner(); 
+        this.loaded = true; 
     }
     @wire(isOwner,{recId: '$recordId'})
         wiredUser(res){
@@ -58,12 +58,14 @@ export default class CloneProgram extends NavigationMixin(LightningElement) {
                 }
                 this.btnDisabled = false; 
             }
+    
+   //This was called in connected callback but I am not sure why use it and it was throwing LWS errors
     //check if the account owner is current user otherwise show add account clone
-   async currentOWner(accOwner){
+   //async currentOWner(accOwner){
        //this.isAccountOwner = this.userId === accOwner ? true: false; 
-       this.isAccountOwner = false; 
-       this.loaded = true;
-    }
+       //this.isAccountOwner = false; 
+       //this.loaded = true;
+    //}
     //check screen size to show table on desktop and cards on mobile
     screenSize = (screen) => {
         return screen === 'Large'? true : false

@@ -94,7 +94,7 @@ export default class ProductTableTwo extends LightningElement{
             if(!this.ornamental){
                 switch(stage){
                     case 'appInfo':
-                        let go = this.template.querySelector('c-app-name-date').next();
+                        let go = this.template.querySelector('c-app-name-date-cal').next();
                         go ? this.currentStage = 'selectProd' : '';
                         break;
                     case 'selectProd':
@@ -131,10 +131,16 @@ export default class ProductTableTwo extends LightningElement{
                 }
             }       
         }
+        //need to set type for button control
+        handleAreaType(mess){
+            this.ornamental = mess.detail.areatype === '100 Gal' ? true : false;
+            console.log('Good Morning ', this.ornamental)
+        }
     //pricebooks in order. because the helper returns a set() you need to spread out to array. 
     pbIds; 
         //get area info for the product calculations
        async handleArea(x){  
+            this.disableBtn = true;
             let resp = await areaInfo({ai:x})
             let priceBooks = await getPriceBooks({accountId: this.accId});
             let pbInfo = await priorityPricing(priceBooks);
@@ -142,9 +148,8 @@ export default class ProductTableTwo extends LightningElement{
                 this.pbIds = [...pbInfo.priceBookIdArray]; 
                 this.areaSQft = resp[0].Area_Sq_Feet__c
                 this.areaUM = resp[0].Pref_U_of_M__c
-                this.ornamental = resp[0].Pref_U_of_M__c === '100 Gal' ? true : false; 
                 this.sprayVol = resp[0].Required_Gallons__c;
-            
+            this.disableBtn = false; 
             }
 //how to call a function from a child comp. if tracking values in parent 
     // search(){
@@ -165,7 +170,14 @@ export default class ProductTableTwo extends LightningElement{
         this.dateName = false;
         this.productList = true; 
     }
-
+    //see if we need to show product list or not
+    evalNameDate(mess){
+        if(mess.detail.appType=== 'Application'){
+            this.setNameDate(mess);
+        }else{
+         this.setNameDateSave(mess)
+        }
+    }
     //set Name Date get values from appNameDate
     setNameDate(mess){
         this.appName = mess.detail.name;
@@ -177,11 +189,53 @@ export default class ProductTableTwo extends LightningElement{
         this.dateName = false;
         this.productList = true; 
         this.parApp = mess.detail.spread != 'once'? true : false;  
+        
+                
         this.handleArea(this.areaId);
         console.log(this.appType, 6)
 
     }
-
+    //If no products needed
+        setNameDateSave(mess){
+            this.appName = mess.detail.name; 
+            let params = {
+                appName: mess.detail.name,
+                appArea: mess.detail.areaId,
+                appDate: mess.detail.date,
+                appNote: this.applicationNote,
+                appType: mess.detail.appType,
+                parentApp: mess.detail.spread != 'once'? true : false,
+                ds: false,
+                tankSize: 0,
+                measurement: 'Acre',
+                volume: 0
+        }
+            addApplication({wrapper:params})
+                .then((res)=>{
+                        this.dispatchEvent(
+                            new ShowToastEvent({
+                                title: 'Success',
+                                message: 'Application created '+ this.appName,
+                                variant: 'success',
+                            }),
+                        );  
+                        this.appName = '';
+                        //this may be an issue was = ''; 
+                        this.areaId = undefined;
+                        this.appDate = '';
+                        this.selectedProducts = [];
+                    }).then(()=>{
+                        const payload = {
+                            updateTable: true
+                        }
+                        publish(this.messageContext, Program_Builder, payload); 
+                        this.closeModal(); 
+                        
+                }).catch((err)=>{
+                    let mess = JSON.stringify(err);
+                    console.log(mess)
+                })
+        }
     //gathers products from appSelectProd then maps over to set values for the appRatePrice that are need for the math functions
     //the pref uses the above function to set the unit of measure automatically for the user
     gatherProducts(mess){

@@ -298,6 +298,38 @@ const triggerPest = (value, rules)=>{
   }
 }
 
+const evalWeed = (now32, now50, plus30_32, plus30_50, ruleSets)=>{
+        const soon = [];
+
+  for (const set of ruleSets) {
+    const now = set.base === 32 ? now32 : now50;
+    const future = set.base === 32 ? plus30_32 : plus30_50;
+
+    for (const r of set.rules ?? []) {
+      const activeNow = now >= r.min && now <= r.max;
+      const entersBy30 = now < r.min && future >= r.min; // crosses start within 30 days
+
+      if (activeNow || entersBy30) {
+        soon.push({
+          key: set.key,
+          label: set.label,
+          base: set.base,
+          now,
+          future,
+          min: r.min,
+          max: r.max,
+          message: r.res,
+          className: activeNow ? r.class : 'firstPestEarly', // or a dedicated "upcoming" class
+          status: activeNow ? 'active' : 'within_30_days',
+          startsIn: activeNow ? 0 : (r.min - now)
+        });
+      }
+    }
+  }
+
+  soon.sort((a, b) => a.startsIn - b.startsIn);
+  return soon;
+}
 const getMonth = (x)=>{
   let month
   switch(x){
@@ -372,5 +404,6 @@ export{hold,
       lowVolume,
       lvUnits,
       triggerPest,
+      evalWeed, 
       getMonth
     }

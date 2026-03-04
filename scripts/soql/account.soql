@@ -3,3 +3,5 @@
 //     query text and running the command:
 //     SFDX: Execute SOQL Query with Currently Selected Text
 select id, name, ConditionRangeMin,  ConditionRangeMax, price from StandardShippingRate where name = 'Ice Melt/Rock Salt'
+
+select pricebook2id, pricebook2.name, priority from buyergrouppricebook where buygroup in ('0ZI75000000GmwyGAC', '0ZIO30000001YKbOAM', '0ZIO300000006dJOAQ', '0ZIO300000011RtOAI', '0ZIO30000001mIjOAI')
