@@ -72,7 +72,12 @@
   border-radius: 0.75rem;
   opacity: 0.8;
 }
-
+.trackInfo{
+    font-size: x-small;
+    margin-left: 6px;
+    margin-top: 21px;
+    display: inline-flex
+}
 /* Your band styles */
 .firstPestEarly .card { background: #fffdf2; }
 .firstPestEarly .card::before { background: #f6c343; }
@@ -96,6 +101,66 @@
 .upcoming .card { background: #f6f8ff; }
 .upcoming .card::before { background: #5b7cfa; }
 
+.lineUp{
+  display: inline-flex;
+}
+.historic{
+  margin-top: 1.2rem;
+    margin-left: 6px;
+    font-size: 0.75rem;
+    opacity: 0.75;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Mobile-only layout helpers */
+.mobileHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.mobileTitle {
+  margin-top: 0.25rem;
+}
+
+.mobileLocationBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 0.75rem;
+  background: #fff;
+  font-size: 0.8rem;
+}
+
+.mobileLocationBtn:active {
+  transform: scale(0.99);
+}
+
+.gddGridMobile {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cardsMobile {
+  grid-template-columns: 1fr;
+}
+
+.mobileHistoric {
+  margin-top: 0.25rem;
+  margin-left: 0;
+}
+
+/* Phones smaller than ~380px: single column stats */
+@media (max-width: 380px) {
+  .gddGridMobile {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 900px) {
   .gddGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cards { grid-template-columns: 1fr; }

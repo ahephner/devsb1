@@ -1,6 +1,11 @@
-import { LightningElement } from 'lwc';
-import {evalWeed} from 'c/programBuilderHelper'; 
-export const GDD_RULES = [
+import { LightningElement, api } from 'lwc';
+import { evalWeed } from 'c/programBuilderHelper';
+import getAddress from '@salesforce/apex/appProduct.getAddressInfo';
+import { updateRecord } from 'lightning/uiRecordApi';
+import NEWADDRESS from 'c/updateLocation';
+import getWeatherCords from '@salesforce/apex/appWeather.getWeatherInfo';
+import FORM_FACTOR from '@salesforce/client/formFactor';
+export  const GDD_RULES = [
 
   // =========================
   // BASE 32 RULES
@@ -69,59 +74,101 @@ export const GDD_RULES = [
 
 ];
 
-export default class WeatherSummary2 extends LightningElement{
-
+export default class WeatherSummary2 extends LightningElement {
   loaded = false;
 
-cur32;
-cur50;
-future32;
-future50;
+  // ===== Existing "Previous Year" fields (unchanged) =====
+  cur32;
+  cur50;
+  future32;
+  future50;
+  weedWarnings = [];
+  @api recordId; 
+  zip; 
+  lat;
+  long;
+  accountId;
+  prevStart;
+  prevEnd; 
+  get hasWarnings() {
+    return (this.weedWarnings?.length ?? 0) > 0;
+  }
 
-weedWarnings = [];
+  get cur32Display() { return this.formatNum(this.cur32); }
+  get cur50Display() { return this.formatNum(this.cur50); }
+  get future32Display() { return this.formatNum(this.future32); }
+  get future50Display() { return this.formatNum(this.future50); }
 
-get hasWarnings() {
-  return (this.weedWarnings?.length ?? 0) > 0;
-}
+  // ===== NEW: Current YTD fields =====
+  ytd32;
+  ytd50;
+  ytdFuture32;
+  ytdFuture50;
+  weedWarningsYtd = [];
+  isDesktop; 
+  get hasWarningsYtd() {
+    return (this.weedWarningsYtd?.length ?? 0) > 0;
+  }
 
-get cur32Display() { return this.formatNum(this.cur32); }
-get cur50Display() { return this.formatNum(this.cur50); }
-get future32Display() { return this.formatNum(this.future32); }
-get future50Display() { return this.formatNum(this.future50); }
+  get ytd32Display() { return this.formatNum(this.ytd32); }
+  get ytd50Display() { return this.formatNum(this.ytd50); }
+  get ytdFuture32Display() { return this.formatNum(this.ytdFuture32); }
+  get ytdFuture50Display() { return this.formatNum(this.ytdFuture50); }
 
-formatNum(x) {
-  if (x == null || Number.isNaN(x)) return '';
-  return Math.round(x);
-}
+  formatNum(x) {
+    if (x == null || Number.isNaN(x)) return '';
+    return Math.round(x);
+  }
 
   // Outputs you can bind to UI
   monthlyResult = [];
   gddSummary = null;
 
   connectedCallback() {
-    this.loadInfo(); 
-    this.fetchHistory();
+    this.start() // ✅ NEW
+  }
+
+  async start(){
+    this.isDesktop = FORM_FACTOR === 'Large';
+    let one = await this.loadInfo();
+    let two = await this.fetchHistory();
+    let three = await this.fetchCurrent();
   }
 
   async loadInfo(){
-
+    let zips = await getWeatherCords({recordId: this.recordId})
+      //future lat = zips[0].Preferred_Lat_Long__c.latitude
+      //future long = zips[0].Preferred_Lat_Long__c.longitude
+      this.zip = zips[0]?.Preferred_Zip_Code__c ?? ''
+      this.lat = zips[0].Preferred_Lat_Long__c ? zips[0].Preferred_Lat_Long__c.latitude:  zips[0].Account__r.BillingLatitude;
+      this.long = zips[0].Preferred_Lat_Long__c ? zips[0].Preferred_Lat_Long__c.longitude: zips[0].Account__r.BillingLongitude;
+      this.accountId = zips[0].Account__c;
   }
+
+  // ===== Existing fetchHistory (UNCHANGED except: local cumOnOrBefore removed) =====
   fetchHistory = async () => {
     this.loaded = false;
 
     const apiEndpoint =
       'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
-    const location = '46060';
+    const location = `${this.lat},${this.long}`;
+//need to automate
 
-    // Choose the season/year you care about//get ath
+    let today = new Date(); 
+    let oneYearAgo = new Date(today);
+
+    // 3. Subtract one year using setFullYear()
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    oneYearAgo = oneYearAgo.toISOString().slice(0,10); 
+
+
     const endDate = '2025-02-27';
-    const seasonStart = `${endDate.slice(0, 4)}-01-01`; // season-to-date from Jan 1
-    const endPlus30 = addDays(endDate, 30);
-
+    const seasonStart = `${oneYearAgo.slice(0, 4)}-01-01`;
+    const endPlus30 = addDays(oneYearAgo, 30);
+    this.prevStart = seasonStart;
+    this.prevEnd = endPlus30; 
     const apiKey = 'SC9NP46DF9TQT57GAHLWSDALA';
     const unitGroup = 'us';
-
-    // Pull what we need once, then compute everything locally
     const elements = 'datetime,tempmax,tempmin,precip';
 
     const url =
@@ -137,63 +184,40 @@ formatNum(x) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const weatherData = await response.json();
 
-      // --- 1) Build lookup by date for easy slicing ---
       const days = (weatherData.days ?? []).slice().sort((a, b) =>
         a.datetime.localeCompare(b.datetime)
       );
-      const byDate = new Map(days.map((d) => [d.datetime, d]));
 
-      // --- 2) Compute daily + cumulative GDD32/GDD50 across the whole pulled range ---
       let cum32 = 0;
       let cum50 = 0;
-
-      // Optional cap for GDD50 (common): cap max at 86F. You can turn this off.
       const CAP_HIGH_FOR_50 = 86;
 
-      const gddSeries = []; // [{date, gdd32, gdd50, cum32, cum50}]
+      const gddSeries = [];
       for (const d of days) {
         const tmax = d.tempmax;
         const tmin = d.tempmin;
 
-        // If data gaps, skip safely
         const gdd32 = (tmax != null && tmin != null) ? calcGdd(tmax, tmin, 32) : 0;
         const gdd50 = (tmax != null && tmin != null) ? calcGdd(tmax, tmin, 50, CAP_HIGH_FOR_50) : 0;
 
         cum32 += gdd32;
         cum50 += gdd50;
 
-        gddSeries.push({
-          date: d.datetime,
-          gdd32,
-          gdd50,
-          cum32,
-          cum50
-        });
+        gddSeries.push({ date: d.datetime, gdd32, gdd50, cum32, cum50 });
       }
 
-      // Helper to get cumulative value on a date (or nearest previous)
-      const cumOnOrBefore = (targetDate) => {
-        // Because gddSeries is sorted, walk from end (fast enough for ~400 days)
-        for (let i = gddSeries.length - 1; i >= 0; i--) {
-          if (gddSeries[i].date <= targetDate) return gddSeries[i];
-        }
-        return null;
-      };
-
-      const endPoint = cumOnOrBefore(endDate);
-      const plus30Point = cumOnOrBefore(endPlus30);
+      // ✅ now uses global helper
+      const endPoint = cumOnOrBefore(gddSeries, oneYearAgo);
+      const plus30Point = cumOnOrBefore(gddSeries, endPlus30);
 
       this.gddSummary = {
         seasonStart,
-        endDate,
+        oneYearAgo,
         endPlus30,
-        // Season-to-date cumulative values (from seasonStart through endDate)
         stdCumGdd32: endPoint?.cum32 ?? null,
         stdCumGdd50: endPoint?.cum50 ?? null,
-        // Projected cumulative values through endDate+30
         projCumGdd32_EndPlus30: plus30Point?.cum32 ?? null,
         projCumGdd50_EndPlus30: plus30Point?.cum50 ?? null,
-        // Increment over the next 30 days (projection delta)
         next30Gdd32: (endPoint && plus30Point) ? (plus30Point.cum32 - endPoint.cum32) : null,
         next30Gdd50: (endPoint && plus30Point) ? (plus30Point.cum50 - endPoint.cum50) : null
       };
@@ -204,11 +228,11 @@ formatNum(x) {
       this.future50 = this.gddSummary.projCumGdd50_EndPlus30;
 
       this.weedWarnings = await evalWeed(
-          this.cur32,
-          this.cur50,
-          this.future32,
-          this.future50,
-          GDD_RULES
+        this.cur32,
+        this.cur50,
+        this.future32,
+        this.future50,
+        GDD_RULES
       );
 
       this.loaded = true;
@@ -218,18 +242,172 @@ formatNum(x) {
       this.loaded = true;
     }
   };
+
+  // ===== NEW: fetchCurrent() for current-year YTD + today+30 =====
+  fetchCurrent = async () => {
+    // NOTE: do NOT touch this.loaded here so your existing loading UX stays stable.
+    // If you want, we can add a separate ytdLoaded flag later.
+
+    const apiEndpoint =
+      'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
+    const location = `${this.lat},${this.long}`;
+
+    const today = todayUtcYmd();                   // e.g. '2026-03-04'
+    const currentYear = today.slice(0, 4);         // '2026'
+    const ytdStart = `${currentYear}-01-01`;
+    const endPlus30 = addDays(today, 30);
+
+    const apiKey = 'SC9NP46DF9TQT57GAHLWSDALA';
+    const unitGroup = 'us';
+    const elements = 'datetime,tempmax,tempmin,precip';
+
+    const url =
+      `${apiEndpoint}${encodeURIComponent(location)}/${ytdStart}/${endPlus30}` +
+      `?key=${encodeURIComponent(apiKey)}` +
+      `&unitGroup=${encodeURIComponent(unitGroup)}` +
+      `&include=days` +
+      `&elements=${encodeURIComponent(elements)}` +
+      `&contentType=json`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const weatherData = await response.json();
+
+      const days = (weatherData.days ?? []).slice().sort((a, b) =>
+        a.datetime.localeCompare(b.datetime)
+      );
+
+      let cum32 = 0;
+      let cum50 = 0;
+      const CAP_HIGH_FOR_50 = 86;
+
+      const gddSeries = [];
+      for (const d of days) {
+        const tmax = d.tempmax;
+        const tmin = d.tempmin;
+
+        const gdd32 = (tmax != null && tmin != null) ? calcGdd(tmax, tmin, 32) : 0;
+        const gdd50 = (tmax != null && tmin != null) ? calcGdd(tmax, tmin, 50, CAP_HIGH_FOR_50) : 0;
+
+        cum32 += gdd32;
+        cum50 += gdd50;
+
+        gddSeries.push({ date: d.datetime, gdd32, gdd50, cum32, cum50 });
+      }
+
+      const nowPoint = cumOnOrBefore(gddSeries, today);
+      const plus30Point = cumOnOrBefore(gddSeries, endPlus30);
+      console.log(plus30Point)
+      this.ytd32 = nowPoint?.cum32 ?? null;
+      this.ytd50 = nowPoint?.cum50 ?? null;
+      this.ytdFuture32 = plus30Point?.cum32 ?? null;
+      this.ytdFuture50 = plus30Point?.cum50 ?? null;
+
+      this.weedWarningsYtd = await evalWeed(
+        this.ytd32,
+        this.ytd50,
+        this.ytdFuture32,
+        this.ytdFuture50,
+        GDD_RULES
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching current YTD weather data:', error);
+    }
+  };
+
+  //for updating
+  async updateZipLatLong(){
+        const fields = {};
+        fields[REC_ID.fieldApiName] = this.recordId
+        fields['Preferred_Lat_Long__Longitude__s'] = this.long
+        fields['Preferred_Lat_Long__Latitude__s'] = this.lat
+       
+        const recordInput = {fields}
+        updateRecord(recordInput)
+        .then(() => {
+          this.dispatchEvent(
+            new ShowToastEvent({
+              title: "Success",
+              message: "Address updated",
+              variant: "success",
+            }),
+          );
+          this.start()
+         
+        }).catch((error)=>{
+          let err =  JSON.stringify(error);
+          this.dispatchEvent(
+            new ShowToastEvent({
+              title: "Error",
+              message: err,
+              variant: "error",
+            }),
+          );
+        })
+      }
+
+  async getApexLocation(x){
+        let raw = await getAddress({streetAddress: x})
+        //console.log(raw)
+        this.lat = raw.data.position.lat
+        this.long = raw.data.position.lng;
+        this.updateZipLatLong(); 
+   }
+  //Update location: 
+ async updateLocation(){
+      let newAdd = await NEWADDRESS.open({
+        size:'small',
+        initLatitude: this.lat,
+        initLongitude: this.long,
+        initZipCode: this.zip
+      }).then((x)=>{
+        if(x === undefined){
+          return;
+        }else if(x.updateHow === 'cords'){
+          this.zip = x.zipCode;
+          this.lat = x.lattitude;
+          this.long = x.longitude; 
+          this.updateZipLatLong();
+        }else{
+          this.getApexLocation(x.address)
+        }
+
+      }).catch((error)=>{
+        let err =  JSON.stringify(error);
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Error",
+            message: err,
+            variant: "error",
+          }),
+        );
+      })
+    }
 }
 
-/**
- * Growing Degree Days:
- * - tavg = (tmax + tmin) / 2
- * - GDD = max(0, tavg - base)
- * Optionally cap high temperature (common in some models, e.g. 86F for base50).
- */
+
+/* ===== Global helpers (so you can reuse) ===== */
+
+function cumOnOrBefore(gddSeries, targetDate) {
+  for (let i = gddSeries.length - 1; i >= 0; i--) {
+    if (gddSeries[i].date <= targetDate) return gddSeries[i];
+  }
+  return null;
+}
+
+function todayUtcYmd() {
+  const dt = new Date();
+  const y = dt.getUTCFullYear();
+  const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(dt.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function calcGdd(tempmax, tempmin, base, capHigh = null) {
   let tMax = tempmax;
   let tMin = tempmin;
-
   if (capHigh != null && tMax > capHigh) tMax = capHigh;
 
   const tAvg = (tMax + tMin) / 2;
@@ -243,6 +421,5 @@ function addDays(yyyyMmDd, daysToAdd) {
   const y2 = dt.getUTCFullYear();
   const m2 = String(dt.getUTCMonth() + 1).padStart(2, '0');
   const d2 = String(dt.getUTCDate()).padStart(2, '0');
-  console.log(`${y2}-${m2}-${d2}`)
   return `${y2}-${m2}-${d2}`;
 }

@@ -298,8 +298,8 @@ const triggerPest = (value, rules)=>{
   }
 }
 
-const evalWeed = (now32, now50, plus30_32, plus30_50, ruleSets)=>{
-        const soon = [];
+const evalWeed = (now32, now50, plus30_32, plus30_50, ruleSets) => {
+  const soon = [];
 
   for (const set of ruleSets) {
     const now = set.base === 32 ? now32 : now50;
@@ -311,17 +311,25 @@ const evalWeed = (now32, now50, plus30_32, plus30_50, ruleSets)=>{
 
       if (activeNow || entersBy30) {
         soon.push({
-          key: set.key,
+          // unique key per rule band so LWC for:each doesn't collide
+          key: `${set.key}_${r.min}_${r.max}`,
+
+          ruleKey: set.key,
           label: set.label,
           base: set.base,
+
           now,
           future,
+
           min: r.min,
           max: r.max,
-          message: r.res,
-          className: activeNow ? r.class : 'firstPestEarly', // or a dedicated "upcoming" class
+
+          // ✅ correct property names
+          message: r.message,
+          className: activeNow ? r.className : 'upcoming',
+
           status: activeNow ? 'active' : 'within_30_days',
-          startsIn: activeNow ? 0 : (r.min - now)
+          startsIn: activeNow ? 0 : Math.round(r.min - now)
         });
       }
     }
@@ -329,7 +337,7 @@ const evalWeed = (now32, now50, plus30_32, plus30_50, ruleSets)=>{
 
   soon.sort((a, b) => a.startsIn - b.startsIn);
   return soon;
-}
+};
 const getMonth = (x)=>{
   let month
   switch(x){

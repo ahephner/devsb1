@@ -6,7 +6,80 @@
       </template>
 
       <template if:true={loaded}>
+        <template if:true={isDesktop}>
+                <!-- =========================
+     NEW: Current Year YTD
+     ========================= -->
+<div class="lineUp">
+  <div class="sectionTitle">Current Year-to-Date GDD - {zip}</div> 
+  <div class="trackInfo">
+    <p>Click here to change location </p><lightning-icon icon-name='utility:store' class="slds-m-left_small" alternative-text='edit' size='xx-small' title='edit' onclick={updateLocation}></lightning-icon>
 
+  </div>
+
+</div>
+
+<div class="gddGrid">
+  <div class="stat">
+    <div class="statLabel">Current YTD GDD32</div>
+    <div class="statValue">{ytd32Display}</div>
+  </div>
+
+  <div class="stat">
+    <div class="statLabel">Current YTD GDD50</div>
+    <div class="statValue">{ytd50Display}</div>
+  </div>
+
+  <div class="stat">
+    <div class="statLabel">Current +30 GDD32</div>
+    <div class="statValue">{ytdFuture32Display}</div>
+  </div>
+
+  <div class="stat">
+    <div class="statLabel">Current +30 GDD50</div>
+    <div class="statValue">{ytdFuture50Display}</div>
+  </div>
+</div>
+
+<div class="sectionTitle">Upcoming / Active Weed Pressure From Current YTD</div>
+
+<template if:true={hasWarningsYtd}>
+  <div class="cards">
+    <template for:each={weedWarningsYtd} for:item="w">
+      <div key={w.key} class={w.className}>
+        <div class="card">
+          <div class="cardTop">
+            <div class="cardTitle">{w.label}</div>
+            <div class="pill">
+              Base {w.base} • {w.status}
+            </div>
+          </div>
+
+          <div class="cardMessage">{w.message}</div>
+
+          <div class="meta">
+            <div>Window: {w.min} – {w.max}</div>
+            <template if:true={w.startsIn}>
+              <div>Starts in: {w.startsIn} GDD</div>
+            </template>
+            <template if:false={w.startsIn}>
+              <div>In window now</div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>
+
+<template if:false={hasWarningsYtd}>
+  <div class="empty">
+    No active or upcoming weed timing windows detected for current YTD.
+  </div>
+</template>
+<div class="lineUp">
+  <div class="sectionTitle">Previous Year Values</div><div class="historic">{gddSummary.seasonStart} - {gddSummary.endPlus30}</div>
+</div>
         <!-- GDD numbers -->
         <div class="gddGrid">
           <div class="stat">
@@ -67,8 +140,126 @@
             No active or upcoming weed timing windows detected for this period.
           </div>
         </template>
-
       </template>
+      </template>
+      <!-- MOBILE -->
+  <template if:false={isDesktop}>
+    <!-- Mobile header -->
+    <div class="mobileHeader">
+      <div class="sectionTitle mobileTitle">Current Year-to-Date GDD - {zip}</div>
+
+      <button class="mobileLocationBtn" onclick={updateLocation}>
+        <lightning-icon icon-name="utility:store" size="x-small" alternative-text="Change location"></lightning-icon>
+        <span>Change location</span>
+      </button>
+    </div>
+
+    <!-- Mobile stats (2-up) -->
+    <div class="gddGrid gddGridMobile">
+      <div class="stat">
+        <div class="statLabel">Current YTD GDD32</div>
+        <div class="statValue">{ytd32Display}</div>
+      </div>
+      <div class="stat">
+        <div class="statLabel">Current YTD GDD50</div>
+        <div class="statValue">{ytd50Display}</div>
+      </div>
+      <div class="stat">
+        <div class="statLabel">Current +30 GDD32</div>
+        <div class="statValue">{ytdFuture32Display}</div>
+      </div>
+      <div class="stat">
+        <div class="statLabel">Current +30 GDD50</div>
+        <div class="statValue">{ytdFuture50Display}</div>
+      </div>
+    </div>
+
+    <div class="sectionTitle">Weed Pressure (Current YTD)</div>
+
+    <template if:true={hasWarningsYtd}>
+      <div class="cards cardsMobile">
+        <template for:each={weedWarningsYtd} for:item="w">
+          <div key={w.key} class={w.className}>
+            <div class="card">
+              <div class="cardTop">
+                <div class="cardTitle">{w.label}</div>
+                <div class="pill">Base {w.base} • {w.status}</div>
+              </div>
+              <div class="cardMessage">{w.message}</div>
+              <div class="meta">
+                <div>Window: {w.min} – {w.max}</div>
+                <template if:true={w.startsIn}>
+                  <div>Starts in: {w.startsIn} GDD</div>
+                </template>
+                <template if:false={w.startsIn}>
+                  <div>In window now</div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <template if:false={hasWarningsYtd}>
+      <div class="empty">No active or upcoming weed timing windows detected for current YTD.</div>
+    </template>
+
+    <!-- Previous year (mobile condensed) -->
+    <div class="sectionTitle">Previous Year Values</div>
+    <div class="historic mobileHistoric">{prevStart} - {prevEnd}</div>
+<!-- {gddSummary.seasonStart} -->
+    <div class="gddGrid gddGridMobile">
+      <div class="stat">
+        <div class="statLabel">Last Year GDD32</div>
+        <div class="statValue">{cur32Display}</div>
+      </div>
+      <div class="stat">
+        <div class="statLabel">Last Year GDD50</div>
+        <div class="statValue">{cur50Display}</div>
+      </div>
+      <div class="stat">
+        <div class="statLabel">+30 Days GDD32</div>
+        <div class="statValue">{future32Display}</div>
+      </div>
+      <div class="stat">
+        <div class="statLabel">+30 Days GDD50</div>
+        <div class="statValue">{future50Display}</div>
+      </div>
+    </div>
+
+    <div class="sectionTitle">Weed Pressure (Previous Year)</div>
+
+    <template if:true={hasWarnings}>
+      <div class="cards cardsMobile">
+        <template for:each={weedWarnings} for:item="w">
+          <div key={w.key} class={w.className}>
+            <div class="card">
+              <div class="cardTop">
+                <div class="cardTitle">{w.label}</div>
+                <div class="pill">Base {w.base} • {w.status}</div>
+              </div>
+              <div class="cardMessage">{w.message}</div>
+              <div class="meta">
+                <div>Window: {w.min} – {w.max}</div>
+                <template if:true={w.startsIn}>
+                  <div>Starts in: {w.startsIn} GDD</div>
+                </template>
+                <template if:false={w.startsIn}>
+                  <div>In window now</div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <template if:false={hasWarnings}>
+      <div class="empty">No active or upcoming weed timing windows detected for this period.</div>
+    </template>
+
+  </template>
     </div>
   </lightning-card>
 </template>
