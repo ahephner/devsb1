@@ -120,7 +120,8 @@ private class test_appProduct {
     static void testAreaWrapper(){
         string label = 'green';
         string value = 'green'; 
-       areaWrapper t = new areaWrapper(label, value);  
+        string appType = 'M';
+       areaWrapper t = new areaWrapper(label, value, appType);  
         System.assertNotEquals(null, t); 
     }
     
@@ -129,6 +130,9 @@ private class test_appProduct {
     static void testGetArea(){
        test.startTest();
         List<Area__c> areaCall = appProduct.areaInfo(area.id);
+        List<Area__c> modelCall = appProduct.areaModel(prog.Id);
+        //String moms = '502 Heller St, Montpelier, OH 43543 USA';  
+        //Map<String, Object> n = appProduct.getAddressInfo(moms);
        test.stopTest();
         system.assertEquals(1, areaCall.size()); 
     }
@@ -151,6 +155,7 @@ private class test_appProduct {
       		 Test.stopTest();  
          
     }
+ 
     
 	@isTest
     static void testGetApps(){
@@ -162,8 +167,12 @@ private class test_appProduct {
     	fallApp.add(a3);
     	fallApp.add(a4);       
     	insert fallApp;
+        
+        //List<ApplicationWrapper> aw = new List<ApplicationWrapper>(); 
         Test.startTest(); 
         	list<application__c> appList = appProduct.getApps(prog.Id);  
+        	list<Application__c> appList2 = appProduct.getAppForCalendar(prog.Id);
+        	List<appProduct.ApplicationWrapper> appThree = appProduct.getAppsWViolations(prog.Id);  
        Test.stopTest();
         	list<application__c> al = [select id from application__c where area__c=: area.id]; 
         system.debug(al);	
@@ -174,20 +183,27 @@ private class test_appProduct {
     @isTest 
     static void testAppProducts(){
         list<App_Product__c> apList = new list<App_Product__c>(); 
+        id pbId = [select id, Pricebook2Id from PricebookEntry where Product2Id =: r1.Id limit 1].Pricebook2Id;
+        list<string> tes = new list<string>();
+        string pass = string.valueOf(pbId);
+        tes.add(pass); 
         App_Product__c ap1 = new App_Product__c(Application__c=application.Id,Product__c = r1.Id);
         App_Product__c ap2 = new App_Product__c(Application__c=application.Id,Product__c = r2.Id);
         apList.add(ap1);
         apList.add(ap2); 
         insert apList; 
         Test.startTest(); 
+        	dataFromProductIdCR.prodPricing compTest = dataFromProductIdCR.prodIdToData(tes, r1.Id);  
         	list<App_Product__c> prodList = appProduct.appProducts(application.Id);        
         	list<App_Product__c> filter = appProduct.dataTableBuildFilter(prog.Id);
         	list<App_Product__c> all = appProduct.allAppProducts(prog.Id);
+        	//list<OpportunityLineItem> nullHis = appProduct.history('2026-5-5', cust.Id); 
         Test.stopTest();
         	list<App_Product__c> nl = [select id from App_Product__c where application__c =: application.id]; 
         	system.assertEquals(2, nl.size());
         
     }
+   //no longer used
     @istest
     static void testSearch(){
 	test.startTest();
@@ -308,7 +324,9 @@ private class test_appProduct {
         nonAgency.add(nonAgencyli);
         test.startTest();
         string newAppDate = '2024-10-09';
+        
         	List<OpportunityLineItem> opli = appProduct.history(newAppDate, cust.Id);
+        	
         test.stopTest();
     }
     //@istest

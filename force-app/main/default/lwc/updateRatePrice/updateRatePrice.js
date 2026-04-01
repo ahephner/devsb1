@@ -62,6 +62,7 @@ export default class UpdateRatePrice extends LightningElement {
     oppNote
     multiApp; 
     parentApp; 
+    hasRenderedPriceCheck = false; 
     updateMulti = false;
     @track productIds = [];
 
@@ -69,6 +70,14 @@ export default class UpdateRatePrice extends LightningElement {
         this.loadProducts();
         //console.log('calling') 
     }
+
+    renderedCallback() {
+        if (this.loaded && !this.hasRenderedPriceCheck) {
+            this.hasRenderedPriceCheck = true;
+            this.initPriceCheck();
+        }
+    }
+
     get unitArea(){
         return [
             {label:'OZ/M', value:'OZ/M'}, 
@@ -365,9 +374,7 @@ export default class UpdateRatePrice extends LightningElement {
                 }
             }
         }
-            handleSpotSpray(evt){
 
-            }
 
 
         
@@ -907,6 +914,33 @@ get radioOpts(){
                 console.log('no choice');
                 
         }
+    }
+
+    initPriceCheck(){
+        //this.hasRendered = false; 
+        
+        
+            for(let i=0; i<this.prodlist.length; i++){
+                //console.log(this.selection[i])
+                let target = this.prodlist[i].Product2Id;
+                //let level = Number(this.selection[i].lOne);
+                let floor = Number(this.prodlist[i].Product__r.Floor_Price__c);
+                let price = Number(this.prodlist[i].Unit_Price__c);
+                //let isManProduct = this.prodList[i].manFloor
+                if(price<floor){
+                this.template.querySelector(`[data-id="${target}"]`).style.color ="red";
+                this.template.querySelector(`[data-margin="${target}"]`).style.color ="red";
+                    this.prodlist[i].goodPrice = false;
+                    //this used to allow the save button Now we are sitting a check box on the opportunity if there is a floor violation. 
+                    //so check box = true means it is checked if false it is unchecked which is the opposite of how we used to do things. 
+                    this.goodPricing = false;
+                    //check for manufacture floor violations
+                    //this.hasManufacturerViolation = isManProduct ? true: false; 
+                    console.log(this.prodlist[i])
+                }
+            }
+            //call inventory 
+           //this.initQtyCheck();    
     }
     //handle price warnings
     handleWarning = (targ, lev, flr, price, ind)=>{

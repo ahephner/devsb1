@@ -40,6 +40,42 @@ public class appProduct {
         //system.debug(apps);
         return apps;
     }
+    
+    public class ApplicationWrapper {
+    	@AuraEnabled public Application__c app;
+    	@AuraEnabled public Boolean hasFloorViolation;
+	}	
+    @AuraEnabled(Cacheable=true)
+	public static List<ApplicationWrapper> getAppsWViolations(Id recordId) {
+    	List<ApplicationWrapper> results = new List<ApplicationWrapper>();
+
+    	List<Application__c> apps = [
+        	SELECT Name, Id, Date__c, Area_Name__c, Total_Price_ap__c, Customer_Name__c,
+               	Program_Name__c, Area__c, Converted__c, Type__c,
+               	Area__r.Program__r.Account__r.BillingLatitude,
+               	Area__r.Program__r.Account__r.BillingLongitude,
+               (
+                   SELECT Id, Floor_Violation__c
+                   FROM App_Products__r
+                   WHERE Floor_Violation__c = true
+                   LIMIT 1
+               )
+        	FROM Application__c
+        	WHERE Program_ID__c = :recordId
+        	ORDER BY Date__c ASC
+    ];
+
+    for (Application__c app : apps) {
+        ApplicationWrapper wrap = new ApplicationWrapper();
+        wrap.app = app;
+        wrap.hasFloorViolation = app.App_Products__r != null && !app.App_Products__r.isEmpty();
+        results.add(wrap);
+    }
+
+    return results;
+}
+
+
     @AuraEnabled(Cacheable=true)
     public static list<Application__c> getApps(ID recordId){
       
@@ -106,7 +142,7 @@ public class appProduct {
             String query = 'Select Id, Product2Id,'
                 + '  Product2.ProductCode, Product2.Name, Product2.Product_Status__c, Product2.Product_Family__c, Product2.Subcategory__c, Product2.Ship_Weight__c, Product2.Pallet_Qty__c,'
                 + '  Product2.Floor_Type__c, Product2.Floor_Price__c, Product2.Last_Purchase_Price__c, Agency_Product__c, product2.Total_Product_Items__c, Product2.Temp_Unavailable__c,'
-                + ' Floor_Price__c, Level_1_UserView__c, Level_One_Margin__c, Level_2_UserView__c, Level_2_Margin__c, Product_Cost__c, Product2.Temp_Mess__c, Product_Type__c, Product_Size__c,'
+                + ' Floor_Price__c, Level_1_UserView__c, Level_One_Margin__c, Level_2_UserView__c, Level_2_Margin__c, Product_Cost__c, Product2.Temp_Mess__c, '
                 + ' Product2.N__c, Product2.K__c, Product2.P__c, Product2.hasFertilizer__c, product2.X1_Gallon_Weight__c'
                 + ' From PricebookEntry Where IsActive = True AND Product2.Include_in_Programs__c = True AND Pricebook2Id =: pbId  AND' ; 
      //AND Product2.ProductClass =:pClass
@@ -182,6 +218,7 @@ public class appProduct {
     }
     @AuraEnabled
     public static Map<String, Object> getAddressInfo(string streetAddress){
+        system.debug(streetAddress); 
         Map<string,object> options = new Map<String,Object> {
             'version' => '1', // Required. Version of the API endpoint. Must be '1'.
             'address' => streetAddress

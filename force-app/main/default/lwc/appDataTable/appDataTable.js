@@ -2,6 +2,7 @@ import { LightningElement, wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getApps from '@salesforce/apex/appProduct.getApps';
+import getAppsWViolations from '@salesforce/apex/appProduct.getAppsWViolations';
 import getAreas from '@salesforce/apex/appProduct.getAreas';
 import getProds from '@salesforce/apex/appProduct.dataTableBuildFilter';
 import cloneSingleApp from '@salesforce/apex/cpqProgramClone.cloneSingleApp';
@@ -24,24 +25,24 @@ const actions = [
 const columns = [
     { label: 'Name', fieldName: 'Name',
         cellAttributes:{
-            class:{fieldName:'madeOrder'}
+            class:{fieldName:'classes'}
         } 
 
     },
     { label: 'Area', fieldName: 'Area_Name__c', sortable: "true",
         cellAttributes:{
-            class:{fieldName:'madeOrder'}
+            class:{fieldName:'classes'}
         }  },
     { label: 'Date', fieldName: 'Date__c', sortable: "true",
         cellAttributes:{
-            class:{fieldName:'madeOrder'}
+            class:{fieldName:'classes'}
         } },
     {label: 'Total Price', 
     fieldName:'Total_Price_ap__c', 
     type:'currency',
     sortable:'true',
     cellAttributes: { alignment: 'left',
-                    class:{fieldName: 'madeOrder'}
+                    class:{fieldName: 'classes'}
      },
 },
 
@@ -99,32 +100,57 @@ export default class AppDataTable extends LightningElement {
             }
         } 
 
-    @wire(getApps, {recordId: '$recordId'})
-        wiredList(result){
-            //console.log('app table recordID', this.recordId)   
-            this.wiredAppList = result; 
-            if(result.data){
-                console.log(result.data)
-                this.appList = result.data.map(item=>{
-                    let madeOrder = item.Converted__c ? 'slds-icon-custom-custom5 slds-text-color_default': 'slds-text-color_default';
-                    return{...item, 'madeOrder': madeOrder}
-                }); 
-                this.copy = this.appList; 
-                this.programName = result.data[0] ? result.data[0].Program_Name__c :'' ;
-                this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
-                this.error = undefined; 
-                this.totalPrice = onLoadTotalPrice(result.data); 
-                //this needs to be it's own thing. 
-                this.lat = result.data[0] ? result.data[0].Area__r.Program__r.Account__r.BillingLatitude: '';
-                this.long = result.data[0]? result.data[0].Area__r.Program__r.Account__r.BillingLongitude: '';
-                this.loaded = true;
-                 
-            }else if(result.error){
-                this.error = result.error 
-                this.appList = undefined; 
+        @wire(getAppsWViolations, {recordId: '$recordId'})
+            wiredList(result){
+                if(result.data){
+                    //console.log(result.data[0].app.Name,'  ', result.data[0].hasFloorViolation)
+                    this.appList = result.data.map(item=>{
+                        let madeOrder = item.app.Converted__c ? 'slds-icon-custom-custom5 slds-text-color_default': 'slds-text-color_default';
+                        let floorViolation = item.hasFloorViolation ? 'slds-theme_warning' : ''
+                        let classes = `${madeOrder} ${floorViolation}`.trim()
+                        return {...item.app, 'classes': classes}
+                    })
+                    //console.log(this.appList[0])
+                    this.copy = this.appList;
+                    this.programName = result.data[0] ? result.data[0].app.Program_Name__c :'' ;
+                    this.customerName = result.data[0] ? result.data[0].app.Customer_Name__c : '';
+                    this.error = undefined; 
+                    this.totalPrice = onLoadTotalPrice(this.appList);
+                    this.lat = result.data[0] ? result.data[0].app.Area__r.Program__r.Account__r.BillingLatitude: '';
+                    this.long = result.data[0]? result.data[0].app.Area__r.Program__r.Account__r.BillingLongitude: '';
+                    this.loaded = true;
+                }else if(result.error){
+                    this.error = result.error
+                   this.appList = undefined;
+                   console.log(this.error)  
+                }
             }
+    // @wire(getApps, {recordId: '$recordId'})
+    //     wiredList(result){
+    //         //console.log('app table recordID', this.recordId)   
+    //         this.wiredAppList = result; 
+    //         if(result.data){
+    //             console.log(result.data)
+    //             this.appList = result.data.map(item=>{
+    //                 let madeOrder = item.Converted__c ? 'slds-icon-custom-custom5 slds-text-color_default': 'slds-text-color_default';
+    //                 return{...item, 'madeOrder': madeOrder}
+    //             }); 
+    //             this.copy = this.appList; 
+    //             this.programName = result.data[0] ? result.data[0].Program_Name__c :'' ;
+    //             this.customerName = result.data[0] ? result.data[0].Customer_Name__c : '';
+    //             this.error = undefined; 
+    //             this.totalPrice = onLoadTotalPrice(result.data); 
+    //             //this needs to be it's own thing. 
+    //             this.lat = result.data[0] ? result.data[0].Area__r.Program__r.Account__r.BillingLatitude: '';
+    //             this.long = result.data[0]? result.data[0].Area__r.Program__r.Account__r.BillingLongitude: '';
+    //             this.loaded = true;
+                 
+    //         }else if(result.error){
+    //             this.error = result.error 
+    //             this.appList = undefined; 
+    //         }
 
-        }
+    //     }
 
         @wire(getProds, {program:'$recordId'})
             wiredProds(result){

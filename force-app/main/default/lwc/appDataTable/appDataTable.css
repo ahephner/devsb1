@@ -22,3 +22,13 @@
 .shady{
     color: #1e9413;
 }
+
+.violation {
+    background-color: #ef4444;
+    border-left: 4px solid #ef4444; /* nice modern red */
+}
+
+.warningText{
+    color: #FF5D2D
+;
+}
