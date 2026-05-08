@@ -47,7 +47,7 @@
         <fieldName>accountId</fieldName>
     </lightningMessageFields>
     <lightningMessageFields>
-        <description>areas available</description> 
+        <description>areas available</description>
         <fieldName>areaArray</fieldName>
     </lightningMessageFields>
     <masterLabel>ProgramBuilder</masterLabel>

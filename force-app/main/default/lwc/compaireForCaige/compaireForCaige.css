@@ -33,3 +33,10 @@
 .tableBtn{
     display: inline-flex;
 }
+
+.spinnerWrap {
+    min-height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

@@ -1,13 +1,19 @@
 import { LightningElement, api, track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 //import priorityPrice from '@salesforce/apex/getPriceBooks.priorityBestPrice';
 import allAppProducts from '@salesforce/apex/appProduct.allAppProducts';
 import prodIdToData from '@salesforce/apex/dataFromProductIdCR.prodIdToData';
+import replaceProduct from '@salesforce/apex/dataFromProductIdCR.replaceProduct';
 import { priorityPricing} from 'c/helperOMS';
  import getPriceBooks from '@salesforce/apex/getPriceBooks.getPriceBookIds';
 //import basicInfo from '@salesforce/apex/appProduct.basicInfo';
 import SearchContact from 'c/searchContactAddress'
 import { appTotal, alreadyAdded, pref,compareToolDryFert, compareToolLiqFert, unitsRequired, roundNum, pricePerUnit, perProduct, merge, areaTreated, sumFert, totalUsed,lowVolume, lvUnits } from 'c/programBuilderHelper';
 import {checkPricing, sumByKey} from 'c/helper'
+
+//salesforce functions
+import LightningConfirm from 'lightning/confirm';
+
 
 export default class CompaireForCaige extends LightningElement {
     
@@ -22,6 +28,7 @@ export default class CompaireForCaige extends LightningElement {
     priceBooks;
 //acccount id get basicInfo will set this. call after product load
     accId;
+    loaded = false;
     // Columns for Table only showing Name and Price till we get data on the table
 
                //for the combo box 
@@ -40,6 +47,16 @@ export default class CompaireForCaige extends LightningElement {
             this.fetchProgramProducts();
         }
     }
+
+    showToast(title, message, variant) {
+    this.dispatchEvent(
+        new ShowToastEvent({
+            title,
+            message,
+            variant
+        })
+    );
+}
     //renderedCallback  => Fires more if the above is not workable MUST have a if statement ie
     //renderedCallbackt(){
     // if(!alreadyLoaded ){ call load function then set this.alreadyLoaded = true}}
@@ -85,8 +102,10 @@ export default class CompaireForCaige extends LightningElement {
             }).then((res)=>{ 
                     this.pbIds = [...priorityPricing(res).priceBookIdArray];
                     console.log(this.pbIds)
+                    this.loaded = true;
             })
             .catch(error => {
+                this.loaded = true;
                 console.error('Error fetching program products', error);
             });
             
@@ -126,6 +145,7 @@ export default class CompaireForCaige extends LightningElement {
             this.showCompareBtn = true;
             this.showComboBox = false;
             this.number = 0; 
+            
         }
     }
     async openSearch(){
@@ -268,12 +288,75 @@ export default class CompaireForCaige extends LightningElement {
                 break;
         }
     }
-        handleReplacement(event){
-            const name = event.target.name;
+    async    handleReplacement(event){
+                //start a spinner on html 
+                let selectProduct = this.tableProduct.filter(x=> x.Product__c === event.target.name);
+
+                const newProdName = event.target.dataset.label; 
+                const pod = this.tableProduct[0].Product_Name__c
+                const result = await LightningConfirm.open({
+                    message: `Do you want to replace ${pod} with ${newProdName}`,
+                    variant: 'headerless',
+                    label: 'this is the aria-label value',
+                // setting theme would have no effect , replacementProduct:apProduct
+            });
+                if(result){
+                    let apProduct = selectProduct[0];
+                    
+                    //need Cost_per_Acre__c, Cost_per_M__c, Total_Price_LWC__c, Unit_Cost__c, Unit_Price__c, Units_Required__c, Rate2__c, Unit_Area__c, N__c, P__c, K__c
+                    let replacement = {
+                        Product__c: apProduct.Product__c,
+                        Rate2__c: apProduct.Rate2__c,
+                        Unit_Area__c: apProduct.Unit_Area__c,
+                        Unit_Price__c: apProduct.Unit_Price__c,
+                        Cost_per_Acre__c: apProduct.Cost_per_Acre__c,
+                        Cost_per_M__c: apProduct.Cost_per_M__c,
+                        Total_Price_LWC__c:apProduct.Total_Price__c,
+                        Unit_Cost__c: apProduct.Product_Cost__c,
+                        Units_Required__c: apProduct.totalUsed,
+                        N__c: apProduct.N__c,
+                        P__c: apProduct.P__c,
+                        K__c: apProduct.K__c,
+                        Product_Size__c: apProduct.Product_Size__c
+                    };
+                try {
+                        this.loaded = false;
+
+                        let res = await replaceProduct({
+                            program: this.recordId,
+                            productBeingReplaced: this.tableProduct[0].Product__c,
+                            replacementProduct: replacement
+                        });
+
+                        if (res === 'success') {
+                            this.showToast('Success', 'Product replacement completed.', 'success');
+
+                            this.tableProduct = [];
+                            this.showCompareBtn = false;
+                            this.searchProd = false;
+                            this.maxPick = false;
+                            this.number = 0;
+
+                            await this.fetchProgramProducts();
+                        } else {
+                            this.showToast('Replacement Failed', res, 'error');
+                        }
+                    } catch (error) {
+                        this.showToast(
+                            'Replacement Failed',
+                            error?.body?.message || error?.message || 'Something went wrong replacing the product.',
+                            'error'
+                        );
+                    } finally {
+                        this.loaded = true;
+                    }
+                }
         }
     //MATH FUNCTIONS 
     //use this.productList = single values we can then do a mass update in apex
     //Rate
+
+    ///MATH review on the per acre and per M liquids 12/9/2025
     handleRate(item){
         let index = this.tableProduct.findIndex(x=> x.Product__c === item.target.name); 
 

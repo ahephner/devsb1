@@ -46,8 +46,7 @@ export default class WeatherDay extends LightningModal{
        let {accdegreedays,description, feelslike, temp,tempmax,tempmin,datetime, day, hours, icon } = this.dayInfo
        let numMonth = months[Number(datetime.slice(5,7))]
        let todayNumber = new Date().getDate(); 
-       let showDate = datetime.slice(8,11)
-       this.month = `${numMonth} - ${showDate}`
+       this.month = `${numMonth} - ${day}`
        this.currentIcon = this.weatherIcons[icon]
        //hourly
        let curHour = new Date().getHours();
@@ -80,7 +79,7 @@ export default class WeatherDay extends LightningModal{
         return back;
     }
     async getHistory(){
-        
+        console.log(this.dayInfo)
         //  try {  
         //         let endPoint = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/39.89833062467567%2C%20-86.14610232546177/2024-02-01/2024-03-08?unitGroup=us&elements=datetime%2Ctempmax%2Ctempmin%2Cdegreedays%2Caccdegreedays%2Csoiltemp01%2Csoiltemp04%2Csoilmoisture01%2Csoilmoisture04&key=SC9NP46DF9TQT57GAHLWSDALA&contentType=json&degreeDayMethod=average&degreeDayTempMaxThreshold=85&degreeDayTempBase=32&degreeDayStartDate=2024-01-01`
 

@@ -20,4 +20,13 @@
         <!--<target>lightningCommunity__Page_Layout</target>-->
         <!--<target>lightningCommunity__Theme_Layout</target>-->
     </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage, lightning__RecordPage">
+            <!-- Enables the component for mobile (phone) -->
+            <supportedFormFactors>
+                <supportedFormFactor type="Small"/>
+                <supportedFormFactor type="Large"/>
+            </supportedFormFactors>
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>

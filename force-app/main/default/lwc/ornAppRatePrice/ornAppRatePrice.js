@@ -74,7 +74,8 @@ noteOps;
 
              this.prodCostG = costs.perGal;
              this.prodCost100 = costs.per100;
-
+            this.data[index].Cost_per_100__c = costs.newHundred;
+            this.data[index].Cost_per_Gallon__c = costs.newGal;
              this.gallonAmounts = finishedGals(this.data[index].Product_Size__c,this.data[index].Rate2__c);
  
              if(this.data[index].isFert){
@@ -103,7 +104,9 @@ noteOps;
             let costs = ornPerProduct(this.data[index].Unit_Price__c, this.data[index].Product_Size__c, this.data[index].Rate2__c);
             this.prodCostG = costs.perGal;
             this.prodCost100 = costs.per100;
-           
+            this.data[index].Cost_per_100__c = costs.newHundred;
+            this.data[index].Cost_per_Gallon__c = costs.newGal;
+
             this.gallonAmounts = finishedGals(this.data[index].Product_Size__c,this.data[index].Rate2__c);
             this.appTotalPrice = ornAppTotal(this.data).total; 
             this.appPer100 = ornAppTotal(this.data).total100;
@@ -145,6 +148,8 @@ noteOps;
 
                  this.prodCostG = costs.perGal;
                  this.prodCost100 = costs.per100;
+                 this.data[index].Cost_per_100__c = costs.newHundred;
+                 this.data[index].Cost_per_Gallon__c = costs.newGal;
                  
              }else{
                  this.data[index].Margin__c = 0;                
@@ -154,6 +159,8 @@ noteOps;
 
                  this.prodCostG = costs.perGal;
                  this.prodCost100 = costs.per100;
+                 this.data[index].Cost_per_100__c = costs.newHundred;
+                 this.data[index].Cost_per_Gallon__c = costs.newGal;
                  this.prodAreaCost = this.areaAcres * this.costPerAcre;
 
              }
@@ -179,6 +186,8 @@ noteOps;
  
                          this.prodCostG = costs.perGal;
                          this.prodCost100 = costs.per100;
+                         this.data[index].Cost_per_100__c = costs.newHundred;
+                         this.data[index].Cost_per_Gallon__c = costs.newGal;
                          this.prodAreaCost = this.areaAcres * this.costPerAcre;
                                                     
                      }else{
@@ -190,6 +199,8 @@ noteOps;
 
                          this.prodCostG = costs.perGal;
                          this.prodCost100 = costs.per100;
+                         this.data[index].Cost_per_100__c = costs.newHundred;
+                         this.data[index].Cost_per_Gallon__c = costs.newGal;
 
                      }
                      this.appTotalPrice = ornAppTotal(this.data).total; 
@@ -275,7 +286,7 @@ newAppNote(event){
         this.loaded = false; 
         let note = this.oppNote.length > 0 ? this.oppNote : '';
         this.dispatchEvent(new CustomEvent('save',{
-             detail: [this.data, note]
+             detail: [this.data, note, false]
         }));    
         //this.loaded = true; 
         return true;

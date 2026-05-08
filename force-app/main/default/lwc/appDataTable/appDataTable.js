@@ -101,7 +101,8 @@ export default class AppDataTable extends LightningElement {
         } 
 
         @wire(getAppsWViolations, {recordId: '$recordId'})
-            wiredList(result){
+        wiredList(result){
+                this.wiredAppList = result;
                 if(result.data){
                     //console.log(result.data[0].app.Name,'  ', result.data[0].hasFloorViolation)
                     this.appList = result.data.map(item=>{

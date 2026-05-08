@@ -45,14 +45,17 @@ public class cpqProgramClone {
                       }
 
     insert areaCopy; 
-    
+    date now = Date.today();
     for(area__c j: areaCopy){
-        for(application__c ap : [select a.Id, a.Name, a.Area__c, a.repeat__c, a.Note__c , a.Clone__c, 
+        for(application__c ap : [select a.Id, a.Name, a.Area__c, a.repeat__c, a.Note__c , a.Clone__c, a.Type__c,
                                 a.Date__c,  a.Weeks_Apart__c, a.Number_of_Apps__c, a.Prev_App_Id__c, Program_ID__c
                                  from Application__c a where a.area__c = :j.previd__c]){
-                                    Application__c newApp = ap.clone(false); 
+                                    Application__c newApp = ap.clone(false);
+                                    Date newDate = newApp.Date__c <= now ? newApp.Date__c.addDays(365) : newApp.Date__c; 
+                                    newApp.Date__c = newDate; 
                                     newApp.area__c = j.Id;
-                                    newApp.Prev_App_Id__c = ap.Id; 
+                                    newApp.Prev_App_Id__c = ap.Id;
+                                    newApp.Type__c = ap.Type__c; 
                                     newApp.Clone__c = True; 
                                     apps.add(newApp);
                                  }
@@ -99,14 +102,14 @@ public class cpqProgramClone {
                                  							       OZ_M__c, P__c, Product__c, Rate2__c, Unit_Area__c, Unit_Cost__c, 
                                            					       Unit_Price__c, Units_Required__c, Total_Price_LWC__c FROM App_Product__c 
                                                                    where Application__c in: appId.keySet()]);
-                    //system.debug('apps ---');
-                    //system.debug(prod);
+                    system.debug('apps ---');
+                    system.debug(prod);
          for(App_Product__c x: prod){
              App_Product__c clonedProd = x.clone(false);	
              	clonedProd.Application__c = appId.get(x.Application__c); 
              	ListCloneProds.add(clonedProd); 
          }
-         
+         system.debug(ListCloneProds);
          if(ListCloneProds.size()> 1){
              insert ListCloneProds; 
          }
@@ -165,7 +168,7 @@ public class cpqProgramClone {
              	clonedProd.altPriceBookId__c = pricing.Pricebook2Id;
              	clonedProd.altPriceBookName__c = pricing.Pricebook2.Name; 
              	clonedProd.Unit_Price__c = pricing.UnitPrice;
-             	clonedProd.Margin__c = pricing.List_Margin__c;
+             	clonedProd.Margin__c = pricing.Program_Planner_Margin__c;
              	clonedProd.Unit_Cost__c = pricing.Product_Cost__c; 
              	//set cost per acre per thousand
              	costCals costs = cpqProgramClone.calcAcreCharge(pricing.UnitPrice,x.Product__r.Size__c, x.Rate2__c,x.Unit_Area__c);
@@ -173,10 +176,11 @@ public class cpqProgramClone {
              	clonedProd.Cost_per_M__c = costs.costPerM; 
              	clonedProd.Total_Price_LWC__c = pricing.UnitPrice * clonedProd.Units_Required__c;  
              	clonedProd.Application__c = appId.get(x.Application__c); 
+             system.debug(clonedProd); 
              	ListCloneProds.add(clonedProd); 
          }
          
-         if(ListCloneProds.size()> 1){
+         if(ListCloneProds.size()>= 1){
              insert ListCloneProds; 
          }
      }catch(Exception e){
@@ -236,7 +240,7 @@ public class cpqProgramClone {
         public Decimal costPerAcre {get;set;}
         public Decimal costPerM {get;set;}
     }
-    private static costCals calcAcreCharge(Decimal productPrice, 
+    public static costCals calcAcreCharge(Decimal productPrice, 
                                    Decimal unitSize, 
                                    Decimal prodRate, 
                                    string unitOfMeasure){

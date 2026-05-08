@@ -62,7 +62,7 @@
                         </template>
                         <template lwc:else>
                             <lightning-input class='validate' type='number' 
-                            label="Area Acres" value={areaAcres} onchange={newAcre} required></lightning-input>
+                            label="Area Acres" value={areaAcres} onchange={newAcre} required step="0.01"></lightning-input>
                         </template>
                                     <lightning-combobox
                                     name='category'

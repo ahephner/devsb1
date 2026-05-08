@@ -182,6 +182,32 @@ private class test_appProduct {
     
     @isTest 
     static void testAppProducts(){
+        
+    //for dataFromProductIdCR
+    Account cust = new Account();
+    cust.Name = 'Abby Hephner';
+    cust.Type = 'Customer';
+    cust.Customer_Name__c = 'Abby Hephner 13022';
+    insert cust;
+      
+    // create new program
+    Program__c progTwo = new Program__c();
+    progTwo.Name = 'Test Program 2025';
+    progTwo.Account__c = cust.Id;
+    insert progTwo;
+        // create new area
+     Area__c areaThree = new Area__c();
+    areaThree.Name = 'Greens';
+    areaThree.Program__c = progTwo.Id;
+    areaThree.Area_Acres__c = 1000;
+    areaThree.Area_Sq_Feet__c = 450000;
+    insert areaThree;
+     //application 
+     Application__c ApplicationLocal = new Application__c();  
+    ApplicationLocal.Name = 'spray';
+    ApplicationLocal.Area__c = areaThree.id;  
+    insert ApplicationLocal;
+    
         list<App_Product__c> apList = new list<App_Product__c>(); 
         id pbId = [select id, Pricebook2Id from PricebookEntry where Product2Id =: r1.Id limit 1].Pricebook2Id;
         list<string> tes = new list<string>();
@@ -192,13 +218,25 @@ private class test_appProduct {
         apList.add(ap1);
         apList.add(ap2); 
         insert apList; 
+        
+        //need for replacement test
+        App_Product__c exist = new App_Product__c(Product__c = r2.Id, Application__c= ApplicationLocal.Id );
+        insert exist; 
+        App_Product__c replace = new App_Product__c(Product__c= r1.Id, Rate2__c= 2, Unit_Area__c= 'OZ/Acre', 
+                                                    Unit_Cost__c=10, Unit_Price__c=20, N__c=0, P__c=0, K__c=0 );
+        
         Test.startTest(); 
         	dataFromProductIdCR.prodPricing compTest = dataFromProductIdCR.prodIdToData(tes, r1.Id);  
         	list<App_Product__c> prodList = appProduct.appProducts(application.Id);        
         	list<App_Product__c> filter = appProduct.dataTableBuildFilter(prog.Id);
         	list<App_Product__c> all = appProduct.allAppProducts(prog.Id);
+        	string messBack = dataFromProductIdCR.replaceProduct(prog.Id, r2.Id, replace);
+        	string sucBack = dataFromProductIdCR.replaceProduct(progTwo.Id, r2.Id, replace);
         	//list<OpportunityLineItem> nullHis = appProduct.history('2026-5-5', cust.Id); 
         Test.stopTest();
+        List<App_Product__c> x = [select Id, application__c, Application__r.Area__r.Area_Acres__c, Application__r.Area__r.Area_Sq_Feet__c 
+                            	  from app_product__c where Program_Id__c =:progTwo.Id  and Product__c =: r2.Id];
+        system.debug(x); 
         	list<App_Product__c> nl = [select id from App_Product__c where application__c =: application.id]; 
         	system.assertEquals(2, nl.size());
         

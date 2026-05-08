@@ -77,6 +77,7 @@ export default class CalendarContainer extends LightningElement{
         let cleanHolidays = this.cleanData(holidays, 'holiday')
         let cleanApps = apps.length > 0 ? this.cleanData(apps, 'applications'): [];
         this.applications = [...cleanHolidays, ...cleanApps, ...this.cleanWeather]
+        console.log(this.applications)
         this.applicationsSet = this.applications.length>0 ? true:false;
     }
 

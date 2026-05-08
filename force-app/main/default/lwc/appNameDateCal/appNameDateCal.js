@@ -112,8 +112,7 @@ export default class AppNameDateCal extends LightningElement {
         this.areaUOM = this.copyList.find(x=>x.value === this.areaPick)?.areaType
         this.dispatchEvent(new CustomEvent('areatype',{
             detail:{
-                    areatype: this.areaUOM,                        
-                }
+                    areatype: this.areaUOM,                        }
                     })
                 );
         

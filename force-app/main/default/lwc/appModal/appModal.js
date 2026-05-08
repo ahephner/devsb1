@@ -84,8 +84,7 @@ export default class AppModal extends LightningElement {
         return [
             {label:'Acre', value: 'Acre'},
             {label: 'M', value:'M'}, 
-            {label:'Ornamental App', value:'100 Gal'},
-            {label:'Pond', value:'Pond'}
+            {label:'Ornamental App', value:'100 Gal'}
         ]
     }
     //input field actions

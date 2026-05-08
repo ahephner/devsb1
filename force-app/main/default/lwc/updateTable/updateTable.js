@@ -28,7 +28,6 @@ export default class UpdateTable extends LightningElement {
     areaOptions=[]
     buttonText = 'Save';
     disableBtn = false; 
-
     @wire(MessageContext)
     messageContext; 
 //subscribe to message channel
@@ -90,6 +89,7 @@ wiredareaInfo({error,data}){
         this.areaId = data.fields.Area__c.value;
         let prefMeasure = data.fields.Area__r.value.fields.Pref_U_of_M__c.value
         this.ornamental = prefMeasure  === '100 Gal' ? true : false;        
+
     }
 }
     

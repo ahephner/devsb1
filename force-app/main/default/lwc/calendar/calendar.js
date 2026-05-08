@@ -103,7 +103,7 @@ export default class Calendar extends LightningElement{
             contentHeight: 500,
             events: this.applications,
             eventClick: (info) => {
-                console.log(info.event._def)
+                //console.log(info.event._def)
                 this.passBack('', info.event._def.publicId, info.event.extendedProps.description); 
             },
             eventDrop: (data) => {
@@ -118,7 +118,7 @@ export default class Calendar extends LightningElement{
                 //var currentMonth = dateInfo.start.getMonth() + 1;
                 this.refreshDate = calendar.getDate().toISOString()//.splice(0,10);
                 
-                console.log("New view range:",  this.refreshDate);
+                //console.log("New view range:",  this.refreshDate);
 
             }
 

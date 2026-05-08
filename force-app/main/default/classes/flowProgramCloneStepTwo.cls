@@ -1,4 +1,4 @@
-public class flowProgramCloneStepTwo {
+public without sharing class flowProgramCloneStepTwo {
 	
     //inputs from flow
     public class proInputs{
@@ -65,7 +65,7 @@ public class flowProgramCloneStepTwo {
              	ListCloneProds.add(clonedProd); 
          }
                 
-         if(ListCloneProds.size()> 1){
+         if(ListCloneProds.size()>= 1){
              insert ListCloneProds;
          }
             }catch(exception e){

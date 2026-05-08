@@ -9,7 +9,7 @@
         </div>
     </div>
     <template lwc:if={applicationsSet}>
-        <c-calendar
+        <!-- <c-calendar
             applications={applications}
             onupdatedate={handleUpdateDate}
             onseeapp={showApp}
@@ -17,8 +17,16 @@
             ontoggle={handleToggle}
             >
             
-        </c-calendar>
-
+        </c-calendar> -->
+        <c-calendar-c-v
+            applications={applications}
+            onupdatedate={handleUpdateDate}
+            onseeapp={showApp}
+            onweatherday={showDayWeather}
+            ontoggle={handleToggle}
+            >
+            
+        </c-calendar-c-v>
     </template> 
     <template lwc:else>
     <div class="exampleHolder">
