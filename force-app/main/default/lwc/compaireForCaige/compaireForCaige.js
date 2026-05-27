@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 //import priorityPrice from '@salesforce/apex/getPriceBooks.priorityBestPrice';
 import allAppProducts from '@salesforce/apex/appProduct.allAppProducts';
 import prodIdToData from '@salesforce/apex/dataFromProductIdCR.prodIdToData';
@@ -29,6 +30,7 @@ export default class CompaireForCaige extends LightningElement {
 //acccount id get basicInfo will set this. call after product load
     accId;
     loaded = false;
+    formSize;
     // Columns for Table only showing Name and Price till we get data on the table
 
                //for the combo box 
@@ -42,12 +44,13 @@ export default class CompaireForCaige extends LightningElement {
             ];
         }
     connectedCallback() {
-        console.log('Record ID:', this.recordId);
+        //console.log('Record ID:', this.recordId);
         if (this.recordId) {
+            this.formSize= this.screenSize(FORM_FACTOR);
             this.fetchProgramProducts();
         }
     }
-
+        screenSize = (screen) => { return screen === 'Large'? true : false }
     showToast(title, message, variant) {
     this.dispatchEvent(
         new ShowToastEvent({

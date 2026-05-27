@@ -11,81 +11,203 @@
     </template>
 
     <template if:true={loaded}>
-        <lightning-card title="Rate Compare">
-            <p>Using Priority Pricing. Will be bringing the ability to replace soon</p>
+        <template if:true={formSize}>
+            <lightning-card title="Rate Compare">
+                <p>Using Priority Pricing. Will be bringing the ability to replace soon</p>
 
-            <div class="slds-p-around_medium">
-                <template if:true={recordId}>
-                    <lightning-combobox
-                        name="box"
-                        lwc:ref="prodBox"
-                        class="areaBox slds-m-bottom_small"
-                        label="Filter by Product"
-                        value={showValue}
-                        options={productList}
-                        onchange={filterProd}>
-                    </lightning-combobox>
-                </template>
+                <div class="slds-p-around_medium">
+                    <template if:true={recordId}>
+                        <lightning-combobox
+                            name="box"
+                            lwc:ref="prodBox"
+                            class="areaBox slds-m-bottom_small"
+                            label="Filter by Product"
+                            value={showValue}
+                            options={productList}
+                            onchange={filterProd}>
+                        </lightning-combobox>
+                    </template>
 
-                <div class="grid-container">
-                    <div class="grid-table">
-                        <div class="cell header">Product Name</div>
-                        <div class="cell header">Rate</div>
-                        <div class="cell header">Unit Area</div>
-                        <div class="cell header">Price</div>
-                        <div class="cell header">N</div>
-                        <div class="cell header">P</div>
-                        <div class="cell header">K</div>
-                        <div class="cell header">Cost per M</div>
-                        <div class="cell header">Cost per Acre</div>
-                        <div class="cell header">Replace</div>
+                    <div class="grid-container">
+                        <div class="grid-table">
+                            <div class="cell header">Product Name</div>
+                            <div class="cell header">Rate</div>
+                            <div class="cell header">Unit Area</div>
+                            <div class="cell header">Price</div>
+                            <div class="cell header">N</div>
+                            <div class="cell header">P</div>
+                            <div class="cell header">K</div>
+                            <div class="cell header">Cost per M</div>
+                            <div class="cell header">Cost per Acre</div>
+                            <div class="cell header">Replace</div>
 
-                        <template for:each={tableProduct} for:item="x" for:index="i">
-                            <div key={x.id} class="cell">{x.label}</div>
+                            <template for:each={tableProduct} for:item="x" for:index="i">
+                                <div key={x.id} class="cell">{x.label}</div>
 
-                            <div key={x.id} class="cell">
-                                <lightning-input
-                                    type="number"
-                                    value={x.rate2}
-                                    onchange={handleRate}
-                                    name={x.Product__c}
-                                    step="0.01">
-                                </lightning-input>
-                            </div>
+                                <div key={x.id} class="cell">
+                                    <lightning-input
+                                        type="number"
+                                        value={x.rate2}
+                                        onchange={handleRate}
+                                        name={x.Product__c}
+                                        step="0.01">
+                                    </lightning-input>
+                                </div>
 
-                            <div key={x.id} class="cell">
-                                <lightning-combobox
-                                    name={x.Product__c}
-                                    value={x.unitMeasure}
-                                    options={unitArea}
-                                    onchange={handleUnitArea}>
-                                </lightning-combobox>
-                            </div>
+                                <div key={x.id} class="cell">
+                                    <lightning-combobox
+                                        name={x.Product__c}
+                                        value={x.unitMeasure}
+                                        options={unitArea}
+                                        onchange={handleUnitArea}>
+                                    </lightning-combobox>
+                                </div>
 
-                            <div key={x.id} class="cell">
-                                <lightning-input
-                                    type="number"
-                                    formatter="currency"
-                                    step="0.01"
-                                    disabled={x.Agency_Pricing__c}
-                                    value={x.Unit_Price__c}
-                                    onchange={handlePrice}
-                                    name={x.Product__c}>
-                                </lightning-input>
-                            </div>
+                                <div key={x.id} class="cell">
+                                    <lightning-input
+                                        type="number"
+                                        formatter="currency"
+                                        step="0.01"
+                                        disabled={x.Agency_Pricing__c}
+                                        value={x.Unit_Price__c}
+                                        onchange={handlePrice}
+                                        name={x.Product__c}>
+                                    </lightning-input>
+                                </div>
 
-                            <div key={x.id} class="cell">{x.N__c}</div>
-                            <div key={x.id} class="cell">{x.P__c}</div>
-                            <div key={x.id} class="cell">{x.K__c}</div>
-                            <div key={x.id} class="cell">${x.Cost_per_M__c}</div>
-                            <div key={x.id} class="cell">${x.Cost_per_Acre__c}</div>
+                                <div key={x.id} class="cell">{x.N__c}</div>
+                                <div key={x.id} class="cell">{x.P__c}</div>
+                                <div key={x.id} class="cell">{x.K__c}</div>
+                                <div key={x.id} class="cell">${x.Cost_per_M__c}</div>
+                                <div key={x.id} class="cell">${x.Cost_per_Acre__c}</div>
 
-                            <template lwc:if={x.firstItem}>
-                                <div key={x.id} class="cell"></div>
+                                <template lwc:if={x.firstItem}>
+                                    <div key={x.id} class="cell"></div>
+                                </template>
+
+                                <template lwc:else>
+                                    <div key={x.id} class="cell">
+                                        <lightning-button
+                                            variant="success"
+                                            label="Replace"
+                                            title="Replace product"
+                                            data-label={x.label}
+                                            name={x.Product__c}
+                                            onclick={handleReplacement}
+                                            class="slds-m-left_x-small">
+                                        </lightning-button>
+                                    </div>
+                                </template>
                             </template>
 
-                            <template lwc:else>
-                                <div key={x.id} class="cell">
+                            <template lwc:if={showCompareBtn}>
+                                <lightning-button
+                                    label="Compare"
+                                    name={btnName}
+                                    class="slds-m-left_x-small slds-m-top_x-small"
+                                    onclick={handleAddToCompare}
+                                    variant="success">
+                                </lightning-button>
+                            </template>
+
+                            <template lwc:elseif={searchProd}>
+                                <c-product2-look-up onnewproduct={handleProductSelect}></c-product2-look-up>
+                            </template>
+
+                            <template lwc:elseif={maxPick}>
+                                <p>Max Compares</p>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </lightning-card>
+        </template>
+
+        <template if:false={formSize}>
+            <lightning-card title="Rate Compare">
+                <p>Using Priority Pricing. Will be bringing the ability to replace soon</p>
+
+                <div class="slds-p-around_medium">
+                    <template if:true={recordId}>
+                        <lightning-combobox
+                            name="box"
+                            lwc:ref="prodBox"
+                            class="areaBox slds-m-bottom_small"
+                            label="Filter by Product"
+                            value={showValue}
+                            options={productList}
+                            onchange={filterProd}>
+                        </lightning-combobox>
+                    </template>
+
+                    <div class="mobile-card-list">
+                        <template for:each={tableProduct} for:item="x">
+                            <div key={x.id} class="product-card">
+                                <div class="product-card-header">
+                                    <div class="product-name">{x.label}</div>
+                                </div>
+
+                                <div class="mobile-field">
+                                    <label>Rate</label>
+                                    <lightning-input
+                                        type="number"
+                                        value={x.rate2}
+                                        onchange={handleRate}
+                                        name={x.Product__c}
+                                        step="0.01">
+                                    </lightning-input>
+                                </div>
+
+                                <div class="mobile-field">
+                                    <label>Unit Area</label>
+                                    <lightning-combobox
+                                        name={x.Product__c}
+                                        value={x.unitMeasure}
+                                        options={unitArea}
+                                        onchange={handleUnitArea}>
+                                    </lightning-combobox>
+                                </div>
+
+                                <div class="mobile-field">
+                                    <label>Price</label>
+                                    <lightning-input
+                                        type="number"
+                                        formatter="currency"
+                                        step="0.01"
+                                        disabled={x.Agency_Pricing__c}
+                                        value={x.Unit_Price__c}
+                                        onchange={handlePrice}
+                                        name={x.Product__c}>
+                                    </lightning-input>
+                                </div>
+
+                                <div class="mobile-stats">
+                                    <div>
+                                        <span>N</span>
+                                        {x.N__c}
+                                    </div>
+                                    <div>
+                                        <span>P</span>
+                                        {x.P__c}
+                                    </div>
+                                    <div>
+                                        <span>K</span>
+                                        {x.K__c}
+                                    </div>
+                                </div>
+
+                                <div class="mobile-costs">
+                                    <div>
+                                        <span>Cost per M</span>
+                                        <strong>${x.Cost_per_M__c}</strong>
+                                    </div>
+                                    <div>
+                                        <span>Cost per Acre</span>
+                                        <strong>${x.Cost_per_Acre__c}</strong>
+                                    </div>
+                                </div>
+
+                                <template if:false={x.firstItem}>
                                     <lightning-button
                                         variant="success"
                                         label="Replace"
@@ -93,32 +215,32 @@
                                         data-label={x.label}
                                         name={x.Product__c}
                                         onclick={handleReplacement}
-                                        class="slds-m-left_x-small">
+                                        class="replace-button">
                                     </lightning-button>
-                                </div>
-                            </template>
-                        </template>
-
-                        <template lwc:if={showCompareBtn}>
-                            <lightning-button
-                                label="Compare"
-                                name={btnName}
-                                class="slds-m-left_x-small slds-m-top_x-small"
-                                onclick={handleAddToCompare}
-                                variant="success">
-                            </lightning-button>
-                        </template>
-
-                        <template lwc:elseif={searchProd}>
-                            <c-product2-look-up onnewproduct={handleProductSelect}></c-product2-look-up>
-                        </template>
-
-                        <template lwc:elseif={maxPick}>
-                            <p>Max Compares</p>
+                                </template>
+                            </div>
                         </template>
                     </div>
+
+                    <template lwc:if={showCompareBtn}>
+                        <lightning-button
+                            label="Compare"
+                            name={btnName}
+                            class="slds-m-left_x-small slds-m-top_x-small"
+                            onclick={handleAddToCompare}
+                            variant="success">
+                        </lightning-button>
+                    </template>
+
+                    <template lwc:elseif={searchProd}>
+                        <c-product2-look-up onnewproduct={handleProductSelect}></c-product2-look-up>
+                    </template>
+
+                    <template lwc:elseif={maxPick}>
+                        <p>Max Compares</p>
+                    </template>
                 </div>
-            </div>
-        </lightning-card>
+            </lightning-card>
+        </template>
     </template>
 </template>
